@@ -1,4 +1,3 @@
-
 import { createClient } from "@supabase/supabase-js";
 import { Santri, Setoran } from "@/types";
 
@@ -17,7 +16,11 @@ export const fetchSantri = async (): Promise<Santri[]> => {
     throw error;
   }
 
-  return data || [];
+  // Cast the jenis_kelamin to ensure type safety
+  return (data || []).map(item => ({
+    ...item,
+    jenis_kelamin: item.jenis_kelamin as "Ikhwan" | "Akhwat"
+  }));
 };
 
 export const fetchSantriByClass = async (kelas: number): Promise<Santri[]> => {
@@ -32,7 +35,11 @@ export const fetchSantriByClass = async (kelas: number): Promise<Santri[]> => {
     throw error;
   }
 
-  return data || [];
+  // Cast the jenis_kelamin to ensure type safety
+  return (data || []).map(item => ({
+    ...item,
+    jenis_kelamin: item.jenis_kelamin as "Ikhwan" | "Akhwat"
+  }));
 };
 
 export const fetchSantriById = async (id: string): Promise<Santri | null> => {
@@ -47,7 +54,13 @@ export const fetchSantriById = async (id: string): Promise<Santri | null> => {
     throw error;
   }
 
-  return data;
+  if (!data) return null;
+
+  // Cast the jenis_kelamin to ensure type safety
+  return {
+    ...data,
+    jenis_kelamin: data.jenis_kelamin as "Ikhwan" | "Akhwat"
+  };
 };
 
 export const createSantri = async (santri: Omit<Santri, 'id' | 'created_at' | 'total_hafalan'>): Promise<Santri> => {
@@ -62,7 +75,11 @@ export const createSantri = async (santri: Omit<Santri, 'id' | 'created_at' | 't
     throw error;
   }
 
-  return data;
+  // Cast the jenis_kelamin to ensure type safety
+  return {
+    ...data,
+    jenis_kelamin: data.jenis_kelamin as "Ikhwan" | "Akhwat"
+  };
 };
 
 export const deleteSantri = async (id: string): Promise<void> => {
@@ -153,7 +170,11 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
     throw error;
   }
 
-  return data || [];
+  // Cast the jenis_kelamin to ensure type safety for each row
+  return (data || []).map(item => ({
+    ...item,
+    jenis_kelamin: item.jenis_kelamin as "Ikhwan" | "Akhwat"
+  }));
 };
 
 export const updateTotalHafalan = async (santriId: string): Promise<void> => {
@@ -223,8 +244,14 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
         count: current.count + 1
       });
     } else {
+      // Cast the jenis_kelamin for the santri
+      const santri = {
+        ...item.santri,
+        jenis_kelamin: item.santri.jenis_kelamin as "Ikhwan" | "Akhwat"
+      };
+      
       scoreMap.set(santriId, {
-        santri: item.santri,
+        santri,
         totalScore: avgScore,
         count: 1
       });
