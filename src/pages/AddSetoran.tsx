@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
-import { getSantriById, addSetoran } from "@/lib/mock-data";
+import { fetchSantriById, createSetoran, updateTotalHafalan } from "@/services/supabaseClient";
 
 interface SurahOption {
   value: string;
@@ -55,7 +55,7 @@ const AddSetoran = () => {
       if (!santriId) return;
       
       try {
-        const data = await getSantriById(santriId);
+        const data = await fetchSantriById(santriId);
         if (data) {
           setSantri(data);
         } else {
@@ -96,7 +96,7 @@ const AddSetoran = () => {
     setIsSubmitting(true);
     
     try {
-      await addSetoran({
+      await createSetoran({
         santri_id: santriId,
         tanggal: new Date().toISOString().split('T')[0],
         juz: parseInt(juz),
@@ -109,6 +109,9 @@ const AddSetoran = () => {
         catatan: notes,
         diuji_oleh: examiner,
       });
+      
+      // Update total hafalan count for the santri
+      await updateTotalHafalan(santriId);
       
       toast({
         title: "Berhasil",

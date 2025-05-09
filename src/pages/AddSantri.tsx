@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { addSantri } from "@/lib/mock-data";
+import { createSantri } from "@/services/supabaseClient";
 
 const AddSantri = () => {
   const [name, setName] = useState("");
@@ -34,7 +34,7 @@ const AddSantri = () => {
     setIsSubmitting(true);
     
     try {
-      await addSantri({
+      await createSantri({
         nama: name,
         kelas: parseInt(classroom),
         jenis_kelamin: gender,

@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      santri: {
+        Row: {
+          created_at: string | null
+          id: string
+          jenis_kelamin: string
+          kelas: number
+          nama: string
+          total_hafalan: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          jenis_kelamin: string
+          kelas: number
+          nama: string
+          total_hafalan?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          jenis_kelamin?: string
+          kelas?: number
+          nama?: string
+          total_hafalan?: number | null
+        }
+        Relationships: []
+      }
+      setoran: {
+        Row: {
+          akhir_ayat: number
+          awal_ayat: number
+          catatan: string | null
+          created_at: string | null
+          diuji_oleh: string
+          id: string
+          juz: number
+          kelancaran: number
+          santri_id: string
+          surat: string
+          tahsin: number
+          tajwid: number
+          tanggal: string
+        }
+        Insert: {
+          akhir_ayat: number
+          awal_ayat: number
+          catatan?: string | null
+          created_at?: string | null
+          diuji_oleh: string
+          id?: string
+          juz: number
+          kelancaran: number
+          santri_id: string
+          surat: string
+          tahsin: number
+          tajwid: number
+          tanggal?: string
+        }
+        Update: {
+          akhir_ayat?: number
+          awal_ayat?: number
+          catatan?: string | null
+          created_at?: string | null
+          diuji_oleh?: string
+          id?: string
+          juz?: number
+          kelancaran?: number
+          santri_id?: string
+          surat?: string
+          tahsin?: number
+          tajwid?: number
+          tanggal?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setoran_santri_id_fkey"
+            columns: ["santri_id"]
+            isOneToOne: false
+            referencedRelation: "santri"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -187,8 +187,6 @@ export const updateTotalHafalan = async (santriId: string): Promise<void> => {
 };
 
 export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
-  // This requires a more complex query with Supabase - for simplicity, 
-  // we'll implement a basic version here
   let query = supabase
     .from('setoran')
     .select(`
