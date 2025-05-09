@@ -1,0 +1,224 @@
+
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft, PlayCircle, Pause } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { QuranSurah, QuranAyat } from "@/types";
+
+const SurahDetail = () => {
+  const { surahNumber } = useParams<{ surahNumber: string }>();
+  const [surah, setSurah] = useState<QuranSurah | null>(null);
+  const [ayat, setAyat] = useState<QuranAyat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [goToAyat, setGoToAyat] = useState("");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchSurahDetails = async () => {
+      if (!surahNumber) return;
+      
+      setLoading(true);
+      try {
+        const response = await fetch(`https://equran.id/api/v2/surat/${surahNumber}`);
+        const data = await response.json();
+        
+        if (data.code === 200 && data.data) {
+          setSurah(data.data);
+          setAyat(data.data.ayat || []);
+          
+          // Initialize audio
+          if (data.data.audio) {
+            const audioElement = new Audio(data.data.audio);
+            setAudio(audioElement);
+          }
+        } else {
+          throw new Error("Failed to fetch surah details");
+        }
+      } catch (error) {
+        console.error("Error fetching surah details:", error);
+        toast({
+          title: "Error",
+          description: "Gagal memuat detail surat",
+          variant: "destructive",
+        });
+        navigate("/quran");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSurahDetails();
+    
+    // Cleanup audio on unmount
+    return () => {
+      if (audio) {
+        audio.pause();
+        setAudio(null);
+      }
+    };
+  }, [surahNumber, navigate, toast]);
+
+  const handleGoToAyat = () => {
+    const ayatNum = parseInt(goToAyat);
+    if (!isNaN(ayatNum) && ayatNum > 0 && surah && ayatNum <= surah.jumlah_ayat) {
+      const ayatElement = document.getElementById(`ayat-${ayatNum}`);
+      if (ayatElement) {
+        ayatElement.scrollIntoView({ behavior: "smooth" });
+        ayatElement.classList.add("bg-accent");
+        setTimeout(() => {
+          ayatElement.classList.remove("bg-accent");
+        }, 2000);
+      }
+    } else {
+      toast({
+        title: "Nomor ayat tidak valid",
+        description: surah ? `Masukkan nomor ayat 1-${surah.jumlah_ayat}` : "Nomor ayat tidak valid",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleAudio = () => {
+    if (!audio) return;
+    
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    if (audio) {
+      audio.addEventListener("ended", () => setIsPlaying(false));
+      return () => {
+        audio.removeEventListener("ended", () => setIsPlaying(false));
+      };
+    }
+  }, [audio]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!surah) {
+    return (
+      <div className="text-center py-10">
+        <p className="text-muted-foreground">Surat tidak ditemukan</p>
+        <Button variant="link" onClick={() => navigate("/quran")}>
+          Kembali ke Daftar Surat
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/quran")}>
+          <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
+        </Button>
+      </div>
+      
+      <Card className="p-6 islamic-card">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-semibold flex items-center gap-2">
+              {surah.nama_latin}
+              <Badge variant="outline" className="ml-2">
+                {surah.tempat_turun === "mekah" ? "Makkiyah" : "Madaniyyah"}
+              </Badge>
+            </h1>
+            <p className="text-muted-foreground">{surah.arti}</p>
+            <p className="mt-1 text-sm">{surah.jumlah_ayat} Ayat</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-arabic">{surah.nama}</p>
+            {audio && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={toggleAudio}
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="h-4 w-4 mr-1" /> Pause
+                  </>
+                ) : (
+                  <>
+                    <PlayCircle className="h-4 w-4 mr-1" /> Play
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </Card>
+      
+      <div className="flex gap-2">
+        <Input
+          placeholder="Menuju ayat..."
+          value={goToAyat}
+          onChange={(e) => setGoToAyat(e.target.value)}
+          className="w-32"
+          type="number"
+          min={1}
+          max={surah.jumlah_ayat}
+        />
+        <Button onClick={handleGoToAyat}>
+          Pergi
+        </Button>
+      </div>
+      
+      <div className="space-y-4">
+        {ayat.length === 0 ? (
+          <Card className="p-6 text-center">
+            <p>Ayat tidak tersedia. Silakan kunjungi sumber resmi untuk membaca Al-Quran.</p>
+          </Card>
+        ) : (
+          ayat.map((ayat) => (
+            <Card
+              key={ayat.nomor}
+              id={`ayat-${ayat.nomor}`}
+              className="p-4 islamic-card transition-colors"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <Badge variant="outline" className="bg-islamic-primary text-primary-foreground">
+                  {ayat.nomor}
+                </Badge>
+              </div>
+              
+              <p className="text-right text-xl leading-loose font-arabic mb-4">
+                {ayat.ar}
+              </p>
+              
+              <p className="text-sm italic text-muted-foreground mb-2">
+                {ayat.tr}
+              </p>
+              
+              <p className="text-sm">
+                {ayat.idn}
+              </p>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SurahDetail;
