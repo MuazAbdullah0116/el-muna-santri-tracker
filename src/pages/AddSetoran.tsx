@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
-import { fetchSantriById, createSetoran, updateTotalHafalan } from "@/services/supabaseClient";
+import { fetchSantriById, createSetoran, updateTotalHafalan } from "@/services/supabase";
 
 interface SurahOption {
   value: string;

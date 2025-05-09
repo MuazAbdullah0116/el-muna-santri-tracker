@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, Trash } from "lucide-react";
@@ -9,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
-import { getAllSantris, getSantrisByClass, searchSantris, deleteSantri, getSetoransBySantriId } from "@/lib/mock-data";
+import { fetchSantri, fetchSantriByClass, fetchSetoranBySantri, deleteSantri } from "@/services/supabase";
 
 const Dashboard = () => {
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
@@ -33,11 +32,11 @@ const Dashboard = () => {
         let data: Santri[];
         
         if (searchQuery.trim()) {
-          data = await searchSantris(searchQuery);
+          data = await fetchSantri(searchQuery);
         } else if (selectedClass) {
-          data = await getSantrisByClass(selectedClass);
+          data = await fetchSantriByClass(selectedClass);
         } else {
-          data = await getAllSantris();
+          data = await fetchSantri();
         }
         
         setSantris(data);
@@ -74,7 +73,7 @@ const Dashboard = () => {
     setSelectedSantri(santri);
     
     try {
-      const setoran = await getSetoransBySantriId(santri.id);
+      const setoran = await fetchSetoranBySantri(santri.id);
       setStudentSetoran(setoran);
     } catch (error) {
       console.error("Error fetching setoran:", error);
@@ -104,10 +103,10 @@ const Dashboard = () => {
       
       // Refresh data after deletion
       if (selectedClass) {
-        const data = await getSantrisByClass(selectedClass);
+        const data = await fetchSantriByClass(selectedClass);
         setSantris(data);
       } else {
-        const data = await getAllSantris();
+        const data = await fetchSantri();
         setSantris(data);
       }
       
