@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, PlayCircle, Pause } from "lucide-react";
+import { ChevronLeft, PlayCircle, Pause, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -17,6 +17,7 @@ const SurahDetail = () => {
   const [goToAyat, setGoToAyat] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [currentReciter, setCurrentReciter] = useState<string>("01"); // Default reciter
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -27,16 +28,46 @@ const SurahDetail = () => {
       
       setLoading(true);
       try {
+        // Using the equran.id API v2
         const response = await fetch(`https://equran.id/api/v2/surat/${surahNumber}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch surah details");
+        }
+        
         const data = await response.json();
         
         if (data.code === 200 && data.data) {
-          setSurah(data.data);
-          setAyat(data.data.ayat || []);
+          // Map the API response to our QuranSurah type
+          const surahData: QuranSurah = {
+            nomor: data.data.nomor,
+            nama: data.data.nama,
+            nama_latin: data.data.namaLatin,
+            jumlah_ayat: data.data.jumlahAyat,
+            tempat_turun: data.data.tempatTurun,
+            arti: data.data.arti,
+            deskripsi: data.data.deskripsi,
+            audio: data.data.audioFull?.[currentReciter] || "",
+          };
           
-          // Initialize audio
-          if (data.data.audio) {
-            const audioElement = new Audio(data.data.audio);
+          setSurah(surahData);
+          
+          // Map the ayat data to our QuranAyat type
+          if (data.data.ayat && data.data.ayat.length > 0) {
+            const ayatData: QuranAyat[] = data.data.ayat.map((ayat: any) => ({
+              id: ayat.nomorAyat,
+              surah: data.data.nomor,
+              nomor: ayat.nomorAyat,
+              ar: ayat.teksArab,
+              tr: ayat.teksLatin,
+              idn: ayat.teksIndonesia,
+            }));
+            
+            setAyat(ayatData);
+          }
+          
+          // Initialize audio if available
+          if (surahData.audio) {
+            const audioElement = new Audio(surahData.audio);
             setAudio(audioElement);
           }
         } else {
@@ -64,7 +95,7 @@ const SurahDetail = () => {
         setAudio(null);
       }
     };
-  }, [surahNumber, navigate, toast]);
+  }, [surahNumber, navigate, toast, currentReciter]);
 
   const handleGoToAyat = () => {
     const ayatNum = parseInt(goToAyat);
@@ -126,41 +157,41 @@ const SurahDetail = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center">
         <Button variant="ghost" size="sm" onClick={() => navigate("/quran")}>
           <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
         </Button>
       </div>
       
-      <Card className="p-6 islamic-card">
-        <div className="flex justify-between items-start">
+      <Card className="p-4 md:p-6 islamic-card">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start">
           <div>
-            <h1 className="text-2xl font-semibold flex items-center gap-2">
+            <h1 className="text-xl md:text-2xl font-semibold flex flex-wrap items-center gap-2">
               {surah.nama_latin}
-              <Badge variant="outline" className="ml-2">
+              <Badge variant="outline" className="ml-1 text-xs">
                 {surah.tempat_turun === "mekah" ? "Makkiyah" : "Madaniyyah"}
               </Badge>
             </h1>
-            <p className="text-muted-foreground">{surah.arti}</p>
-            <p className="mt-1 text-sm">{surah.jumlah_ayat} Ayat</p>
+            <p className="text-sm text-muted-foreground">{surah.arti}</p>
+            <p className="mt-1 text-xs md:text-sm">{surah.jumlah_ayat} Ayat</p>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-arabic">{surah.nama}</p>
+          <div className="text-right mt-2 md:mt-0">
+            <p className="text-xl md:text-2xl font-arabic">{surah.nama}</p>
             {audio && (
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-2"
+                className="mt-2 text-xs"
                 onClick={toggleAudio}
               >
                 {isPlaying ? (
                   <>
-                    <Pause className="h-4 w-4 mr-1" /> Pause
+                    <Pause className="h-3 w-3 mr-1" /> Pause
                   </>
                 ) : (
                   <>
-                    <PlayCircle className="h-4 w-4 mr-1" /> Play
+                    <PlayCircle className="h-3 w-3 mr-1" /> Play
                   </>
                 )}
               </Button>
@@ -169,48 +200,50 @@ const SurahDetail = () => {
         </div>
       </Card>
       
-      <div className="flex gap-2">
-        <Input
-          placeholder="Menuju ayat..."
-          value={goToAyat}
-          onChange={(e) => setGoToAyat(e.target.value)}
-          className="w-32"
-          type="number"
-          min={1}
-          max={surah.jumlah_ayat}
-        />
-        <Button onClick={handleGoToAyat}>
-          Pergi
-        </Button>
+      <div className="flex flex-col xs:flex-row gap-2">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Menuju ayat..."
+            value={goToAyat}
+            onChange={(e) => setGoToAyat(e.target.value)}
+            className="w-24 md:w-32 text-sm"
+            type="number"
+            min={1}
+            max={surah.jumlah_ayat}
+          />
+          <Button onClick={handleGoToAyat} size="sm" className="text-xs md:text-sm">
+            Pergi
+          </Button>
+        </div>
       </div>
       
       <div className="space-y-4">
         {ayat.length === 0 ? (
-          <Card className="p-6 text-center">
-            <p>Ayat tidak tersedia. Silakan kunjungi sumber resmi untuk membaca Al-Quran.</p>
+          <Card className="p-4 md:p-6 text-center">
+            <p className="text-sm">Ayat tidak tersedia. Silakan kunjungi sumber resmi untuk membaca Al-Quran.</p>
           </Card>
         ) : (
           ayat.map((ayat) => (
             <Card
               key={ayat.nomor}
               id={`ayat-${ayat.nomor}`}
-              className="p-4 islamic-card transition-colors"
+              className="p-3 md:p-4 islamic-card transition-colors"
             >
               <div className="flex items-center justify-between mb-2">
-                <Badge variant="outline" className="bg-islamic-primary text-primary-foreground">
+                <Badge variant="outline" className="bg-islamic-primary text-primary-foreground text-xs">
                   {ayat.nomor}
                 </Badge>
               </div>
               
-              <p className="text-right text-xl leading-loose font-arabic mb-4">
+              <p className="text-right text-lg md:text-xl leading-loose font-arabic mb-3 md:mb-4">
                 {ayat.ar}
               </p>
               
-              <p className="text-sm italic text-muted-foreground mb-2">
+              <p className="text-xs md:text-sm italic text-muted-foreground mb-2">
                 {ayat.tr}
               </p>
               
-              <p className="text-sm">
+              <p className="text-xs md:text-sm">
                 {ayat.idn}
               </p>
             </Card>

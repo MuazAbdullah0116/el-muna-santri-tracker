@@ -5,6 +5,7 @@ import { Home, BookOpen, Trophy, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
+import IslamicLogo from "./IslamicLogo";
 import {
   Sidebar,
   SidebarContent,
@@ -70,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Sidebar collapsible="icon">
           <SidebarContent className="py-4">
             <div className="mb-6 px-3">
-              <h2 className="font-bold text-lg text-center">Al-M</h2>
+              <IslamicLogo size="sm" animated />
             </div>
             <SidebarMenu>
               {filteredNavItems.map((item) => (
@@ -78,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <SidebarMenuButton 
                     asChild 
                     tooltip={item.name}
-                    isActive={location.pathname === item.path}
+                    isActive={location.pathname === item.path || (item.path === "/quran" && location.pathname.startsWith("/quran/"))}
                   >
                     <Link to={item.path} className="flex items-center gap-3">
                       {item.icon}
@@ -97,7 +98,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container flex h-14 max-w-screen-2xl items-center">
             <div className="flex-1 flex items-center justify-center md:justify-start">
-              <h1 className="text-base md:text-lg font-semibold">
+              <h1 className="text-sm md:text-base lg:text-lg font-semibold">
                 Pengelola Santri Al-Munawwarah
               </h1>
             </div>
@@ -110,24 +111,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 container py-6 pb-20 md:pb-6">
+        <main className="flex-1 container py-4 md:py-6 pb-20 md:pb-6 px-2 md:px-6">
           {children}
         </main>
 
         {/* Bottom navigation for mobile */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
           <div className="container flex justify-around py-2">
             {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center py-1 px-3 text-muted-foreground",
-                  location.pathname === item.path && "text-primary font-medium"
+                  "flex flex-col items-center py-1 px-2 text-muted-foreground text-xs",
+                  (location.pathname === item.path || 
+                   (item.path === "/quran" && location.pathname.startsWith("/quran/"))) 
+                    && "text-primary font-medium"
                 )}
               >
                 {item.icon}
-                <span className="text-xs mt-1">{item.name}</span>
+                <span className="mt-1 text-[10px]">{item.name}</span>
               </Link>
             ))}
           </div>

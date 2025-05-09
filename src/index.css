@@ -107,15 +107,15 @@
   }
   
   h1 {
-    @apply text-3xl lg:text-4xl;
-  }
-  
-  h2 {
     @apply text-2xl lg:text-3xl;
   }
   
-  h3 {
+  h2 {
     @apply text-xl lg:text-2xl;
+  }
+  
+  h3 {
+    @apply text-lg lg:text-xl;
   }
 }
 
@@ -131,5 +131,36 @@
   .islamic-pattern-border {
     @apply border border-islamic-primary/30 bg-gradient-to-br from-white/80 to-white/70 dark:from-card dark:to-card/90;
   }
+
+  .font-arabic {
+    font-family: 'Scheherazade New', 'Amiri', serif;
+    line-height: 1.8;
+  }
 }
 
+/* Import Arabic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&family=Amiri:wght@400;700&display=swap');
+
+/* Responsive text size adjustments */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: 90%;
+  }
+  
+  .font-arabic {
+    font-size: 120%;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-responsive {
+    font-size: 85%;
+  }
+}
+
+/* Additional utility classes for small screens */
+.xs\:flex-row {
+  @media (min-width: 480px) {
+    flex-direction: row;
+  }
+}
