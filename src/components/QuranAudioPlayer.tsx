@@ -12,6 +12,7 @@ interface QuranAudioPlayerProps {
 }
 
 const QuranAudioPlayer = ({ audioUrl, surahName, isPlaying, onTogglePlay, onClose }: QuranAudioPlayerProps) => {
+  // Don't render anything if there's no audio
   if (!audioUrl) return null;
 
   return (

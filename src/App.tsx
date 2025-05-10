@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,27 +23,60 @@ import QuranAudioPlayer from "./components/QuranAudioPlayer";
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Audio state is now in App component, which persists across routes
   const [audioState, setAudioState] = useState({
     audioUrl: null as string | null,
     surahName: '',
     isPlaying: false
   });
 
-  // Global audio player controls
-  const handleTogglePlay = () => {
-    const audioElement = document.querySelector('audio') as HTMLAudioElement;
+  // Audio element reference
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
+  // Set up audio element when URL changes
+  useEffect(() => {
+    if (audioState.audioUrl) {
+      const audio = new Audio(audioState.audioUrl);
+      audio.addEventListener("ended", () => {
+        setAudioState(prev => ({ ...prev, isPlaying: false }));
+      });
+      
+      setAudioElement(audio);
+      
+      // Cleanup
+      return () => {
+        audio.pause();
+        audio.remove();
+      };
+    } else {
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.remove();
+        setAudioElement(null);
+      }
+    }
+  }, [audioState.audioUrl]);
+
+  // Handle play/pause when isPlaying changes
+  useEffect(() => {
     if (audioElement) {
       if (audioState.isPlaying) {
-        audioElement.pause();
+        audioElement.play().catch(error => {
+          console.error("Error playing audio:", error);
+          setAudioState(prev => ({ ...prev, isPlaying: false }));
+        });
       } else {
-        audioElement.play();
+        audioElement.pause();
       }
-      setAudioState(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
     }
+  }, [audioState.isPlaying, audioElement]);
+
+  // Global audio player controls
+  const handleTogglePlay = () => {
+    setAudioState(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
   };
 
   const handleCloseAudio = () => {
-    const audioElement = document.querySelector('audio') as HTMLAudioElement;
     if (audioElement) {
       audioElement.pause();
       audioElement.currentTime = 0;
@@ -52,9 +85,24 @@ const App = () => {
   };
 
   // Make audio state available globally
-  window.setQuranAudio = (audioUrl: string | null, surahName: string, isPlaying: boolean) => {
-    setAudioState({ audioUrl, surahName, isPlaying });
-  };
+  useEffect(() => {
+    window.setQuranAudio = (audioUrl, surahName, isPlaying) => {
+      if (audioUrl === null) {
+        // Only clear audio if explicitly asked to
+        if (surahName === '') {
+          setAudioState({ audioUrl: null, surahName: '', isPlaying: false });
+        }
+      } else {
+        // If setting new audio
+        setAudioState({ audioUrl, surahName, isPlaying });
+      }
+    };
+    
+    return () => {
+      // Cleanup
+      window.setQuranAudio = () => {};
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

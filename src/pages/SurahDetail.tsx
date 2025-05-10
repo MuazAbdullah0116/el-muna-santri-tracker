@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, PlayCircle, Pause, Download } from "lucide-react";
+import { ChevronLeft, PlayCircle, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { QuranSurah, QuranAyat } from "@/types";
-import QuranAudioPlayer from "@/components/QuranAudioPlayer";
 
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
@@ -155,10 +154,8 @@ const SurahDetail = () => {
     }
     
     return () => {
-      // Clean up global audio state on unmount
-      if (window.setQuranAudio) {
-        window.setQuranAudio(null, '', false);
-      }
+      // Don't reset the global audio state on unmount anymore
+      // This allows the audio to keep playing when navigating away
     };
   }, [surah, isPlaying]);
 

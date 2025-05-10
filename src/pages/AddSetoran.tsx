@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Santri } from "@/types";
 import { fetchSantriById, createSetoran, updateTotalHafalan } from "@/services/supabase";
 
@@ -22,6 +28,8 @@ const AddSetoran = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Changed from hardcoded today's date to state with Date object
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [juz, setJuz] = useState("1");
   const [surah, setSurah] = useState("");
   const [startAyat, setStartAyat] = useState("");
@@ -97,7 +105,7 @@ const AddSetoran = () => {
     try {
       await createSetoran({
         santri_id: santriId,
-        tanggal: new Date().toISOString().split('T')[0],
+        tanggal: format(selectedDate, 'yyyy-MM-dd'),
         juz: parseInt(juz),
         surat: surah,
         awal_ayat: parseInt(startAyat),
@@ -151,12 +159,27 @@ const AddSetoran = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="date">Tanggal</Label>
-              <Input
-                id="date"
-                type="date"
-                defaultValue={new Date().toISOString().split('T')[0]}
-                disabled
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                    id="date"
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(selectedDate, "dd MMMM yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
