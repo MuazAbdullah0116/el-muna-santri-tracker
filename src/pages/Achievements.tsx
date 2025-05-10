@@ -39,7 +39,7 @@ const Achievements = () => {
         const hafalanData = await fetchTopHafalan();
         setTopHafalan(hafalanData.map(santri => ({
           ...santri,
-          achievement: "hafalan",
+          achievement: "hafalan" as "hafalan",
           value: santri.total_hafalan || 0
         })));
         
@@ -48,7 +48,7 @@ const Achievements = () => {
           const performersData = await fetchTopPerformers();
           setTopNilai(performersData.map(santri => ({
             ...santri,
-            achievement: "nilai",
+            achievement: "nilai" as "nilai",
             value: parseFloat(santri.nilai_rata.toFixed(1))
           })));
         } catch (err) {
@@ -56,7 +56,7 @@ const Achievements = () => {
           // If performers fail, create placeholder data
           setTopNilai(santriData.map(santri => ({
             ...santri,
-            achievement: "nilai",
+            achievement: "nilai" as "nilai",
             value: 0
           })));
         }
@@ -64,7 +64,7 @@ const Achievements = () => {
         // Top teratur (regularity)
         setTopTeratur(santriData.map(santri => ({
           ...santri,
-          achievement: "teratur",
+          achievement: "teratur" as "teratur",
           value: santri.total_hafalan || 0
         })).sort((a, b) => b.value - a.value));
         

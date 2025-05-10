@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, PlayCircle, Pause, Download } from "lucide-react";
@@ -129,6 +128,14 @@ const SurahDetail = () => {
     setIsPlaying(!isPlaying);
   };
 
+  const handleCloseAudio = () => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    setIsPlaying(false);
+  };
+
   useEffect(() => {
     if (audio) {
       audio.addEventListener("ended", () => setIsPlaying(false));
@@ -137,6 +144,23 @@ const SurahDetail = () => {
       };
     }
   }, [audio]);
+
+  // Update global audio state when local audio state changes
+  useEffect(() => {
+    if (surah && surah.audio) {
+      // Use the global audio state setter if available
+      if (window.setQuranAudio) {
+        window.setQuranAudio(surah.audio, surah.nama_latin, isPlaying);
+      }
+    }
+    
+    return () => {
+      // Clean up global audio state on unmount
+      if (window.setQuranAudio) {
+        window.setQuranAudio(null, '', false);
+      }
+    };
+  }, [surah, isPlaying]);
 
   if (loading) {
     return (
@@ -251,14 +275,6 @@ const SurahDetail = () => {
           ))
         )}
       </div>
-
-      {/* Audio Player Popup */}
-      <QuranAudioPlayer 
-        audioUrl={surah?.audio || null} 
-        surahName={surah?.nama_latin || ""} 
-        isPlaying={isPlaying} 
-        onTogglePlay={toggleAudio} 
-      />
     </div>
   );
 };
