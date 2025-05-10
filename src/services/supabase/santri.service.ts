@@ -3,13 +3,20 @@ import { Santri } from "@/types";
 import { supabase } from "./client";
 
 /**
- * Fetches all santri records
+ * Fetches all santri records, optionally filtered by search query
  */
-export const fetchSantri = async (): Promise<Santri[]> => {
-  const { data, error } = await supabase
+export const fetchSantri = async (searchQuery?: string): Promise<Santri[]> => {
+  let query = supabase
     .from('santri')
     .select('*')
     .order('created_at', { ascending: false });
+  
+  // Apply search filter if query is provided
+  if (searchQuery) {
+    query = query.ilike('nama', `%${searchQuery}%`);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error fetching santri:", error);

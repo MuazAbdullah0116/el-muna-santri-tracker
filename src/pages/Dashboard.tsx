@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Plus, Trash } from "lucide-react";
@@ -8,7 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
-import { fetchSantri, fetchSantriByClass, fetchSetoranBySantri, deleteSantri } from "@/services/supabase";
+import { fetchSantri, fetchSantriByClass, deleteSantri } from "@/services/supabase/santri.service";
+import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 
 const Dashboard = () => {
   const [selectedClass, setSelectedClass] = useState<number | null>(null);
