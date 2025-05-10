@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { QuranSurah, QuranAyat } from "@/types";
+import QuranAudioPlayer from "@/components/QuranAudioPlayer";
 
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
@@ -250,6 +251,14 @@ const SurahDetail = () => {
           ))
         )}
       </div>
+
+      {/* Audio Player Popup */}
+      <QuranAudioPlayer 
+        audioUrl={surah?.audio || null} 
+        surahName={surah?.nama_latin || ""} 
+        isPlaying={isPlaying} 
+        onTogglePlay={toggleAudio} 
+      />
     </div>
   );
 };

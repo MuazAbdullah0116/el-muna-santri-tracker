@@ -108,13 +108,11 @@ const Settings = () => {
           </Accordion>
         </CardContent>
         
-        {user && user !== "Wali" && (
-          <CardFooter>
-            <Button variant="outline" className="w-full" onClick={handleLogout}>
-              Keluar
-            </Button>
-          </CardFooter>
-        )}
+        <CardFooter>
+          <Button variant="outline" className="w-full" onClick={handleLogout}>
+            Keluar
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

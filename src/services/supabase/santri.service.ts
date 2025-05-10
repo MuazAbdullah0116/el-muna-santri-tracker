@@ -82,7 +82,12 @@ export const fetchSantriById = async (id: string): Promise<Santri | null> => {
 export const createSantri = async (santri: Omit<Santri, 'id' | 'created_at' | 'total_hafalan'>): Promise<Santri> => {
   const { data, error } = await supabase
     .from('santri')
-    .insert([santri])
+    .insert([
+      {
+        ...santri,
+        total_hafalan: 0 // Ensure total_hafalan is set to default 0
+      }
+    ])
     .select()
     .single();
 

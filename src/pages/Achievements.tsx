@@ -1,12 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Santri, SantriWithAchievement } from "@/types";
 import { mockSantris, mockSetorans } from "@/lib/mock-data";
+import { fetchSantriById } from "@/services/supabase/santri.service";
+import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 
 const Achievements = () => {
   const [filter, setFilter] = useState<"all" | "ikhwan" | "akhwat">("all");
@@ -17,6 +19,9 @@ const Achievements = () => {
   const [filteredHafalan, setFilteredHafalan] = useState<SantriWithAchievement[]>([]);
   const [filteredNilai, setFilteredNilai] = useState<SantriWithAchievement[]>([]);
   const [filteredTeratur, setFilteredTeratur] = useState<SantriWithAchievement[]>([]);
+  const [selectedSantri, setSelectedSantri] = useState<Santri | null>(null);
+  const [studentSetoran, setStudentSetoran] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Calculate achievements
   useEffect(() => {
@@ -102,6 +107,25 @@ const Achievements = () => {
     setFilteredTeratur(filterSantris(topTeratur));
   }, [filter, searchQuery, topHafalan, topNilai, topTeratur]);
 
+  const handleSelectSantri = async (santri: SantriWithAchievement) => {
+    try {
+      // Get complete santri data first 
+      const santriDetails = await fetchSantriById(santri.id);
+      if (santriDetails) {
+        setSelectedSantri(santriDetails);
+        
+        // Fetch setoran data
+        const setoran = await fetchSetoranBySantri(santri.id);
+        setStudentSetoran(setoran);
+        
+        // Open dialog
+        setIsDialogOpen(true);
+      }
+    } catch (error) {
+      console.error("Error fetching santri details:", error);
+    }
+  };
+
   const renderAchievementCard = (title: string, santris: SantriWithAchievement[], valueLabel: string) => {
     return (
       <Card className="islamic-card">
@@ -118,7 +142,8 @@ const Achievements = () => {
                   key={santri.id}
                   className={`flex items-center justify-between p-3 rounded-lg ${
                     index < 3 ? "bg-accent/50" : "bg-background/50"
-                  }`}
+                  } hover:bg-accent/30 cursor-pointer transition-colors`}
+                  onClick={() => handleSelectSantri(santri)}
                 >
                   <div className="flex items-center">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium mr-3 ${
@@ -227,6 +252,89 @@ const Achievements = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Santri Detail Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Detail Santri</DialogTitle>
+            <DialogDescription>
+              Informasi dan riwayat setoran santri
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedSantri && (
+            <>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-medium">{selectedSantri.nama}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                        Kelas {selectedSantri.kelas}
+                      </span>
+                      <span className="text-sm bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                        {selectedSantri.jenis_kelamin}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <h4 className="font-medium">Total Hafalan</h4>
+                  <span className="text-xl font-bold text-islamic-primary">
+                    {selectedSantri.total_hafalan} Setoran
+                  </span>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium">Riwayat Setoran</h4>
+                  {studentSetoran.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      Belum ada setoran
+                    </p>
+                  ) : (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {studentSetoran.map((setoran) => (
+                        <div key={setoran.id} className="border rounded-md p-3 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{setoran.surat}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(setoran.tanggal).toLocaleDateString("id-ID")}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-xs">
+                            Ayat {setoran.awal_ayat} - {setoran.akhir_ayat}
+                          </div>
+                          <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                              <span className="text-muted-foreground">Kelancaran:</span>{" "}
+                              <span className="font-medium">{setoran.kelancaran}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Tajwid:</span>{" "}
+                              <span className="font-medium">{setoran.tajwid}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Tahsin:</span>{" "}
+                              <span className="font-medium">{setoran.tahsin}</span>
+                            </div>
+                          </div>
+                          {setoran.catatan && (
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              {setoran.catatan}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
