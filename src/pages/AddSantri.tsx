@@ -34,6 +34,12 @@ const AddSantri = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Submitting santri data:", {
+        nama: name,
+        kelas: parseInt(classroom),
+        jenis_kelamin: gender
+      });
+      
       await createSantri({
         nama: name,
         kelas: parseInt(classroom),
@@ -50,7 +56,7 @@ const AddSantri = () => {
       console.error("Error adding santri:", error);
       toast({
         title: "Error",
-        description: "Gagal menambahkan data santri",
+        description: "Gagal menambahkan data santri. Mohon coba lagi.",
         variant: "destructive",
       });
     } finally {
@@ -127,7 +133,11 @@ const AddSantri = () => {
               >
                 Batal
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="flex-1">
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="flex-1"
+              >
                 {isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>

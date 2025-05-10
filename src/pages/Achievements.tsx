@@ -1,14 +1,15 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Santri, SantriWithAchievement } from "@/types";
-import { mockSantris, mockSetorans } from "@/lib/mock-data";
-import { fetchSantriById } from "@/services/supabase/santri.service";
+import { useToast } from "@/hooks/use-toast";
+import SearchBar from "@/components/dashboard/SearchBar";
+import { fetchSantri } from "@/services/supabase/santri.service";
 import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
+import { fetchTopHafalan, fetchTopPerformers } from "@/services/supabase/achievement.service";
 
 const Achievements = () => {
   const [filter, setFilter] = useState<"all" | "ikhwan" | "akhwat">("all");
@@ -22,66 +23,65 @@ const Achievements = () => {
   const [selectedSantri, setSelectedSantri] = useState<Santri | null>(null);
   const [studentSetoran, setStudentSetoran] = useState<any[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // Calculate achievements
+  const { toast } = useToast();
+  
+  // Load data from database
   useEffect(() => {
-    // Group setoran by santri_id
-    const setoranBySantri: Record<string, any[]> = {};
-    mockSetorans.forEach(setoran => {
-      if (!setoranBySantri[setoran.santri_id]) {
-        setoranBySantri[setoran.santri_id] = [];
-      }
-      setoranBySantri[setoran.santri_id].push(setoran);
-    });
-    
-    // Calculate achievements for each santri
-    const hafalanList: SantriWithAchievement[] = [];
-    const nilaiList: SantriWithAchievement[] = [];
-    const teraturList: SantriWithAchievement[] = [];
-    
-    mockSantris.forEach(santri => {
-      const santriSetorans = setoranBySantri[santri.id] || [];
-      
-      // Total Hafalan (based on total setorans)
-      hafalanList.push({
-        ...santri,
-        achievement: "hafalan",
-        value: santriSetorans.length,
-      });
-      
-      // Average Score
-      if (santriSetorans.length > 0) {
-        const totalScore = santriSetorans.reduce((sum, setoran) => {
-          return sum + (setoran.kelancaran + setoran.tajwid + setoran.tahsin) / 3;
-        }, 0);
-        const avgScore = totalScore / santriSetorans.length;
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        // Get all santri for basic data
+        const santriData = await fetchSantri();
         
-        nilaiList.push({
+        // Top hafalan
+        const hafalanData = await fetchTopHafalan();
+        setTopHafalan(hafalanData.map(santri => ({
           ...santri,
-          achievement: "nilai",
-          value: parseFloat(avgScore.toFixed(1)),
-        });
-      } else {
-        nilaiList.push({
+          achievement: "hafalan",
+          value: santri.total_hafalan || 0
+        })));
+        
+        // Top performers by score
+        try {
+          const performersData = await fetchTopPerformers();
+          setTopNilai(performersData.map(santri => ({
+            ...santri,
+            achievement: "nilai",
+            value: parseFloat(santri.nilai_rata.toFixed(1))
+          })));
+        } catch (err) {
+          console.error("Error loading performers:", err);
+          // If performers fail, create placeholder data
+          setTopNilai(santriData.map(santri => ({
+            ...santri,
+            achievement: "nilai",
+            value: 0
+          })));
+        }
+        
+        // Top teratur (regularity)
+        setTopTeratur(santriData.map(santri => ({
           ...santri,
-          achievement: "nilai",
-          value: 0,
+          achievement: "teratur",
+          value: santri.total_hafalan || 0
+        })).sort((a, b) => b.value - a.value));
+        
+      } catch (error) {
+        console.error("Error loading achievement data:", error);
+        toast({
+          title: "Error",
+          description: "Gagal memuat data prestasi",
+          variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
-      
-      // Regularity (based on frequency of submissions)
-      teraturList.push({
-        ...santri,
-        achievement: "teratur",
-        value: santriSetorans.length,
-      });
-    });
+    };
     
-    // Sort achievements
-    setTopHafalan(hafalanList.sort((a, b) => b.value - a.value));
-    setTopNilai(nilaiList.sort((a, b) => b.value - a.value));
-    setTopTeratur(teraturList.sort((a, b) => b.value - a.value));
-  }, []);
+    loadData();
+  }, [toast]);
   
   // Apply filters
   useEffect(() => {
@@ -108,25 +108,44 @@ const Achievements = () => {
   }, [filter, searchQuery, topHafalan, topNilai, topTeratur]);
 
   const handleSelectSantri = async (santri: SantriWithAchievement) => {
+    console.log("Selected santri for achievement details:", santri);
     try {
-      // Get complete santri data first 
-      const santriDetails = await fetchSantriById(santri.id);
-      if (santriDetails) {
-        setSelectedSantri(santriDetails);
-        
-        // Fetch setoran data
-        const setoran = await fetchSetoranBySantri(santri.id);
-        setStudentSetoran(setoran);
-        
-        // Open dialog
-        setIsDialogOpen(true);
-      }
+      setSelectedSantri(santri);
+      
+      // Fetch setoran data
+      const setoran = await fetchSetoranBySantri(santri.id);
+      console.log("Fetched setoran data:", setoran);
+      setStudentSetoran(setoran);
+      
+      // Open dialog
+      setIsDialogOpen(true);
     } catch (error) {
       console.error("Error fetching santri details:", error);
+      toast({
+        title: "Error",
+        description: "Gagal memuat data setoran santri",
+        variant: "destructive",
+      });
     }
   };
 
   const renderAchievementCard = (title: string, santris: SantriWithAchievement[], valueLabel: string) => {
+    if (loading) {
+      return (
+        <Card className="islamic-card">
+          <CardHeader className="pb-2">
+            <CardTitle>{title}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-10">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+              <p className="mt-2 text-muted-foreground">Memuat data...</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+    
     return (
       <Card className="islamic-card">
         <CardHeader className="pb-2">
@@ -191,12 +210,10 @@ const Achievements = () => {
       
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-grow">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari santri..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         
@@ -283,7 +300,7 @@ const Achievements = () => {
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Total Hafalan</h4>
                   <span className="text-xl font-bold text-islamic-primary">
-                    {selectedSantri.total_hafalan} Setoran
+                    {selectedSantri.total_hafalan || 0} Ayat
                   </span>
                 </div>
                 
