@@ -16,11 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Santri } from "@/types";
 import { fetchSantriById, createSetoran, updateTotalHafalan } from "@/services/supabase";
-
-interface SurahOption {
-  value: string;
-  label: string;
-}
+import { getSurahsForJuz, getMaxAyatForSurahInJuz, getMinAyatForSurahInJuz } from "@/services/supabase/client";
 
 const AddSetoran = () => {
   const { santriId } = useParams<{ santriId: string }>();
@@ -28,7 +24,6 @@ const AddSetoran = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Changed from hardcoded today's date to state with Date object
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [juz, setJuz] = useState("1");
   const [surah, setSurah] = useState("");
@@ -40,23 +35,15 @@ const AddSetoran = () => {
   const [notes, setNotes] = useState("");
   const [examiner, setExaminer] = useState("");
   
+  // Available surah options based on selected juz
+  const [surahOptions, setSurahOptions] = useState<{ value: string; label: string }[]>([]);
+  const [minAyat, setMinAyat] = useState<number>(1);
+  const [maxAyat, setMaxAyat] = useState<number>(0);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // Mock Surah list
-  const surahOptions: SurahOption[] = [
-    { value: "Al-Fatihah", label: "1. Al-Fatihah" },
-    { value: "Al-Baqarah", label: "2. Al-Baqarah" },
-    { value: "Ali 'Imran", label: "3. Ali 'Imran" },
-    { value: "An-Nisa", label: "4. An-Nisa" },
-    { value: "Al-Ma'idah", label: "5. Al-Ma'idah" },
-    { value: "Al-An'am", label: "6. Al-An'am" },
-    { value: "Al-A'raf", label: "7. Al-A'raf" },
-    { value: "Al-Anfal", label: "8. Al-Anfal" },
-    { value: "At-Taubah", label: "9. At-Taubah" },
-    { value: "Yunus", label: "10. Yunus" },
-  ];
 
+  // Load santri data
   useEffect(() => {
     const fetchSantri = async () => {
       if (!santriId) return;
@@ -88,6 +75,31 @@ const AddSetoran = () => {
     fetchSantri();
   }, [santriId, navigate, toast]);
 
+  // Update surahs when juz changes
+  useEffect(() => {
+    const availableSurahs = getSurahsForJuz(juz);
+    setSurahOptions(availableSurahs);
+    
+    // Reset surah and ayat values when juz changes
+    setSurah("");
+    setStartAyat("");
+    setEndAyat("");
+    setMaxAyat(0);
+    setMinAyat(1);
+  }, [juz]);
+
+  // Update ayat limits when surah changes
+  useEffect(() => {
+    if (juz && surah) {
+      const min = getMinAyatForSurahInJuz(juz, surah);
+      const max = getMaxAyatForSurahInJuz(juz, surah);
+      setMinAyat(min);
+      setMaxAyat(max);
+      setStartAyat(min.toString());
+      setEndAyat("");
+    }
+  }, [juz, surah]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -95,6 +107,37 @@ const AddSetoran = () => {
       toast({
         title: "Data tidak lengkap",
         description: "Mohon lengkapi semua field",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate ayat range
+    const startAyatNum = parseInt(startAyat);
+    const endAyatNum = parseInt(endAyat);
+    
+    if (startAyatNum < minAyat) {
+      toast({
+        title: "Error",
+        description: `Ayat awal minimal ${minAyat} untuk surat ini di juz ${juz}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (endAyatNum > maxAyat) {
+      toast({
+        title: "Error",
+        description: `Ayat akhir maksimal ${maxAyat} untuk surat ini di juz ${juz}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (endAyatNum < startAyatNum) {
+      toast({
+        title: "Error",
+        description: "Ayat akhir tidak boleh lebih kecil dari ayat awal",
         variant: "destructive",
       });
       return;
@@ -108,8 +151,8 @@ const AddSetoran = () => {
         tanggal: format(selectedDate, 'yyyy-MM-dd'),
         juz: parseInt(juz),
         surat: surah,
-        awal_ayat: parseInt(startAyat),
-        akhir_ayat: parseInt(endAyat),
+        awal_ayat: startAyatNum,
+        akhir_ayat: endAyatNum,
         kelancaran: kelancaran[0],
         tajwid: tajwid[0],
         tahsin: tahsin[0],
@@ -209,6 +252,7 @@ const AddSetoran = () => {
                   value={surah}
                   onValueChange={setSurah}
                   required
+                  disabled={!juz}
                 >
                   <SelectTrigger id="surah">
                     <SelectValue placeholder="Pilih surat" />
@@ -230,12 +274,19 @@ const AddSetoran = () => {
                 <Input
                   id="startAyat"
                   type="number"
-                  min="1"
+                  min={minAyat}
+                  max={maxAyat}
                   placeholder="Awal ayat"
                   value={startAyat}
                   onChange={(e) => setStartAyat(e.target.value)}
+                  disabled={!surah}
                   required
                 />
+                {minAyat > 1 && (
+                  <p className="text-xs text-muted-foreground">
+                    Min: {minAyat}
+                  </p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -243,12 +294,19 @@ const AddSetoran = () => {
                 <Input
                   id="endAyat"
                   type="number"
-                  min="1"
+                  min={minAyat}
+                  max={maxAyat}
                   placeholder="Akhir ayat"
                   value={endAyat}
                   onChange={(e) => setEndAyat(e.target.value)}
+                  disabled={!startAyat}
                   required
                 />
+                {maxAyat > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Max: {maxAyat}
+                  </p>
+                )}
               </div>
             </div>
             

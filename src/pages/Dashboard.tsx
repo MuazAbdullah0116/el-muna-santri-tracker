@@ -27,33 +27,33 @@ const Dashboard = () => {
   // Classes from 7 to 12
   const classes = [7, 8, 9, 10, 11, 12];
 
-  useEffect(() => {
-    const fetchSantris = async () => {
-      setLoading(true);
-      try {
-        let data: Santri[];
-        
-        if (searchQuery.trim()) {
-          data = await fetchSantri(searchQuery);
-        } else if (selectedClass) {
-          data = await fetchSantriByClass(selectedClass);
-        } else {
-          data = await fetchSantri();
-        }
-        
-        setSantris(data);
-      } catch (error) {
-        console.error("Error fetching santris:", error);
-        toast({
-          title: "Error",
-          description: "Gagal memuat data santri",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+  const fetchSantris = async () => {
+    setLoading(true);
+    try {
+      let data: Santri[];
+      
+      if (searchQuery.trim()) {
+        data = await fetchSantri(searchQuery);
+      } else if (selectedClass) {
+        data = await fetchSantriByClass(selectedClass);
+      } else {
+        data = await fetchSantri();
       }
-    };
-    
+      
+      setSantris(data);
+    } catch (error) {
+      console.error("Error fetching santris:", error);
+      toast({
+        title: "Error",
+        description: "Gagal memuat data santri",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSantris();
   }, [selectedClass, searchQuery, toast]);
 
@@ -98,13 +98,7 @@ const Dashboard = () => {
       });
       
       // Refresh data after deletion
-      if (selectedClass) {
-        const data = await fetchSantriByClass(selectedClass);
-        setSantris(data);
-      } else {
-        const data = await fetchSantri();
-        setSantris(data);
-      }
+      await fetchSantris();
       
       setSelectedSantri(null);
       setShowDeleteDialog(false);
@@ -163,6 +157,7 @@ const Dashboard = () => {
         onDelete={handleDeleteSantri}
         showDeleteDialog={showDeleteDialog}
         setShowDeleteDialog={setShowDeleteDialog}
+        refreshData={fetchSantris}
       />
     </div>
   );
