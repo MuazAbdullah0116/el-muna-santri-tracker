@@ -1,8 +1,10 @@
 
 import { supabase } from "./client";
+import { getHafalanScore } from "../quran/quranMapping";
 
 /**
  * Fetches top santri by hafalan amount, optionally filtered by gender
+ * Now uses improved ranking based on juz, pages, and lines
  */
 export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
   console.log("Fetching top hafalan", gender ? `for ${gender}` : "for all");
@@ -11,7 +13,7 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
       .from('santri')
       .select('id, nama, kelas, jenis_kelamin, total_hafalan')
       .order('total_hafalan', { ascending: false })
-      .limit(10);
+      .limit(20); // Get more records to sort by our improved logic
     
     if (gender) {
       query = query.eq('jenis_kelamin', gender);
@@ -25,11 +27,24 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
     }
 
     console.log("Top hafalan data retrieved:", data?.length);
-    // Cast the jenis_kelamin to ensure type safety for each row
-    return (data || []).map(item => ({
-      ...item,
-      jenis_kelamin: item.jenis_kelamin as "Ikhwan" | "Akhwat"
-    }));
+    
+    // Process the data to calculate juz, pages, and lines for each santri
+    const enhancedData = (data || []).map(santri => {
+      const hafalanScore = getHafalanScore(santri.total_hafalan || 0);
+      return {
+        ...santri,
+        jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat",
+        hafalanJuz: hafalanScore.juz,
+        hafalanPages: hafalanScore.pages,
+        hafalanLines: hafalanScore.lines,
+        hafalanScore: hafalanScore.score
+      };
+    });
+    
+    // Sort by our custom score for more accurate ranking
+    const sortedData = enhancedData.sort((a, b) => b.hafalanScore - a.hafalanScore).slice(0, 10);
+    
+    return sortedData;
   } catch (err) {
     console.error("Exception in fetchTopHafalan:", err);
     throw err;
@@ -60,7 +75,7 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     // Then, get all santri
     const { data: santriData, error: santriError } = await supabase
       .from('santri')
-      .select('id, nama, kelas, jenis_kelamin');
+      .select('id, nama, kelas, jenis_kelamin, total_hafalan');
     
     if (santriError) {
       console.error("Error fetching santri for top performers:", santriError);
@@ -113,7 +128,7 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
       kelas: data.santri.kelas,
       jenis_kelamin: data.santri.jenis_kelamin,
       nilai_rata: data.totalScore / data.count,
-      total_hafalan: 0 // Will be populated from santri data
+      total_hafalan: data.santri.total_hafalan || 0
     })).sort((a, b) => b.nilai_rata - a.nilai_rata).slice(0, 10);
 
     return result;

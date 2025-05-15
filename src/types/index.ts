@@ -51,4 +51,9 @@ export interface SetoranWithSantri extends Setoran {
 export interface SantriWithAchievement extends Santri {
   achievement: "hafalan" | "nilai" | "teratur";
   value: number;
+  hafalanFormatted?: string;
+  hafalanJuz?: number;
+  hafalanPages?: number;
+  hafalanLines?: number;
+  hafalanScore?: number;
 }

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/services/supabase/client";
+import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
 
 interface SantriDetailProps {
   selectedSantri: Santri | null;
@@ -206,7 +207,7 @@ const SantriDetail = ({
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Total Hafalan</h4>
                   <span className="text-xl font-bold text-islamic-primary">
-                    {selectedSantri.total_hafalan} Setoran
+                    {getFormattedHafalanProgress(selectedSantri.total_hafalan || 0)}
                   </span>
                 </div>
                 

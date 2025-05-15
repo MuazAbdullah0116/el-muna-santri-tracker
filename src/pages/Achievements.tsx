@@ -10,6 +10,7 @@ import SearchBar from "@/components/dashboard/SearchBar";
 import { fetchSantri } from "@/services/supabase/santri.service";
 import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 import { fetchTopHafalan, fetchTopPerformers } from "@/services/supabase/achievement.service";
+import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
 
 const Achievements = () => {
   const [filter, setFilter] = useState<"all" | "ikhwan" | "akhwat">("all");
@@ -35,12 +36,13 @@ const Achievements = () => {
         // Get all santri for basic data
         const santriData = await fetchSantri();
         
-        // Top hafalan
+        // Top hafalan with new improved calculation
         const hafalanData = await fetchTopHafalan();
         setTopHafalan(hafalanData.map(santri => ({
           ...santri,
           achievement: "hafalan" as "hafalan",
-          value: santri.total_hafalan || 0
+          value: santri.total_hafalan || 0,
+          hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
         })));
         
         // Top performers by score
@@ -65,7 +67,8 @@ const Achievements = () => {
         setTopTeratur(santriData.map(santri => ({
           ...santri,
           achievement: "teratur" as "teratur",
-          value: santri.total_hafalan || 0
+          value: santri.total_hafalan || 0,
+          hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
         })).sort((a, b) => b.value - a.value));
         
       } catch (error) {
@@ -129,7 +132,7 @@ const Achievements = () => {
     }
   };
 
-  const renderAchievementCard = (title: string, santris: SantriWithAchievement[], valueLabel: string) => {
+  const renderAchievementCard = (title: string, santris: SantriWithAchievement[], valueLabel: string, isHafalan: boolean = false) => {
     if (loading) {
       return (
         <Card className="islamic-card">
@@ -187,11 +190,13 @@ const Achievements = () => {
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-semibold text-islamic-primary">
-                      {santri.value}
+                      {isHafalan ? santri.hafalanFormatted : santri.value}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-1">
-                      {valueLabel}
-                    </span>
+                    {!isHafalan && (
+                      <span className="text-xs text-muted-foreground ml-1">
+                        {valueLabel}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -251,21 +256,24 @@ const Achievements = () => {
           {renderAchievementCard(
             "Hafalan Terbanyak",
             filteredHafalan,
-            "setoran"
+            "",
+            true
           )}
         </TabsContent>
         <TabsContent value="nilai" className="pt-4">
           {renderAchievementCard(
             "Nilai Terbaik",
             filteredNilai,
-            "rerata"
+            "rerata",
+            false
           )}
         </TabsContent>
         <TabsContent value="teratur" className="pt-4">
           {renderAchievementCard(
             "Hafalan Teratur",
             filteredTeratur,
-            "setoran"
+            "",
+            true
           )}
         </TabsContent>
       </Tabs>
@@ -300,7 +308,7 @@ const Achievements = () => {
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">Total Hafalan</h4>
                   <span className="text-xl font-bold text-islamic-primary">
-                    {selectedSantri.total_hafalan || 0} Ayat
+                    {getFormattedHafalanProgress(selectedSantri.total_hafalan || 0)}
                   </span>
                 </div>
                 

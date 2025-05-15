@@ -1,6 +1,7 @@
 
 import { Setoran } from "@/types";
 import { supabase } from "./client";
+import { calculateHafalanProgress } from "../quran/quranMapping";
 
 /**
  * Fetches all setoran records
@@ -123,6 +124,7 @@ export const deleteSetoran = async (id: string): Promise<void> => {
 
 /**
  * Updates the total hafalan count for a santri based on their setoran records
+ * Now with improved calculation based on juz, pages, and lines
  */
 export const updateTotalHafalan = async (santriId: string): Promise<void> => {
   console.log("Updating total hafalan for santri:", santriId);
@@ -144,7 +146,7 @@ export const updateTotalHafalan = async (santriId: string): Promise<void> => {
       return sum + count;
     }, 0) || 0;
     
-    console.log("Calculated total hafalan:", totalAyat);
+    console.log("Calculated total hafalan ayat count:", totalAyat);
 
     // Update santri record
     const { error: updateError } = await supabase
@@ -162,4 +164,12 @@ export const updateTotalHafalan = async (santriId: string): Promise<void> => {
     console.error("Exception in updateTotalHafalan:", err);
     throw err;
   }
+};
+
+/**
+ * Gets the formatted hafalan progress (juz, pages, lines) for a santri
+ */
+export const getFormattedHafalanProgress = (totalAyat: number): string => {
+  const progress = calculateHafalanProgress(totalAyat);
+  return progress.formattedProgress;
 };
