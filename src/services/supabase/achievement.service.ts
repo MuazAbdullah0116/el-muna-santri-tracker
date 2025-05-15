@@ -11,14 +11,14 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
   try {
     let query = supabase
       .from('santri')
-      .select('id, nama, kelas, jenis_kelamin, total_hafalan')
-      .order('total_hafalan', { ascending: false })
-      .limit(20); // Get more records to sort by our improved logic
+      .select('id, nama, kelas, jenis_kelamin, total_hafalan');
     
+    // Apply gender filter if specified
     if (gender) {
       query = query.eq('jenis_kelamin', gender);
     }
-
+    
+    // Get all records to sort by our improved logic
     const { data, error } = await query;
 
     if (error) {
@@ -28,8 +28,12 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
 
     console.log("Top hafalan data retrieved:", data?.length);
     
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
     // Process the data to calculate juz, pages, and lines for each santri
-    const enhancedData = (data || []).map(santri => {
+    const enhancedData = data.map(santri => {
       const hafalanScore = getHafalanScore(santri.total_hafalan || 0);
       return {
         ...santri,
@@ -42,7 +46,9 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
     });
     
     // Sort by our custom score for more accurate ranking
-    const sortedData = enhancedData.sort((a, b) => b.hafalanScore - a.hafalanScore).slice(0, 10);
+    const sortedData = enhancedData
+      .sort((a, b) => b.hafalanScore - a.hafalanScore)
+      .slice(0, 10);
     
     return sortedData;
   } catch (err) {
@@ -82,15 +88,23 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
       throw santriError;
     }
 
+    if (!santriData || !setoranData) {
+      return [];
+    }
+
     // Filter santri by gender if specified
     const filteredSantri = gender 
       ? santriData.filter(s => s.jenis_kelamin === gender) 
       : santriData;
     
+    if (filteredSantri.length === 0) {
+      return [];
+    }
+    
     // Process data to get average scores
     const scoreMap = new Map();
     
-    setoranData?.forEach(item => {
+    setoranData.forEach(item => {
       const santriId = item.santri_id;
       const avgScore = (item.kelancaran + item.tajwid + item.tahsin) / 3;
       
@@ -122,18 +136,76 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     console.log("Calculated performer scores for", scoreMap.size, "santri");
     
     // Calculate averages and sort
-    const result = Array.from(scoreMap.entries()).map(([id, data]: [string, any]) => ({
-      id,
-      nama: data.santri.nama,
-      kelas: data.santri.kelas,
-      jenis_kelamin: data.santri.jenis_kelamin,
-      nilai_rata: data.totalScore / data.count,
-      total_hafalan: data.santri.total_hafalan || 0
-    })).sort((a, b) => b.nilai_rata - a.nilai_rata).slice(0, 10);
+    const result = Array.from(scoreMap.entries())
+      .map(([id, data]: [string, any]) => ({
+        id,
+        nama: data.santri.nama,
+        kelas: data.santri.kelas,
+        jenis_kelamin: data.santri.jenis_kelamin,
+        nilai_rata: data.totalScore / data.count,
+        total_hafalan: data.santri.total_hafalan || 0
+      }))
+      .sort((a, b) => b.nilai_rata - a.nilai_rata)
+      .slice(0, 10);
 
     return result;
   } catch (err) {
     console.error("Exception in fetchTopPerformers:", err);
+    throw err;
+  }
+};
+
+/**
+ * Fetches top santri by regularity (consistent setoran patterns)
+ * This is currently a placeholder using total_hafalan as a metric
+ * In the future, it can be enhanced to analyze setoran patterns
+ */
+export const fetchTopRegularity = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
+  console.log("Fetching top regularity", gender ? `for ${gender}` : "for all");
+  try {
+    let query = supabase
+      .from('santri')
+      .select('id, nama, kelas, jenis_kelamin, total_hafalan');
+    
+    // Apply gender filter if specified
+    if (gender) {
+      query = query.eq('jenis_kelamin', gender);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error("Error fetching top regularity:", error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
+    // Process data for regularity metrics
+    // For now, just using total_hafalan as a placeholder
+    const processedData = data.map(santri => {
+      const hafalanScore = getHafalanScore(santri.total_hafalan || 0);
+      return {
+        ...santri,
+        jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat",
+        hafalanJuz: hafalanScore.juz,
+        hafalanPages: hafalanScore.pages,
+        hafalanLines: hafalanScore.lines,
+        hafalanScore: hafalanScore.score
+      };
+    });
+    
+    // Sort by total_hafalan for now
+    // In the future, implement a more sophisticated regularity algorithm
+    const sortedData = processedData
+      .sort((a, b) => b.hafalanScore - a.hafalanScore)
+      .slice(0, 10);
+    
+    return sortedData;
+  } catch (err) {
+    console.error("Exception in fetchTopRegularity:", err);
     throw err;
   }
 };

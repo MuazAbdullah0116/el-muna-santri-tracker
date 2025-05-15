@@ -9,7 +9,11 @@ import { useToast } from "@/hooks/use-toast";
 import SearchBar from "@/components/dashboard/SearchBar";
 import { fetchSantri } from "@/services/supabase/santri.service";
 import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
-import { fetchTopHafalan, fetchTopPerformers } from "@/services/supabase/achievement.service";
+import { 
+  fetchTopHafalan, 
+  fetchTopPerformers,
+  fetchTopRegularity 
+} from "@/services/supabase/achievement.service";
 import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
 
 const Achievements = () => {
@@ -28,16 +32,20 @@ const Achievements = () => {
   
   const { toast } = useToast();
   
-  // Load data from database
+  // Load data based on current gender filter
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Get all santri for basic data
-        const santriData = await fetchSantri();
+        // Determine the gender filter for API calls
+        const genderFilter = filter === "all" 
+          ? undefined 
+          : filter === "ikhwan" 
+            ? "Ikhwan" 
+            : "Akhwat";
         
-        // Top hafalan with new improved calculation
-        const hafalanData = await fetchTopHafalan();
+        // Top hafalan with improved calculation
+        const hafalanData = await fetchTopHafalan(genderFilter);
         setTopHafalan(hafalanData.map(santri => ({
           ...santri,
           achievement: "hafalan" as "hafalan",
@@ -47,7 +55,7 @@ const Achievements = () => {
         
         // Top performers by score
         try {
-          const performersData = await fetchTopPerformers();
+          const performersData = await fetchTopPerformers(genderFilter);
           setTopNilai(performersData.map(santri => ({
             ...santri,
             achievement: "nilai" as "nilai",
@@ -55,21 +63,32 @@ const Achievements = () => {
           })));
         } catch (err) {
           console.error("Error loading performers:", err);
-          // If performers fail, create placeholder data
-          setTopNilai(santriData.map(santri => ({
-            ...santri,
-            achievement: "nilai" as "nilai",
-            value: 0
-          })));
+          toast({
+            title: "Error",
+            description: "Gagal memuat data prestasi nilai",
+            variant: "destructive",
+          });
+          setTopNilai([]);
         }
         
-        // Top teratur (regularity)
-        setTopTeratur(santriData.map(santri => ({
-          ...santri,
-          achievement: "teratur" as "teratur",
-          value: santri.total_hafalan || 0,
-          hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
-        })).sort((a, b) => b.value - a.value));
+        // Top teratur (regularity) - now using dedicated service
+        try {
+          const regularityData = await fetchTopRegularity(genderFilter);
+          setTopTeratur(regularityData.map(santri => ({
+            ...santri,
+            achievement: "teratur" as "teratur",
+            value: santri.total_hafalan || 0,
+            hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
+          })));
+        } catch (err) {
+          console.error("Error loading regularity data:", err);
+          toast({
+            title: "Error",
+            description: "Gagal memuat data hafalan teratur",
+            variant: "destructive",
+          });
+          setTopTeratur([]);
+        }
         
       } catch (error) {
         console.error("Error loading achievement data:", error);
@@ -84,31 +103,22 @@ const Achievements = () => {
     };
     
     loadData();
-  }, [toast]);
+  }, [toast, filter]); // Re-fetch when filter changes
   
-  // Apply filters
+  // Apply search filter
   useEffect(() => {
-    const filterSantris = (santris: SantriWithAchievement[]) => {
+    const filterBySearch = (santris: SantriWithAchievement[]) => {
       return santris.filter(santri => {
-        // Gender filter
-        const genderMatch =
-          filter === "all" || 
-          (filter === "ikhwan" && santri.jenis_kelamin === "Ikhwan") ||
-          (filter === "akhwat" && santri.jenis_kelamin === "Akhwat");
-        
         // Search filter
-        const searchMatch = 
-          !searchQuery ||
+        return !searchQuery ||
           santri.nama.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        return genderMatch && searchMatch;
       });
     };
     
-    setFilteredHafalan(filterSantris(topHafalan));
-    setFilteredNilai(filterSantris(topNilai));
-    setFilteredTeratur(filterSantris(topTeratur));
-  }, [filter, searchQuery, topHafalan, topNilai, topTeratur]);
+    setFilteredHafalan(filterBySearch(topHafalan));
+    setFilteredNilai(filterBySearch(topNilai));
+    setFilteredTeratur(filterBySearch(topTeratur));
+  }, [searchQuery, topHafalan, topNilai, topTeratur]);
 
   const handleSelectSantri = async (santri: SantriWithAchievement) => {
     console.log("Selected santri for achievement details:", santri);
@@ -159,7 +169,7 @@ const Achievements = () => {
             <p className="text-center text-muted-foreground">Tidak ada data</p>
           ) : (
             <div className="space-y-3">
-              {santris.slice(0, 10).map((santri, index) => (
+              {santris.map((santri, index) => (
                 <div
                   key={santri.id}
                   className={`flex items-center justify-between p-3 rounded-lg ${

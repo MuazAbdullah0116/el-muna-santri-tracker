@@ -11,7 +11,7 @@ export const juzMapping = [
   { juz: 4, surah: 3, ayah: 93 },   // Ali 'Imran 93
   { juz: 5, surah: 4, ayah: 24 },   // An-Nisa 24
   { juz: 6, surah: 4, ayah: 148 },  // An-Nisa 148
-  { juz: 7, surah: 5, ayah: 82 },   // Al-Ma'idah 82
+  { juz: 7, surah: 5, ayah: 83 },   // Al-Ma'idah 83
   { juz: 8, surah: 6, ayah: 111 },  // Al-An'am 111
   { juz: 9, surah: 7, ayah: 88 },   // Al-A'raf 88
   { juz: 10, surah: 8, ayah: 41 },  // Al-Anfal 41
@@ -155,8 +155,42 @@ export const surahAyatCount = [
   { surah: 114, count: 6 },   // An-Nas
 ];
 
+// Ayat count per juz based on the provided data
+export const ayatCountPerJuz = [
+  { juz: 1, count: 148 },  // Juz 1: 148 ayat
+  { juz: 2, count: 111 },  // Juz 2: 111 ayat
+  { juz: 3, count: 126 },  // Juz 3: 126 ayat
+  { juz: 4, count: 131 },  // Juz 4: 131 ayat
+  { juz: 5, count: 124 },  // Juz 5: 124 ayat
+  { juz: 6, count: 110 },  // Juz 6: 110 ayat
+  { juz: 7, count: 149 },  // Juz 7: 149 ayat
+  { juz: 8, count: 142 },  // Juz 8: 142 ayat
+  { juz: 9, count: 159 },  // Juz 9: 159 ayat
+  { juz: 10, count: 127 }, // Juz 10: 127 ayat
+  { juz: 11, count: 151 }, // Juz 11: 151 ayat
+  { juz: 12, count: 170 }, // Juz 12: 170 ayat
+  { juz: 13, count: 154 }, // Juz 13: 154 ayat
+  { juz: 14, count: 227 }, // Juz 14: 227 ayat
+  { juz: 15, count: 185 }, // Juz 15: 185 ayat
+  { juz: 16, count: 269 }, // Juz 16: 269 ayat
+  { juz: 17, count: 190 }, // Juz 17: 190 ayat
+  { juz: 18, count: 202 }, // Juz 18: 202 ayat
+  { juz: 19, count: 339 }, // Juz 19: 339 ayat
+  { juz: 20, count: 171 }, // Juz 20: 171 ayat
+  { juz: 21, count: 178 }, // Juz 21: 178 ayat
+  { juz: 22, count: 169 }, // Juz 22: 169 ayat
+  { juz: 23, count: 357 }, // Juz 23: 357 ayat
+  { juz: 24, count: 175 }, // Juz 24: 175 ayat
+  { juz: 25, count: 246 }, // Juz 25: 246 ayat
+  { juz: 26, count: 195 }, // Juz 26: 195 ayat
+  { juz: 27, count: 399 }, // Juz 27: 399 ayat
+  { juz: 28, count: 137 }, // Juz 28: 137 ayat
+  { juz: 29, count: 431 }, // Juz 29: 431 ayat
+  { juz: 30, count: 564 }, // Juz 30: 564 ayat
+];
+
 // Simplified mapping of pages in standard Rasm Utsmani mushaf (604 pages)
-// This is an approximation - each page has about 15 lines except first few pages
+// This is an approximation based on Rasm Utsmani standard
 export const pagesPerJuz = {
   1: 21,   // Juz 1: ~21 pages
   2: 20,   // Juz 2: ~20 pages
@@ -193,13 +227,16 @@ export const pagesPerJuz = {
 // Standard number of lines per page in Rasm Utsmani
 export const LINES_PER_PAGE = 15;
 
-// Total number of ayat in the Quran
+// Special case for first pages
+export const LINES_PER_FIRST_PAGES = 6; // First 2 pages have 6 lines
+
+// Total number of ayat in the Quran (sum of ayatCountPerJuz)
 export const TOTAL_AYAT_IN_QURAN = 6236;
 
 // Average number of ayat per line (approximate)
 export const AVG_AYAT_PER_LINE = 2.5;
 
-// Calculate total pages in the Quran
+// Calculate total pages in the Quran (604 as per Rasm Utsmani)
 export const TOTAL_PAGES_IN_QURAN = Object.values(pagesPerJuz).reduce((sum, pages) => sum + pages, 0);
 
 /**
@@ -223,15 +260,25 @@ export function calculateHafalanProgress(ayatCount: number): {
     };
   }
 
-  // Calculate juz based on average number of ayat per juz
-  const avgAyatPerJuz = TOTAL_AYAT_IN_QURAN / 30;
-  const completedJuz = Math.floor(ayatCount / avgAyatPerJuz);
+  // Calculate juz based on actual ayat count per juz
+  let completedJuz = 0;
+  let remainingAyat = ayatCount;
   
-  // Calculate remaining ayat after counting completed juz
-  const remainingAyat = ayatCount - (completedJuz * avgAyatPerJuz);
+  // Count complete juz
+  for (const juzData of ayatCountPerJuz) {
+    if (remainingAyat >= juzData.count) {
+      completedJuz++;
+      remainingAyat -= juzData.count;
+    } else {
+      break;
+    }
+  }
   
   // Calculate pages from remaining ayat
-  const avgAyatPerPage = avgAyatPerJuz / 20; // Approximate 20 pages per juz
+  // Average ayat per page in Rasm Utsmani
+  const avgAyatPerPage = TOTAL_AYAT_IN_QURAN / TOTAL_PAGES_IN_QURAN;
+  
+  // Complete pages after juz
   const completedPages = Math.floor(remainingAyat / avgAyatPerPage);
   
   // Calculate lines from remaining ayat after counting completed pages
@@ -239,7 +286,10 @@ export function calculateHafalanProgress(ayatCount: number): {
   const completedLines = Math.ceil(remainingAyatAfterPages / AVG_AYAT_PER_LINE);
   
   // Total pages (juz * ~20 pages + completed pages)
-  const totalPages = (completedJuz * 20) + completedPages;
+  let totalPages = completedPages;
+  for (let j = 1; j <= completedJuz; j++) {
+    totalPages += pagesPerJuz[j as keyof typeof pagesPerJuz] || 20;
+  }
 
   // Format the progress string
   let formattedProgress = "";
