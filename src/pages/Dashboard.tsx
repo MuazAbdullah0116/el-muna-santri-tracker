@@ -126,7 +126,8 @@ const Dashboard = () => {
       <ClassFilter 
         selectedClass={selectedClass} 
         onClassSelect={handleClassSelect} 
-        classes={classes} 
+        classes={classes}
+        refreshData={fetchSantris}
       />
       
       {loading ? (

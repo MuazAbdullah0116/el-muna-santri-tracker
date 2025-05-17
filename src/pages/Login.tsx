@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Settings, Trash2, Edit } from "lucide-react";
 import IslamicLogo from "@/components/IslamicLogo";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,7 +13,6 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showAdminTools, setShowAdminTools] = useState(false);
   const { login, skipLogin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -53,10 +50,6 @@ const Login = () => {
   const handleSkipLogin = () => {
     skipLogin();
     navigate("/quran");
-  };
-
-  const toggleAdminTools = () => {
-    setShowAdminTools(!showAdminTools);
   };
 
   return (
@@ -106,44 +99,6 @@ const Login = () => {
                 </Button>
               </div>
             </form>
-
-            {(username === "Asatidz" || username === "Musyrif") && (
-              <div className="mt-6">
-                <button
-                  type="button"
-                  onClick={toggleAdminTools}
-                  className="flex items-center text-sm text-muted-foreground hover:text-primary"
-                >
-                  <Settings className="h-4 w-4 mr-1" />
-                  {showAdminTools ? 'Sembunyikan Tools Admin' : 'Tampilkan Tools Admin'}
-                </button>
-                
-                {showAdminTools && (
-                  <div className="mt-4 space-y-4">
-                    <Separator />
-                    <div className="text-sm font-medium">Tools Admin</div>
-                    <div className="grid grid-cols-1 gap-2">
-                      <Button
-                        variant="outline"
-                        className="flex items-center justify-start"
-                        onClick={() => navigate("/edit-setoran")}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Setoran
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex items-center justify-start"
-                        onClick={() => navigate("/delete-setoran")}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Hapus Riwayat Setoran
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </CardContent>
           <CardFooter className="flex justify-center">
             <Button variant="outline" onClick={handleSkipLogin}>

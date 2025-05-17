@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, PlayCircle, Pause } from "lucide-react";
+import { ChevronLeft, Pause, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -180,10 +181,29 @@ const SurahDetail = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center">
+      <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate("/quran")}>
           <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
         </Button>
+        
+        {audio && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAudio}
+            className="flex items-center gap-1"
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="h-3 w-3" /> Pause
+              </>
+            ) : (
+              <>
+                <PlayCircle className="h-3 w-3" /> Play Audio
+              </>
+            )}
+          </Button>
+        )}
       </div>
       
       <Card className="p-4 md:p-6 islamic-card">
@@ -200,24 +220,6 @@ const SurahDetail = () => {
           </div>
           <div className="text-right mt-2 md:mt-0">
             <p className="text-xl md:text-2xl font-arabic">{surah.nama}</p>
-            {audio && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 text-xs"
-                onClick={toggleAudio}
-              >
-                {isPlaying ? (
-                  <>
-                    <Pause className="h-3 w-3 mr-1" /> Pause
-                  </>
-                ) : (
-                  <>
-                    <PlayCircle className="h-3 w-3 mr-1" /> Play
-                  </>
-                )}
-              </Button>
-            )}
           </div>
         </div>
       </Card>
