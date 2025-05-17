@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from "react";
 import { Play, Pause, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

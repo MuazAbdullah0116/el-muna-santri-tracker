@@ -90,10 +90,10 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
               handleLongPress(kelas);
             }}
             onTouchStart={() => {
-              const timer = setTimeout(() => {
+              const longPressTimer = setTimeout(() => {
                 handleLongPress(kelas);
               }, 800);
-              return () => clearTimeout(timer);
+              return () => clearTimeout(longPressTimer);
             }}
             className={`islamic-bubble aspect-square relative ${
               selectedClass === kelas ? "bg-accent text-accent-foreground" : ""

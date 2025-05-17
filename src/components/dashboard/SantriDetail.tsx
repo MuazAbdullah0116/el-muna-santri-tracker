@@ -189,6 +189,11 @@ const SantriDetail = ({
                               {setoran.catatan}
                             </div>
                           )}
+                          <div className="mt-2 text-xs flex justify-end">
+                            <span className="text-muted-foreground">
+                              Penguji: <span className="font-medium">{setoran.diuji_oleh}</span>
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
