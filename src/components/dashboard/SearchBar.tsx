@@ -11,11 +11,14 @@ interface SearchBarProps {
 const SearchBar = ({ searchQuery, onSearchChange, placeholder = "Cari santri..." }: SearchBarProps) => {
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-islamic-secondary to-islamic-accent flex items-center justify-center">
-          <Filter className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-islamic-secondary to-islamic-accent flex items-center justify-center shadow-lg">
+          <Filter className="w-5 h-5 text-white" />
         </div>
-        <h2 className="text-lg font-semibold text-gray-800">Pencarian Santri</h2>
+        <div>
+          <h2 className="text-xl font-bold text-gray-800">Pencarian Santri</h2>
+          <p className="text-sm text-gray-600">Temukan santri dengan cepat</p>
+        </div>
       </div>
       
       <div className="relative">

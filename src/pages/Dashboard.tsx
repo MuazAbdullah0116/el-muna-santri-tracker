@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Users, BookOpen } from "lucide-react";
+import { Plus, Users, BookOpen, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
@@ -112,62 +112,66 @@ const Dashboard = () => {
     }
   };
 
+  const totalHafalan = santris.reduce((sum, santri) => sum + (santri.total_hafalan || 0), 0);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-islamic-light via-white to-islamic-accent/10">
       <div className="space-y-8 p-6">
         {/* Header Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-islamic-primary/10">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-lg">
-                <Users className="w-6 h-6 text-white" />
+        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
+                <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-800">Dashboard Santri</h1>
-                <p className="text-gray-600">Kelola data santri dan setoran hafalan</p>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard Santri</h1>
+                <p className="text-gray-600 text-lg">Kelola data santri dan setoran hafalan</p>
               </div>
             </div>
             
             <Button 
               onClick={handleAddSantri}
-              className="bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90 shadow-lg px-6 py-3 rounded-xl"
+              className="bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90 shadow-xl px-8 py-4 rounded-2xl text-lg font-semibold"
             >
-              <Plus className="mr-2 h-5 w-5" /> 
+              <Plus className="mr-3 h-6 w-6" /> 
               Tambah Santri
             </Button>
           </div>
           
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-            <div className="bg-gradient-to-br from-islamic-primary/10 to-islamic-primary/5 rounded-xl p-4 border border-islamic-primary/20">
-              <div className="flex items-center gap-3">
-                <Users className="w-8 h-8 text-islamic-primary" />
+          {/* Enhanced Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="bg-gradient-to-br from-islamic-primary/10 to-islamic-primary/5 rounded-2xl p-6 border border-islamic-primary/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-islamic-primary flex items-center justify-center shadow-lg">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Santri</p>
-                  <p className="text-2xl font-bold text-islamic-primary">{santris.length}</p>
+                  <p className="text-sm text-gray-600 font-medium">Total Santri</p>
+                  <p className="text-3xl font-bold text-islamic-primary">{santris.length}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-islamic-secondary/10 to-islamic-secondary/5 rounded-xl p-4 border border-islamic-secondary/20">
-              <div className="flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-islamic-secondary" />
+            <div className="bg-gradient-to-br from-islamic-secondary/10 to-islamic-secondary/5 rounded-2xl p-6 border border-islamic-secondary/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-islamic-secondary flex items-center justify-center shadow-lg">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-600">Total Hafalan</p>
-                  <p className="text-2xl font-bold text-islamic-secondary">
-                    {santris.reduce((sum, santri) => sum + (santri.total_hafalan || 0), 0)}
-                  </p>
+                  <p className="text-sm text-gray-600 font-medium">Total Hafalan</p>
+                  <p className="text-3xl font-bold text-islamic-secondary">{totalHafalan}</p>
                 </div>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-islamic-accent/10 to-islamic-accent/5 rounded-xl p-4 border border-islamic-accent/20">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-islamic-accent flex items-center justify-center text-white font-bold">
-                  {selectedClass || "?"}
+            <div className="bg-gradient-to-br from-islamic-accent/10 to-islamic-accent/5 rounded-2xl p-6 border border-islamic-accent/20">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-islamic-accent flex items-center justify-center shadow-lg">
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Kelas Aktif</p>
-                  <p className="text-2xl font-bold text-islamic-accent">
-                    {selectedClass ? `Kelas ${selectedClass}` : "Semua"}
+                  <p className="text-sm text-gray-600 font-medium">Kelas Aktif</p>
+                  <p className="text-3xl font-bold text-islamic-accent">
+                    {selectedClass ? selectedClass : "Semua"}
                   </p>
                 </div>
               </div>
@@ -176,12 +180,12 @@ const Dashboard = () => {
         </div>
         
         {/* Search Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-islamic-primary/10">
+        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           <SearchBar searchQuery={searchQuery} onSearchChange={handleSearchChange} />
         </div>
         
         {/* Class Filter Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-islamic-primary/10">
+        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           <ClassFilter 
             selectedClass={selectedClass} 
             onClassSelect={handleClassSelect} 
@@ -191,30 +195,35 @@ const Dashboard = () => {
         </div>
         
         {/* Content Section */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-islamic-primary/10">
+        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           {loading ? (
-            <div className="text-center py-16">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-islamic-primary border-t-transparent shadow-lg"></div>
-              <p className="mt-4 text-gray-600 font-medium">Memuat data santri...</p>
+            <div className="text-center py-20">
+              <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-islamic-primary border-t-transparent shadow-lg"></div>
+              <p className="mt-6 text-gray-600 font-medium text-lg">Memuat data santri...</p>
             </div>
           ) : santris.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-islamic-primary/10 to-islamic-secondary/10 flex items-center justify-center">
-                <Users className="w-10 h-10 text-islamic-primary/60" />
+            <div className="text-center py-20">
+              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-islamic-primary/10 to-islamic-secondary/10 flex items-center justify-center">
+                <Users className="w-12 h-12 text-islamic-primary/60" />
               </div>
-              <p className="text-gray-600 font-medium text-lg">Tidak ada data santri</p>
-              <p className="text-gray-500 text-sm mt-2">Mulai dengan menambahkan santri baru</p>
+              <p className="text-gray-600 font-medium text-xl mb-2">Tidak ada data santri</p>
+              <p className="text-gray-500 text-base">Mulai dengan menambahkan santri baru</p>
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3 mb-6">
-                <BookOpen className="w-6 h-6 text-islamic-primary" />
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Daftar Santri {selectedClass && `- Kelas ${selectedClass}`}
-                </h2>
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-lg">
+                  <BookOpen className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Daftar Santri {selectedClass && `- Kelas ${selectedClass}`}
+                  </h2>
+                  <p className="text-gray-600">Klik untuk melihat detail santri</p>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {santris.map((santri) => (
                   <SantriCard 
                     key={santri.id} 
