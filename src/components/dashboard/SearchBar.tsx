@@ -23,11 +23,11 @@ const SearchBar = ({ searchQuery, onSearchChange, placeholder = "Cari santri..."
       
       <div className="relative">
         <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-          <Search className="h-5 w-5 text-islamic-primary/60" />
+          <Search className="h-5 w-5 text-muted-foreground" />
         </div>
         <Input
           placeholder={placeholder}
-          className="pl-12 pr-4 py-3 text-base border-2 border-islamic-primary/20 rounded-xl focus:border-islamic-primary focus:ring-islamic-primary/20 bg-background shadow-sm transition-all duration-200"
+          className="pl-12 pr-4 py-3 text-base border-2 border-border rounded-xl focus:border-islamic-primary focus:ring-islamic-primary/20 bg-background text-foreground shadow-sm transition-all duration-200"
           value={searchQuery}
           onChange={onSearchChange}
         />

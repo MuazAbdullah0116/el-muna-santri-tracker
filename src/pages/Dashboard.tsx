@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Users, BookOpen, TrendingUp } from "lucide-react";
@@ -118,7 +117,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10">
       <div className="space-y-8 p-6">
         {/* Header Section */}
-        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div className="flex items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
@@ -180,12 +179,12 @@ const Dashboard = () => {
         </div>
         
         {/* Search Section */}
-        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
           <SearchBar searchQuery={searchQuery} onSearchChange={handleSearchChange} />
         </div>
         
         {/* Class Filter Section */}
-        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
           <ClassFilter 
             selectedClass={selectedClass} 
             onClassSelect={handleClassSelect} 
@@ -195,7 +194,7 @@ const Dashboard = () => {
         </div>
         
         {/* Content Section */}
-        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
           {loading ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-islamic-primary border-t-transparent shadow-lg"></div>

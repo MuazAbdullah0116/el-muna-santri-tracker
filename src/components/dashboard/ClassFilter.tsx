@@ -120,7 +120,7 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
               className={`group relative overflow-hidden rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl ${
                 selectedClass === kelas 
                   ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-lg" 
-                  : "bg-gradient-to-br from-card to-islamic-light/50 dark:to-islamic-dark/50 text-islamic-primary border-2 border-islamic-primary/20 hover:border-islamic-primary/40"
+                  : "bg-card border-2 border-border text-foreground hover:border-islamic-primary/40"
               }`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -141,14 +141,14 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
       <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-foreground">
               <ChevronUp className="w-5 h-5 text-islamic-primary" />
               Naikkan Kelas
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground">
               Apakah Anda yakin ingin menaikkan seluruh santri kelas {classToPromote} ke kelas {classToPromote ? classToPromote + 1 : ""}?
               <br />
-              <span className="text-orange-600 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
+              <span className="text-destructive font-medium">Tindakan ini tidak dapat dibatalkan.</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
