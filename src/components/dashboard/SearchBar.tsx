@@ -1,5 +1,5 @@
 
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface SearchBarProps {
@@ -10,14 +10,26 @@ interface SearchBarProps {
 
 const SearchBar = ({ searchQuery, onSearchChange, placeholder = "Cari santri..." }: SearchBarProps) => {
   return (
-    <div className="relative">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        placeholder={placeholder}
-        className="pl-8"
-        value={searchQuery}
-        onChange={onSearchChange}
-      />
+    <div className="mb-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-islamic-secondary to-islamic-accent flex items-center justify-center">
+          <Filter className="w-4 h-4 text-white" />
+        </div>
+        <h2 className="text-lg font-semibold text-gray-800">Pencarian Santri</h2>
+      </div>
+      
+      <div className="relative">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+          <Search className="h-5 w-5 text-islamic-primary/60" />
+        </div>
+        <Input
+          placeholder={placeholder}
+          className="pl-12 pr-4 py-3 text-base border-2 border-islamic-primary/20 rounded-xl focus:border-islamic-primary focus:ring-islamic-primary/20 bg-white shadow-sm transition-all duration-200"
+          value={searchQuery}
+          onChange={onSearchChange}
+        />
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-islamic-primary/5 to-islamic-secondary/5 pointer-events-none opacity-0 transition-opacity duration-200 peer-focus:opacity-100" />
+      </div>
     </div>
   );
 };

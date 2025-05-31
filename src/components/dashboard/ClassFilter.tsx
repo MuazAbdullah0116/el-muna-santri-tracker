@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/services/supabase/client";
@@ -80,36 +80,72 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
 
   return (
     <>
-      <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-        {classes.map((kelas) => (
-          <button
-            key={kelas}
-            onClick={() => handleClassClick(kelas)}
-            onContextMenu={(e) => {
-              e.preventDefault();
-              handleLongPress(kelas);
-            }}
-            onTouchStart={() => {
-              const longPressTimer = setTimeout(() => {
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center">
+            <GraduationCap className="w-4 h-4 text-white" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-800">Filter Kelas</h2>
+        </div>
+        
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          {classes.map((kelas) => (
+            <button
+              key={kelas}
+              onClick={() => handleClassClick(kelas)}
+              onContextMenu={(e) => {
+                e.preventDefault();
                 handleLongPress(kelas);
-              }, 800);
-              return () => clearTimeout(longPressTimer);
-            }}
-            className={`islamic-bubble aspect-square relative ${
-              selectedClass === kelas ? "bg-accent text-accent-foreground" : ""
-            }`}
-          >
-            <span className="text-lg font-medium">Kelas {kelas}</span>
-          </button>
-        ))}
+              }}
+              onTouchStart={(e) => {
+                let touchTimer: NodeJS.Timeout;
+                const startTouch = () => {
+                  touchTimer = setTimeout(() => {
+                    handleLongPress(kelas);
+                  }, 800);
+                };
+                
+                const endTouch = () => {
+                  clearTimeout(touchTimer);
+                };
+                
+                startTouch();
+                
+                e.currentTarget.addEventListener('touchend', endTouch, { once: true });
+                e.currentTarget.addEventListener('touchcancel', endTouch, { once: true });
+              }}
+              className={`group relative overflow-hidden rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+                selectedClass === kelas 
+                  ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-lg" 
+                  : "bg-gradient-to-br from-white to-islamic-light/50 text-islamic-primary border-2 border-islamic-primary/20 hover:border-islamic-primary/40"
+              }`}
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              
+              <div className="relative text-center">
+                <div className="text-sm font-medium mb-1">Kelas</div>
+                <div className="text-2xl font-bold">{kelas}</div>
+              </div>
+              
+              {selectedClass === kelas && (
+                <div className="absolute inset-0 border-2 border-white/30 rounded-2xl" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Naikkan Kelas</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <ChevronUp className="w-5 h-5 text-islamic-primary" />
+              Naikkan Kelas
+            </DialogTitle>
             <DialogDescription>
               Apakah Anda yakin ingin menaikkan seluruh santri kelas {classToPromote} ke kelas {classToPromote ? classToPromote + 1 : ""}?
+              <br />
+              <span className="text-orange-600 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -122,9 +158,9 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
             <Button 
               onClick={handlePromoteClass} 
               disabled={isPromoting}
-              className="flex items-center gap-2"
+              className="bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90"
             >
-              <ChevronUp className="h-4 w-4" />
+              <ChevronUp className="h-4 w-4 mr-2" />
               {isPromoting ? "Memproses..." : "Naikkan Kelas"}
             </Button>
           </DialogFooter>
