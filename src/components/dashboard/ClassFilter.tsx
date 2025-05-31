@@ -86,8 +86,8 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
             <GraduationCap className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Filter Kelas</h2>
-            <p className="text-sm text-gray-600">Tekan lama untuk naikkan kelas</p>
+            <h2 className="text-xl font-bold text-foreground">Filter Kelas</h2>
+            <p className="text-sm text-muted-foreground">Tekan lama untuk naikkan kelas</p>
           </div>
         </div>
         
@@ -120,7 +120,7 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
               className={`group relative overflow-hidden rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-xl ${
                 selectedClass === kelas 
                   ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-lg" 
-                  : "bg-gradient-to-br from-white to-islamic-light/50 text-islamic-primary border-2 border-islamic-primary/20 hover:border-islamic-primary/40"
+                  : "bg-gradient-to-br from-card to-islamic-light/50 dark:to-islamic-dark/50 text-islamic-primary border-2 border-islamic-primary/20 hover:border-islamic-primary/40"
               }`}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

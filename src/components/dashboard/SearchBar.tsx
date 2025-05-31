@@ -16,8 +16,8 @@ const SearchBar = ({ searchQuery, onSearchChange, placeholder = "Cari santri..."
           <Filter className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-800">Pencarian Santri</h2>
-          <p className="text-sm text-gray-600">Temukan santri dengan cepat</p>
+          <h2 className="text-xl font-bold text-foreground">Pencarian Santri</h2>
+          <p className="text-sm text-muted-foreground">Temukan santri dengan cepat</p>
         </div>
       </div>
       
@@ -27,7 +27,7 @@ const SearchBar = ({ searchQuery, onSearchChange, placeholder = "Cari santri..."
         </div>
         <Input
           placeholder={placeholder}
-          className="pl-12 pr-4 py-3 text-base border-2 border-islamic-primary/20 rounded-xl focus:border-islamic-primary focus:ring-islamic-primary/20 bg-white shadow-sm transition-all duration-200"
+          className="pl-12 pr-4 py-3 text-base border-2 border-islamic-primary/20 rounded-xl focus:border-islamic-primary focus:ring-islamic-primary/20 bg-background shadow-sm transition-all duration-200"
           value={searchQuery}
           onChange={onSearchChange}
         />

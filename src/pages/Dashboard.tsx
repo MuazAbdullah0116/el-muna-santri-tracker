@@ -115,18 +115,18 @@ const Dashboard = () => {
   const totalHafalan = santris.reduce((sum, santri) => sum + (santri.total_hafalan || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-islamic-light via-white to-islamic-accent/10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10">
       <div className="space-y-8 p-6">
         {/* Header Section */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div className="flex items-center gap-6">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
                 <Users className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard Santri</h1>
-                <p className="text-gray-600 text-lg">Kelola data santri dan setoran hafalan</p>
+                <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard Santri</h1>
+                <p className="text-muted-foreground text-lg">Kelola data santri dan setoran hafalan</p>
               </div>
             </div>
             
@@ -147,7 +147,7 @@ const Dashboard = () => {
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Total Santri</p>
+                  <p className="text-sm text-muted-foreground font-medium">Total Santri</p>
                   <p className="text-3xl font-bold text-islamic-primary">{santris.length}</p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ const Dashboard = () => {
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Total Hafalan</p>
+                  <p className="text-sm text-muted-foreground font-medium">Total Hafalan</p>
                   <p className="text-3xl font-bold text-islamic-secondary">{totalHafalan}</p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ const Dashboard = () => {
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 font-medium">Kelas Aktif</p>
+                  <p className="text-sm text-muted-foreground font-medium">Kelas Aktif</p>
                   <p className="text-3xl font-bold text-islamic-accent">
                     {selectedClass ? selectedClass : "Semua"}
                   </p>
@@ -180,12 +180,12 @@ const Dashboard = () => {
         </div>
         
         {/* Search Section */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           <SearchBar searchQuery={searchQuery} onSearchChange={handleSearchChange} />
         </div>
         
         {/* Class Filter Section */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           <ClassFilter 
             selectedClass={selectedClass} 
             onClassSelect={handleClassSelect} 
@@ -195,19 +195,19 @@ const Dashboard = () => {
         </div>
         
         {/* Content Section */}
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-islamic-primary/10">
           {loading ? (
             <div className="text-center py-20">
               <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-islamic-primary border-t-transparent shadow-lg"></div>
-              <p className="mt-6 text-gray-600 font-medium text-lg">Memuat data santri...</p>
+              <p className="mt-6 text-muted-foreground font-medium text-lg">Memuat data santri...</p>
             </div>
           ) : santris.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-islamic-primary/10 to-islamic-secondary/10 flex items-center justify-center">
                 <Users className="w-12 h-12 text-islamic-primary/60" />
               </div>
-              <p className="text-gray-600 font-medium text-xl mb-2">Tidak ada data santri</p>
-              <p className="text-gray-500 text-base">Mulai dengan menambahkan santri baru</p>
+              <p className="text-foreground font-medium text-xl mb-2">Tidak ada data santri</p>
+              <p className="text-muted-foreground text-base">Mulai dengan menambahkan santri baru</p>
             </div>
           ) : (
             <>
@@ -216,10 +216,10 @@ const Dashboard = () => {
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-800">
+                  <h2 className="text-2xl font-bold text-foreground">
                     Daftar Santri {selectedClass && `- Kelas ${selectedClass}`}
                   </h2>
-                  <p className="text-gray-600">Klik untuk melihat detail santri</p>
+                  <p className="text-muted-foreground">Klik untuk melihat detail santri</p>
                 </div>
               </div>
               

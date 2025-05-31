@@ -11,7 +11,7 @@ interface SantriCardProps {
 const SantriCard = ({ santri, onClick }: SantriCardProps) => {
   return (
     <Card 
-      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] bg-gradient-to-br from-white via-white to-islamic-light/30 border border-islamic-primary/20 hover:border-islamic-primary/40" 
+      className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] bg-gradient-to-br from-card via-card to-islamic-light/30 dark:to-islamic-dark/30 border border-islamic-primary/20 hover:border-islamic-primary/40" 
       onClick={() => onClick(santri)}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-islamic-primary/5 to-islamic-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -24,7 +24,7 @@ const SantriCard = ({ santri, onClick }: SantriCardProps) => {
                 <User className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg text-gray-800 truncate group-hover:text-islamic-primary transition-colors">
+                <h3 className="font-semibold text-lg text-foreground truncate group-hover:text-islamic-primary transition-colors">
                   {santri.nama}
                 </h3>
               </div>
@@ -48,7 +48,7 @@ const SantriCard = ({ santri, onClick }: SantriCardProps) => {
             <span className="text-2xl font-bold text-islamic-primary bg-gradient-to-r from-islamic-primary to-islamic-secondary bg-clip-text text-transparent">
               {santri.total_hafalan || 0}
             </span>
-            <span className="text-xs text-gray-600 font-medium">Setoran</span>
+            <span className="text-xs text-muted-foreground font-medium">Setoran</span>
           </div>
         </div>
         
