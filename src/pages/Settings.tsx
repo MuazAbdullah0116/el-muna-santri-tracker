@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Settings as SettingsIcon, Database, Palette, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import ThemeSettings from "@/components/settings/ThemeSettings";
+import IslamicLogo from "@/components/IslamicLogo";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -15,8 +15,15 @@ const Settings = () => {
         {/* Header Section */}
         <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-xl border border-border">
           <div className="flex items-center gap-3 md:gap-6">
-            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
-              <SettingsIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+            {/* Logo and Icon */}
+            <div className="flex items-center gap-3 md:gap-6">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
+                <SettingsIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              </div>
+              {/* Logo Pondok */}
+              <div className="hidden sm:block">
+                <IslamicLogo size="md" animated />
+              </div>
             </div>
             <div>
               <h1 className="text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">Pengaturan</h1>
@@ -55,6 +62,10 @@ const Settings = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Logo for mobile */}
+                  <div className="sm:hidden flex justify-center mb-2">
+                    <IslamicLogo size="md" animated />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-muted-foreground">Versi Aplikasi</label>
@@ -70,7 +81,7 @@ const Settings = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="border-t pt-4">
                     <h4 className="font-medium mb-2">Fitur Tersedia:</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -81,6 +92,12 @@ const Settings = () => {
                       <Badge variant="outline">Prestasi Santri</Badge>
                       <Badge variant="outline">Responsive Design</Badge>
                     </div>
+                  </div>
+                  {/* Developer credit */}
+                  <div className="pt-4 text-right">
+                    <span className="text-xs md:text-sm text-muted-foreground">
+                      Developer: <span className="font-semibold text-islamic-primary">Visual Acr Studio</span>
+                    </span>
                   </div>
                 </CardContent>
               </Card>
