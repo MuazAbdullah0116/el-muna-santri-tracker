@@ -69,9 +69,9 @@ const Achievements = () => {
             const setoranList = await fetchSetoranBySantri(santri.id);
             if (setoranList.length > 0) {
               const totalScore = setoranList.reduce((sum, setoran) => {
-                const kelancaran = parseFloat(setoran.kelancaran) || 0;
-                const tajwid = parseFloat(setoran.tajwid) || 0;
-                const tahsin = parseFloat(setoran.tahsin) || 0;
+                const kelancaran = Number(setoran.kelancaran) || 0;
+                const tajwid = Number(setoran.tajwid) || 0;
+                const tahsin = Number(setoran.tahsin) || 0;
                 return sum + (kelancaran + tajwid + tahsin) / 3;
               }, 0);
               const avgScore = totalScore / setoranList.length;

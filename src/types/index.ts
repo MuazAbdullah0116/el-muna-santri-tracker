@@ -56,4 +56,5 @@ export interface SantriWithAchievement extends Santri {
   hafalanPages?: number;
   hafalanLines?: number;
   hafalanScore?: number;
+  nilai_rata?: number;
 }
