@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +65,7 @@ const AddSantri = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="max-w-md mx-auto p-4">
       <Card className="islamic-card">
         <CardHeader>
           <CardTitle>Tambah Santri</CardTitle>
@@ -73,7 +74,7 @@ const AddSantri = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Nama Santri</Label>
               <Input
@@ -82,9 +83,10 @@ const AddSantri = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="bg-card"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="classroom">Kelas</Label>
               <Select
@@ -92,19 +94,23 @@ const AddSantri = () => {
                 onValueChange={setClassroom}
                 required
               >
-                <SelectTrigger id="classroom">
+                <SelectTrigger id="classroom" className="bg-card">
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-50 bg-card shadow-xl">
                   {[7, 8, 9, 10, 11, 12].map((kelas) => (
-                    <SelectItem key={kelas} value={kelas.toString()}>
+                    <SelectItem 
+                      key={kelas} 
+                      value={kelas.toString()}
+                      className="hover:bg-islamic-primary/10 focus:bg-islamic-primary/10"
+                    >
                       Kelas {kelas}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label>Jenis Kelamin</Label>
               <RadioGroup
@@ -113,29 +119,29 @@ const AddSantri = () => {
                 className="flex gap-4"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Ikhwan" id="ikhwan" />
+                  <RadioGroupItem value="Ikhwan" id="ikhwan" className="border-islamic-primary focus:ring-islamic-primary" />
                   <Label htmlFor="ikhwan">Ikhwan</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Akhwat" id="akhwat" />
+                  <RadioGroupItem value="Akhwat" id="akhwat" className="border-islamic-primary focus:ring-islamic-primary" />
                   <Label htmlFor="akhwat">Akhwat</Label>
                 </div>
               </RadioGroup>
             </div>
-            
-            <div className="flex gap-2 pt-2">
+
+            <div className="flex gap-3 pt-2">
               <Button
                 type="button"
                 variant="outline"
+                className="flex-1 border-islamic-primary text-islamic-primary hover:bg-islamic-primary/10 hover:border-islamic-primary"
                 onClick={() => navigate("/dashboard")}
-                className="flex-1"
               >
                 Batal
               </Button>
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="flex-1"
+                className="flex-1 bg-islamic-primary hover:bg-islamic-primary/90 text-white shadow font-semibold"
               >
                 {isSubmitting ? "Menyimpan..." : "Simpan"}
               </Button>
@@ -148,3 +154,4 @@ const AddSantri = () => {
 };
 
 export default AddSantri;
+
