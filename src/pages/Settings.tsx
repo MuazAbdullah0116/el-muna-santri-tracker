@@ -1,119 +1,142 @@
 
+import { useState } from "react";
+import { Settings as SettingsIcon, Database, Palette, Users, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { useTheme } from "@/components/theme-provider";
-import { useAuth } from "@/context/auth-context";
-import { useNavigate } from "react-router-dom";
-import IslamicLogo from "@/components/IslamicLogo";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import ExportImport from "@/components/settings/ExportImport";
 
 const Settings = () => {
-  const { theme, setTheme } = useTheme();
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  const [activeTab, setActiveTab] = useState("general");
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <Card className="islamic-card">
-        <CardHeader>
-          <CardTitle>Setelan</CardTitle>
-          <CardDescription>Konfigurasi aplikasi sesuai kebutuhan Anda</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="theme-mode">Mode Gelap</Label>
-              <p className="text-sm text-muted-foreground">
-                Ubah tampilan aplikasi ke mode gelap atau terang
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10">
+      <div className="space-y-4 md:space-y-6 p-3 md:p-6">
+        {/* Header Section */}
+        <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-xl border border-border">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
+              <SettingsIcon className="w-6 h-6 md:w-8 md:h-8 text-white" />
             </div>
-            <Switch
-              id="theme-mode"
-              checked={theme === "dark"}
-              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
-            />
+            <div>
+              <h1 className="text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">Pengaturan</h1>
+              <p className="text-sm md:text-lg text-muted-foreground">Kelola pengaturan aplikasi dan data</p>
+            </div>
           </div>
+        </div>
 
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="usage">
-              <AccordionTrigger>Panduan Penggunaan</AccordionTrigger>
-              <AccordionContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium">Santri dan Setoran</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Anda dapat menambahkan santri baru melalui tombol "Tambah Santri" di Dashboard. 
-                    Untuk setiap santri, Anda bisa menambahkan data setoran hafalan dengan klik nama 
-                    santri kemudian "Tambah Setoran".
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Al-Quran Digital</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Halaman Al-Quran Digital berisi seluruh surat dalam Al-Quran. Klik salah 
-                    satu surat untuk membaca ayat-ayatnya. Anda juga dapat menggunakan fitur 
-                    pencarian dan navigasi ayat.
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium">Prestasi Santri</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Lihat peringkat santri berdasarkan jumlah hafalan, nilai rata-rata, dan 
-                    keteraturan setoran. Anda dapat memfilter berdasarkan jenis kelamin dan 
-                    mencari santri tertentu.
-                  </p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="about">
-              <AccordionTrigger>Tentang Aplikasi</AccordionTrigger>
-              <AccordionContent className="space-y-4">
-                <div className="text-center">
-                  <IslamicLogo size="md" />
-                  <h3 className="font-medium mt-4">Pengelola Setoran Santri</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Pondok Pesantren Al-Munawwarah
-                  </p>
-                  <p className="text-sm mt-2">
-                    Versi 1.0
-                  </p>
-                  <p className="text-sm text-muted-foreground mt-4">
-                    Dikembangkan oleh Rusn Creator<br/>
-                    © 2025 All rights reserved
-                  </p>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-        
-        <CardFooter>
-          <Button variant="outline" className="w-full" onClick={handleLogout}>
-            Keluar
-          </Button>
-        </CardFooter>
-      </Card>
+        {/* Settings Content */}
+        <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-xl border border-border">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-[600px]">
+              <TabsTrigger value="general" className="flex items-center gap-2">
+                <SettingsIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Umum</span>
+              </TabsTrigger>
+              <TabsTrigger value="data" className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Data</span>
+              </TabsTrigger>
+              <TabsTrigger value="users" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">Pengguna</span>
+              </TabsTrigger>
+              <TabsTrigger value="appearance" className="flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                <span className="hidden sm:inline">Tampilan</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="general" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-islamic-primary">
+                    <Database className="w-5 h-5" />
+                    Informasi Aplikasi
+                  </CardTitle>
+                  <CardDescription>
+                    Detail aplikasi manajemen santri
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Versi Aplikasi</label>
+                      <p className="text-lg font-semibold">1.0.0</p>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Database</label>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          Supabase
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">Terhubung</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Fitur Tersedia:</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <Badge variant="outline">Manajemen Santri</Badge>
+                      <Badge variant="outline">Setoran Hafalan</Badge>
+                      <Badge variant="outline">Laporan Progress</Badge>
+                      <Badge variant="outline">Filter & Pencarian</Badge>
+                      <Badge variant="outline">Export Data</Badge>
+                      <Badge variant="outline">Responsive Design</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="data" className="space-y-6">
+              <ExportImport />
+            </TabsContent>
+
+            <TabsContent value="users" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-islamic-secondary">
+                    <Users className="w-5 h-5" />
+                    Manajemen Pengguna
+                  </CardTitle>
+                  <CardDescription>
+                    Kelola pengguna dan hak akses (fitur dalam pengembangan)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+                    <p className="text-muted-foreground">Fitur manajemen pengguna akan tersedia pada versi mendatang</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="appearance" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-islamic-accent">
+                    <Palette className="w-5 h-5" />
+                    Pengaturan Tampilan
+                  </CardTitle>
+                  <CardDescription>
+                    Sesuaikan tampilan aplikasi (fitur dalam pengembangan)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <Palette className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+                    <p className="text-muted-foreground">Pengaturan tema dan tampilan akan tersedia pada versi mendatang</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
 };
