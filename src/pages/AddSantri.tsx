@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,8 +131,8 @@ const AddSantri = () => {
             <div className="flex gap-3 pt-2">
               <Button
                 type="button"
-                variant="outline"
-                className="flex-1 border-islamic-primary text-islamic-primary hover:bg-islamic-primary/10 hover:border-islamic-primary"
+                variant="destructive"
+                className="flex-1 border-destructive text-destructive bg-white hover:bg-destructive hover:text-white"
                 onClick={() => navigate("/dashboard")}
               >
                 Batal
@@ -154,4 +153,3 @@ const AddSantri = () => {
 };
 
 export default AddSantri;
-
