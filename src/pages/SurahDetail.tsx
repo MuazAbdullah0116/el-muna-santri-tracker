@@ -15,7 +15,6 @@ const SurahDetail = () => {
   const [loading, setLoading] = useState(true);
   const [goToAyat, setGoToAyat] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [currentReciter, setCurrentReciter] = useState<string>("01"); // Default reciter
   
   const navigate = useNavigate();
@@ -63,12 +62,6 @@ const SurahDetail = () => {
             
             setAyat(ayatData);
           }
-          
-          // Initialize audio if available
-          if (surahData.audio) {
-            const audioElement = new Audio(surahData.audio);
-            setAudio(audioElement);
-          }
         } else {
           throw new Error("Failed to fetch surah details");
         }
@@ -86,14 +79,6 @@ const SurahDetail = () => {
     };
     
     fetchSurahDetails();
-    
-    // Cleanup audio on unmount
-    return () => {
-      if (audio) {
-        audio.pause();
-        setAudio(null);
-      }
-    };
   }, [surahNumber, navigate, toast, currentReciter]);
 
   const handleGoToAyat = () => {
@@ -117,47 +102,34 @@ const SurahDetail = () => {
   };
 
   const toggleAudio = () => {
-    if (!audio) return;
-    
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleCloseAudio = () => {
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
-    setIsPlaying(false);
-  };
-
-  useEffect(() => {
-    if (audio) {
-      audio.addEventListener("ended", () => setIsPlaying(false));
-      return () => {
-        audio.removeEventListener("ended", () => setIsPlaying(false));
-      };
-    }
-  }, [audio]);
-
-  // Update global audio state when local audio state changes
-  useEffect(() => {
-    if (surah && surah.audio) {
-      // Use the global audio state setter if available
-      if (window.setQuranAudio) {
-        window.setQuranAudio(surah.audio, surah.nama_latin, isPlaying);
-      }
+    if (!surah || !surah.audio) {
+      toast({
+        title: "Audio tidak tersedia",
+        description: "Audio untuk surat ini tidak tersedia",
+        variant: "destructive",
+      });
+      return;
     }
     
+    const newPlayingState = !isPlaying;
+    setIsPlaying(newPlayingState);
+    
+    // Update global audio state
+    if (window.setQuranAudio) {
+      window.setQuranAudio(surah.audio, surah.nama_latin, newPlayingState);
+    }
+  };
+
+  // Cleanup when component unmounts
+  useEffect(() => {
     return () => {
-      // Don't reset the global audio state on unmount anymore
-      // This allows the audio to keep playing when navigating away
+      // Stop audio when leaving the page
+      if (window.setQuranAudio) {
+        window.setQuranAudio(null, '', false);
+      }
+      setIsPlaying(false);
     };
-  }, [surah, isPlaying]);
+  }, []);
 
   if (loading) {
     return (
@@ -196,7 +168,7 @@ const SurahDetail = () => {
             Kembali
           </Button>
           
-          {audio && (
+          {surah.audio && (
             <Button
               variant="outline"
               size="sm"
