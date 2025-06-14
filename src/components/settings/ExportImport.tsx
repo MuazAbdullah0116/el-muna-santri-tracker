@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Download, Upload, FileSpreadsheet, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { fetchSantri } from "@/services/supabase/santri.service";
-import { fetchSetoran } from "@/services/supabase/setoran.service";
+import { fetchSantri } from "@/services/googleSheets/santri.service";
+import { fetchSetoran } from "@/services/googleSheets/setoran.service";
 import { exportToCSV, exportToExcel, parseCSV, readFileContent } from "@/services/exportImport.service";
 
 const ExportImport = () => {
@@ -91,7 +90,7 @@ const ExportImport = () => {
       
       toast({
         title: "File Berhasil Dibaca",
-        description: `${parsedData.length} baris data berhasil diparse. Fitur import ke database akan segera tersedia.`,
+        description: `${parsedData.length} baris data berhasil diparse. Fitur import ke Google Sheets akan segera tersedia.`,
       });
     } catch (error) {
       console.error("Import error:", error);
@@ -184,7 +183,7 @@ const ExportImport = () => {
             <p className="font-medium mb-1">⚠️ Fitur Import:</p>
             <ul className="list-disc list-inside space-y-1">
               <li>Saat ini hanya bisa membaca dan validasi file CSV</li>
-              <li>Import ke database akan segera tersedia</li>
+              <li>Import ke Google Sheets akan segera tersedia</li>
               <li>Pastikan format CSV sesuai dengan hasil export</li>
             </ul>
           </div>

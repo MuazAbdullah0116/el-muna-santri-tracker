@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Users, BookOpen, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Santri } from "@/types";
-import { fetchSantri, fetchSantriByClass, deleteSantri } from "@/services/supabase/santri.service";
-import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
+import { fetchSantri, fetchSantriByClass, deleteSantri } from "@/services/googleSheets/santri.service";
+import { fetchSetoranBySantri } from "@/services/googleSheets/setoran.service";
 import SantriCard from "@/components/dashboard/SantriCard";
 import ClassFilter from "@/components/dashboard/ClassFilter";
 import SearchBar from "@/components/dashboard/SearchBar";
