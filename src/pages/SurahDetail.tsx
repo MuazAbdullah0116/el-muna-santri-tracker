@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Pause, PlayCircle } from "lucide-react";
+import { ChevronLeft, Pause, PlayCircle, BookOpen, MapPin, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -162,117 +161,191 @@ const SurahDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/5 flex flex-col items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-islamic-primary border-t-transparent shadow-lg mb-4"></div>
+        <p className="text-sm text-muted-foreground">Memuat detail surat...</p>
       </div>
     );
   }
 
   if (!surah) {
     return (
-      <div className="text-center py-10">
-        <p className="text-muted-foreground">Surat tidak ditemukan</p>
-        <Button variant="link" onClick={() => navigate("/quran")}>
-          Kembali ke Daftar Surat
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/5 flex flex-col items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-destructive/20 to-destructive/10 flex items-center justify-center">
+            <BookOpen className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground">Surat tidak ditemukan</h2>
+          <p className="text-muted-foreground">Maaf, surat yang Anda cari tidak dapat ditemukan.</p>
+          <Button variant="outline" onClick={() => navigate("/quran")} className="mt-4">
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Kembali ke Daftar Surat
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/quran")}>
-          <ChevronLeft className="h-4 w-4 mr-1" /> Kembali
-        </Button>
-        
-        {audio && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={toggleAudio}
-            className="flex items-center gap-1"
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="h-3 w-3" /> Pause
-              </>
-            ) : (
-              <>
-                <PlayCircle className="h-3 w-3" /> Play Audio
-              </>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/5 p-4 md:p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header with navigation */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/quran")} className="hover:bg-islamic-primary/10">
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Kembali
           </Button>
-        )}
-      </div>
-      
-      <Card className="p-4 md:p-6 islamic-card">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-start">
-          <div>
-            <h1 className="text-xl md:text-2xl font-semibold flex flex-wrap items-center gap-2">
-              {surah.nama_latin}
-              <Badge variant="outline" className="ml-1 text-xs">
-                {surah.tempat_turun === "mekah" ? "Makkiyah" : "Madaniyyah"}
-              </Badge>
-            </h1>
-            <p className="text-sm text-muted-foreground">{surah.arti}</p>
-            <p className="mt-1 text-xs md:text-sm">{surah.jumlah_ayat} Ayat</p>
-          </div>
-          <div className="text-right mt-2 md:mt-0">
-            <p className="text-xl md:text-2xl font-arabic">{surah.nama}</p>
-          </div>
-        </div>
-      </Card>
-      
-      <div className="flex flex-col xs:flex-row gap-2">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Menuju ayat..."
-            value={goToAyat}
-            onChange={(e) => setGoToAyat(e.target.value)}
-            className="w-24 md:w-32 text-sm"
-            type="number"
-            min={1}
-            max={surah.jumlah_ayat}
-          />
-          <Button onClick={handleGoToAyat} size="sm" className="text-xs md:text-sm">
-            Pergi
-          </Button>
-        </div>
-      </div>
-      
-      <div className="space-y-4">
-        {ayat.length === 0 ? (
-          <Card className="p-4 md:p-6 text-center">
-            <p className="text-sm">Ayat tidak tersedia. Silakan kunjungi sumber resmi untuk membaca Al-Quran.</p>
-          </Card>
-        ) : (
-          ayat.map((ayat) => (
-            <Card
-              key={ayat.nomor}
-              id={`ayat-${ayat.nomor}`}
-              className="p-3 md:p-4 islamic-card transition-colors"
+          
+          {audio && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleAudio}
+              className="flex items-center gap-2 border-islamic-primary text-islamic-primary hover:bg-islamic-primary hover:text-white"
             >
-              <div className="flex items-center justify-between mb-2">
-                <Badge variant="outline" className="bg-islamic-primary text-primary-foreground text-xs">
-                  {ayat.nomor}
-                </Badge>
+              {isPlaying ? (
+                <>
+                  <Pause className="h-4 w-4" />
+                  Pause Audio
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="h-4 w-4" />
+                  Play Audio
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+        
+        {/* Surah header card */}
+        <Card className="bg-gradient-to-br from-card via-card to-islamic-light/20 dark:to-islamic-dark/20 border border-border shadow-xl">
+          <div className="p-6 md:p-8">
+            <div className="text-center space-y-4">
+              {/* Arabic name */}
+              <h1 className="font-arabic text-4xl md:text-5xl text-islamic-primary">
+                {surah.nama}
+              </h1>
+              
+              {/* Latin name and details */}
+              <div className="space-y-2">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  {surah.nama_latin}
+                </h2>
+                <p className="text-lg text-muted-foreground italic">
+                  "{surah.arti}"
+                </p>
               </div>
               
-              <p className="text-right text-lg md:text-xl leading-loose font-arabic mb-3 md:mb-4">
-                {ayat.ar}
-              </p>
-              
-              <p className="text-xs md:text-sm italic text-muted-foreground mb-2">
-                {ayat.tr}
-              </p>
-              
-              <p className="text-xs md:text-sm">
-                {ayat.idn}
-              </p>
+              {/* Badges */}
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <Badge variant="outline" className="bg-islamic-primary text-white border-islamic-primary">
+                  Surat ke-{surah.nomor}
+                </Badge>
+                <Badge variant="outline" className="bg-islamic-secondary/10 text-islamic-secondary border-islamic-secondary/20">
+                  <MapPin className="w-3 h-3 mr-1" />
+                  {surah.tempat_turun === "mekah" ? "Makkiyah" : "Madaniyyah"}
+                </Badge>
+                <Badge variant="outline" className="bg-islamic-accent/10 text-islamic-accent border-islamic-accent/20">
+                  <BookOpen className="w-3 h-3 mr-1" />
+                  {surah.jumlah_ayat} Ayat
+                </Badge>
+                {surah.audio && (
+                  <Badge variant="outline" className="bg-islamic-gold/10 text-islamic-gold border-islamic-gold/20">
+                    <Volume2 className="w-3 h-3 mr-1" />
+                    Audio tersedia
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        {/* Navigation to specific ayat */}
+        <Card className="bg-card border border-border shadow-lg">
+          <div className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <label className="text-sm font-medium text-foreground whitespace-nowrap">
+                Menuju ayat:
+              </label>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Input
+                  placeholder={`1-${surah.jumlah_ayat}`}
+                  value={goToAyat}
+                  onChange={(e) => setGoToAyat(e.target.value)}
+                  className="w-32 text-sm border-border focus:border-islamic-primary"
+                  type="number"
+                  min={1}
+                  max={surah.jumlah_ayat}
+                />
+                <Button 
+                  onClick={handleGoToAyat} 
+                  size="sm" 
+                  className="bg-islamic-primary hover:bg-islamic-primary/90 text-white"
+                >
+                  Pergi
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        {/* Ayat list */}
+        <div className="space-y-4">
+          {ayat.length === 0 ? (
+            <Card className="bg-card border border-border shadow-lg">
+              <div className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-muted/50 to-muted/30 flex items-center justify-center">
+                  <BookOpen className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold text-foreground">Ayat tidak tersedia</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Maaf, ayat untuk surat ini sedang tidak tersedia. Silakan kunjungi sumber resmi untuk membaca Al-Quran.
+                  </p>
+                </div>
+              </div>
             </Card>
-          ))
-        )}
+          ) : (
+            ayat.map((ayat) => (
+              <Card
+                key={ayat.nomor}
+                id={`ayat-${ayat.nomor}`}
+                className="bg-gradient-to-br from-card via-card to-islamic-light/10 dark:to-islamic-dark/10 border border-border shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <div className="p-6 md:p-8 space-y-6">
+                  {/* Ayat number */}
+                  <div className="flex justify-center">
+                    <Badge variant="outline" className="bg-islamic-primary text-white border-islamic-primary text-sm font-medium">
+                      آية {ayat.nomor}
+                    </Badge>
+                  </div>
+                  
+                  {/* Arabic text */}
+                  <div className="text-center">
+                    <p className="font-arabic text-2xl md:text-3xl leading-loose text-foreground">
+                      {ayat.ar}
+                    </p>
+                  </div>
+                  
+                  {/* Transliteration */}
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <p className="text-sm md:text-base italic text-muted-foreground leading-relaxed">
+                      {ayat.tr}
+                    </p>
+                  </div>
+                  
+                  {/* Indonesian translation */}
+                  <div className="bg-islamic-light/20 dark:bg-islamic-dark/20 rounded-xl p-4 border border-islamic-primary/10">
+                    <p className="text-sm md:text-base text-foreground leading-relaxed">
+                      {ayat.idn}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
