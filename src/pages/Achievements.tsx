@@ -8,14 +8,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Santri, SantriWithAchievement } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import SearchBar from "@/components/dashboard/SearchBar";
-import { fetchSantri } from "@/services/supabase/santri.service";
-import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
-import { 
-  fetchTopHafalan, 
-  fetchTopPerformers,
-  fetchTopRegularity 
-} from "@/services/supabase/achievement.service";
-import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
+import { fetchSantri } from "@/services/googleSheets/santri.service";
+import { fetchSetoranBySantri } from "@/services/googleSheets/setoran.service";
+import { getFormattedHafalanProgress } from "@/services/googleSheets/setoran.service";
 import { Crown, Trophy, Star, User, BookOpen } from "lucide-react";
 
 const Achievements = () => {
@@ -34,69 +29,93 @@ const Achievements = () => {
   
   const { toast } = useToast();
   
-  // Load data based on current gender filter
+  // Load data from Google Sheets
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Determine the gender filter for API calls
-        const genderFilter = filter === "all" 
-          ? undefined 
-          : filter === "ikhwan" 
-            ? "Ikhwan" 
-            : "Akhwat";
+        console.log("Loading achievement data from Google Sheets...");
         
-        // Top hafalan with improved calculation
-        const hafalanData = await fetchTopHafalan(genderFilter);
-        setTopHafalan(hafalanData.map(santri => ({
-          ...santri,
-          achievement: "hafalan" as "hafalan",
-          value: santri.total_hafalan || 0,
-          hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
-        })));
+        // Fetch all santri data
+        const allSantri = await fetchSantri();
+        console.log("Fetched santri data:", allSantri);
         
-        // Top performers by score
-        try {
-          const performersData = await fetchTopPerformers(genderFilter);
-          setTopNilai(performersData.map(santri => ({
+        // Filter by gender if needed
+        const filteredSantri = filter === "all" 
+          ? allSantri 
+          : allSantri.filter(santri => {
+              if (filter === "ikhwan") return santri.jenis_kelamin === "Ikhwan";
+              if (filter === "akhwat") return santri.jenis_kelamin === "Akhwat";
+              return true;
+            });
+        
+        // Calculate achievements for hafalan (top by total hafalan)
+        const hafalanData = filteredSantri
+          .map(santri => ({
             ...santri,
-            achievement: "nilai" as "nilai",
-            value: parseFloat(santri.nilai_rata.toFixed(1))
-          })));
-        } catch (err) {
-          console.error("Error loading performers:", err);
-          toast({
-            title: "Error",
-            description: "Gagal memuat data prestasi nilai",
-            variant: "destructive",
-          });
-          setTopNilai([]);
-        }
-        
-        // Top teratur (regularity) - now using dedicated service
-        try {
-          const regularityData = await fetchTopRegularity(genderFilter);
-          setTopTeratur(regularityData.map(santri => ({
-            ...santri,
-            achievement: "teratur" as "teratur",
+            achievement: "hafalan" as "hafalan",
             value: santri.total_hafalan || 0,
             hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
-          })));
-        } catch (err) {
-          console.error("Error loading regularity data:", err);
-          toast({
-            title: "Error",
-            description: "Gagal memuat data hafalan teratur",
-            variant: "destructive",
-          });
-          setTopTeratur([]);
+          }))
+          .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
+          .slice(0, 10);
+        
+        setTopHafalan(hafalanData);
+        
+        // For nilai terbaik, we need to fetch setoran data and calculate averages
+        const nilaiData: SantriWithAchievement[] = [];
+        for (const santri of filteredSantri) {
+          try {
+            const setoranList = await fetchSetoranBySantri(santri.id);
+            if (setoranList.length > 0) {
+              const totalScore = setoranList.reduce((sum, setoran) => {
+                const kelancaran = parseFloat(setoran.kelancaran) || 0;
+                const tajwid = parseFloat(setoran.tajwid) || 0;
+                const tahsin = parseFloat(setoran.tahsin) || 0;
+                return sum + (kelancaran + tajwid + tahsin) / 3;
+              }, 0);
+              const avgScore = totalScore / setoranList.length;
+              
+              nilaiData.push({
+                ...santri,
+                achievement: "nilai" as "nilai",
+                value: parseFloat(avgScore.toFixed(1)),
+                nilai_rata: avgScore
+              });
+            }
+          } catch (err) {
+            console.error(`Error calculating scores for santri ${santri.id}:`, err);
+          }
         }
+        
+        nilaiData.sort((a, b) => (b.nilai_rata || 0) - (a.nilai_rata || 0));
+        setTopNilai(nilaiData.slice(0, 10));
+        
+        // For teratur (regularity), we use santri with most consistent setoran
+        const regularityData = filteredSantri
+          .filter(santri => (santri.total_hafalan || 0) > 0)
+          .map(santri => ({
+            ...santri,
+            achievement: "teratur" as "teratur", 
+            value: santri.total_hafalan || 0,
+            hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
+          }))
+          .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
+          .slice(0, 10);
+        
+        setTopTeratur(regularityData);
+        
+        console.log("Achievement data loaded:", {
+          hafalan: hafalanData.length,
+          nilai: nilaiData.length,
+          teratur: regularityData.length
+        });
         
       } catch (error) {
         console.error("Error loading achievement data:", error);
         toast({
           title: "Error",
-          description: "Gagal memuat data prestasi",
+          description: "Gagal memuat data prestasi dari Google Sheets",
           variant: "destructive",
         });
       } finally {
@@ -105,13 +124,12 @@ const Achievements = () => {
     };
     
     loadData();
-  }, [toast, filter]); // Re-fetch when filter changes
+  }, [toast, filter]);
   
   // Apply search filter
   useEffect(() => {
     const filterBySearch = (santris: SantriWithAchievement[]) => {
       return santris.filter(santri => {
-        // Search filter
         return !searchQuery ||
           santri.nama.toLowerCase().includes(searchQuery.toLowerCase());
       });
@@ -127,9 +145,9 @@ const Achievements = () => {
     try {
       setSelectedSantri(santri);
       
-      // Fetch setoran data
+      // Fetch setoran data from Google Sheets
       const setoran = await fetchSetoranBySantri(santri.id);
-      console.log("Fetched setoran data:", setoran);
+      console.log("Fetched setoran data from Google Sheets:", setoran);
       setStudentSetoran(setoran);
       
       // Open dialog
@@ -171,7 +189,7 @@ const Achievements = () => {
           <CardContent>
             <div className="text-center py-8 md:py-10">
               <div className="inline-block animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-2 md:border-4 border-islamic-primary border-t-transparent"></div>
-              <p className="mt-2 text-xs md:text-sm text-muted-foreground">Memuat data...</p>
+              <p className="mt-2 text-xs md:text-sm text-muted-foreground">Memuat data dari Google Sheets...</p>
             </div>
           </CardContent>
         </Card>
@@ -283,7 +301,7 @@ const Achievements = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2 truncate">Prestasi Santri</h1>
-              <p className="text-sm md:text-lg text-muted-foreground">Pencapaian terbaik dalam hafalan Al-Qur'an</p>
+              <p className="text-sm md:text-lg text-muted-foreground">Pencapaian terbaik dalam hafalan Al-Qur'an dari Google Sheets</p>
             </div>
           </div>
           

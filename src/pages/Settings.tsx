@@ -1,11 +1,10 @@
 
 import { useState } from "react";
-import { Settings as SettingsIcon, Database, Palette, Users, Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Settings as SettingsIcon, Database, Palette, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import ExportImport from "@/components/settings/ExportImport";
+import ThemeSettings from "@/components/settings/ThemeSettings";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -21,7 +20,7 @@ const Settings = () => {
             </div>
             <div>
               <h1 className="text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2">Pengaturan</h1>
-              <p className="text-sm md:text-lg text-muted-foreground">Kelola pengaturan aplikasi dan data</p>
+              <p className="text-sm md:text-lg text-muted-foreground">Kelola pengaturan aplikasi</p>
             </div>
           </div>
         </div>
@@ -29,22 +28,18 @@ const Settings = () => {
         {/* Settings Content */}
         <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-xl border border-border">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:w-[600px]">
+            <TabsList className="grid w-full grid-cols-3 lg:w-[500px]">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Umum</span>
               </TabsTrigger>
-              <TabsTrigger value="data" className="flex items-center gap-2">
-                <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Data</span>
+              <TabsTrigger value="appearance" className="flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                <span className="hidden sm:inline">Tampilan</span>
               </TabsTrigger>
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Pengguna</span>
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="flex items-center gap-2">
-                <Palette className="w-4 h-4" />
-                <span className="hidden sm:inline">Tampilan</span>
               </TabsTrigger>
             </TabsList>
 
@@ -69,7 +64,7 @@ const Settings = () => {
                       <label className="text-sm font-medium text-muted-foreground">Database</label>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-green-100 text-green-800 border-green-200">
-                          Supabase
+                          Google Sheets
                         </Badge>
                         <span className="text-sm text-muted-foreground">Terhubung</span>
                       </div>
@@ -83,7 +78,7 @@ const Settings = () => {
                       <Badge variant="outline">Setoran Hafalan</Badge>
                       <Badge variant="outline">Laporan Progress</Badge>
                       <Badge variant="outline">Filter & Pencarian</Badge>
-                      <Badge variant="outline">Export Data</Badge>
+                      <Badge variant="outline">Prestasi Santri</Badge>
                       <Badge variant="outline">Responsive Design</Badge>
                     </div>
                   </div>
@@ -91,8 +86,8 @@ const Settings = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="data" className="space-y-6">
-              <ExportImport />
+            <TabsContent value="appearance" className="space-y-6">
+              <ThemeSettings />
             </TabsContent>
 
             <TabsContent value="users" className="space-y-6">
@@ -110,26 +105,6 @@ const Settings = () => {
                   <div className="text-center py-8">
                     <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
                     <p className="text-muted-foreground">Fitur manajemen pengguna akan tersedia pada versi mendatang</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="appearance" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-islamic-accent">
-                    <Palette className="w-5 h-5" />
-                    Pengaturan Tampilan
-                  </CardTitle>
-                  <CardDescription>
-                    Sesuaikan tampilan aplikasi (fitur dalam pengembangan)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <Palette className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                    <p className="text-muted-foreground">Pengaturan tema dan tampilan akan tersedia pada versi mendatang</p>
                   </div>
                 </CardContent>
               </Card>
