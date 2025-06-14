@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,44 +65,44 @@ const AddSantri = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white border border-islamic-primary/30 rounded-2xl shadow-lg">
+    <div className="max-w-md mx-auto p-4 bg-white dark:bg-gray-900 border border-islamic-primary/30 rounded-2xl shadow-lg">
       <Card className="bg-transparent shadow-none border-none">
         <CardHeader>
-          <CardTitle>Tambah Santri</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-gray-900 dark:text-white">Tambah Santri</CardTitle>
+          <CardDescription className="text-gray-600 dark:text-gray-300">
             Tambahkan data santri baru ke sistem
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Nama Santri</Label>
+              <Label htmlFor="name" className="text-gray-900 dark:text-white">Nama Santri</Label>
               <Input
                 id="name"
                 placeholder="Masukkan nama santri"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="bg-card"
+                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="classroom">Kelas</Label>
+              <Label htmlFor="classroom" className="text-gray-900 dark:text-white">Kelas</Label>
               <Select
                 value={classroom}
                 onValueChange={setClassroom}
                 required
               >
-                <SelectTrigger id="classroom" className="bg-card">
+                <SelectTrigger id="classroom" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
                   <SelectValue placeholder="Pilih kelas" />
                 </SelectTrigger>
-                <SelectContent className="z-50 bg-card shadow-xl">
+                <SelectContent className="z-50 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 shadow-xl">
                   {[7, 8, 9, 10, 11, 12].map((kelas) => (
                     <SelectItem 
                       key={kelas} 
                       value={kelas.toString()}
-                      className="hover:bg-islamic-primary/10 focus:bg-islamic-primary/10"
+                      className="text-gray-900 dark:text-white hover:bg-islamic-primary/10 focus:bg-islamic-primary/10"
                     >
                       Kelas {kelas}
                     </SelectItem>
@@ -111,7 +112,7 @@ const AddSantri = () => {
             </div>
 
             <div className="space-y-2">
-              <Label>Jenis Kelamin</Label>
+              <Label className="text-gray-900 dark:text-white">Jenis Kelamin</Label>
               <RadioGroup
                 value={gender}
                 onValueChange={(val) => setGender(val as "Ikhwan" | "Akhwat")}
@@ -119,11 +120,11 @@ const AddSantri = () => {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Ikhwan" id="ikhwan" className="border-islamic-primary focus:ring-islamic-primary" />
-                  <Label htmlFor="ikhwan">Ikhwan</Label>
+                  <Label htmlFor="ikhwan" className="text-gray-900 dark:text-white">Ikhwan</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="Akhwat" id="akhwat" className="border-islamic-primary focus:ring-islamic-primary" />
-                  <Label htmlFor="akhwat">Akhwat</Label>
+                  <Label htmlFor="akhwat" className="text-gray-900 dark:text-white">Akhwat</Label>
                 </div>
               </RadioGroup>
             </div>
@@ -132,7 +133,7 @@ const AddSantri = () => {
               <Button
                 type="button"
                 variant="destructive"
-                className="flex-1 border-destructive text-destructive bg-white hover:bg-destructive hover:text-white"
+                className="flex-1"
                 onClick={() => navigate("/dashboard")}
               >
                 Batal
