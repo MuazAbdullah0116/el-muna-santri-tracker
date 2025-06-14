@@ -1,9 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Santri, SantriWithAchievement } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import SearchBar from "@/components/dashboard/SearchBar";
@@ -15,6 +16,7 @@ import {
   fetchTopRegularity 
 } from "@/services/supabase/achievement.service";
 import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
+import { Crown, Trophy, Star, User, BookOpen } from "lucide-react";
 
 const Achievements = () => {
   const [filter, setFilter] = useState<"all" | "ikhwan" | "akhwat">("all");
@@ -142,16 +144,33 @@ const Achievements = () => {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getRankIcon = (index: number) => {
+    switch (index) {
+      case 0:
+        return <Crown className="w-4 h-4 text-yellow-500" />;
+      case 1:
+        return <Trophy className="w-4 h-4 text-gray-400" />;
+      case 2:
+        return <Star className="w-4 h-4 text-amber-600" />;
+      default:
+        return <span className="w-4 h-4 flex items-center justify-center text-xs font-medium text-muted-foreground">{index + 1}</span>;
+    }
+  };
+
   const renderAchievementCard = (title: string, santris: SantriWithAchievement[], valueLabel: string, isHafalan: boolean = false) => {
     if (loading) {
       return (
-        <Card className="islamic-card">
-          <CardHeader className="pb-2">
-            <CardTitle>{title}</CardTitle>
+        <Card className="bg-gradient-to-br from-card via-card to-islamic-light/20 dark:to-islamic-dark/20 border border-islamic-primary/20 shadow-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-foreground">{title}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-center py-10">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-t-transparent"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-islamic-primary border-t-transparent shadow-lg"></div>
               <p className="mt-2 text-muted-foreground">Memuat data...</p>
             </div>
           </CardContent>
@@ -160,54 +179,90 @@ const Achievements = () => {
     }
     
     return (
-      <Card className="islamic-card">
-        <CardHeader className="pb-2">
-          <CardTitle>{title}</CardTitle>
+      <Card className="bg-gradient-to-br from-card via-card to-islamic-light/20 dark:to-islamic-dark/20 border border-islamic-primary/20 shadow-xl">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-foreground">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-lg">
+              <BookOpen className="w-4 h-4 text-white" />
+            </div>
+            {title}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {santris.length === 0 ? (
-            <p className="text-center text-muted-foreground">Tidak ada data</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-islamic-primary/10 to-islamic-secondary/10 flex items-center justify-center">
+                <User className="w-8 h-8 text-islamic-primary/60" />
+              </div>
+              <p className="text-muted-foreground font-medium">Tidak ada data</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {santris.map((santri, index) => (
                 <div
                   key={santri.id}
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    index < 3 ? "bg-accent/50" : "bg-background/50"
-                  } hover:bg-accent/30 cursor-pointer transition-colors`}
+                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
+                    index < 3 
+                      ? "bg-gradient-to-r from-islamic-accent/10 via-card to-islamic-gold/10 border-islamic-gold/30 hover:border-islamic-gold/50" 
+                      : "bg-gradient-to-r from-card via-card to-islamic-light/10 dark:to-islamic-dark/10 border-border hover:border-islamic-primary/30"
+                  }`}
                   onClick={() => handleSelectSantri(santri)}
                 >
-                  <div className="flex items-center">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium mr-3 ${
-                      index === 0
-                        ? "bg-islamic-gold text-black"
-                        : index === 1
-                        ? "bg-gray-300 text-gray-800"
-                        : index === 2
-                        ? "bg-amber-700 text-white"
-                        : "bg-muted text-muted-foreground"
-                    }`}>
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className="font-medium">{santri.nama}</p>
-                      <div className="flex text-xs text-muted-foreground mt-0.5">
-                        <span>Kelas {santri.kelas}</span>
-                        <span className="mx-1">•</span>
-                        <span>{santri.jenis_kelamin}</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary/5 to-islamic-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  <div className="relative p-4">
+                    <div className="flex items-center gap-4">
+                      {/* Rank & Avatar */}
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shadow-md ${
+                          index === 0
+                            ? "bg-gradient-to-br from-yellow-400 to-yellow-600"
+                            : index === 1
+                            ? "bg-gradient-to-br from-gray-300 to-gray-500"
+                            : index === 2
+                            ? "bg-gradient-to-br from-amber-600 to-amber-800"
+                            : "bg-gradient-to-br from-muted to-muted-foreground/20"
+                        }`}>
+                          {getRankIcon(index)}
+                        </div>
+                        
+                        <Avatar className="w-12 h-12 shadow-lg border-2 border-background">
+                          <AvatarFallback className="bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white font-semibold text-sm">
+                            {getInitials(santri.nama)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      
+                      {/* Student Info */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-lg text-foreground truncate group-hover:text-islamic-primary transition-colors">
+                          {santri.nama}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="bg-islamic-primary/10 text-islamic-primary border-islamic-primary/20 text-xs">
+                            Kelas {santri.kelas}
+                          </Badge>
+                          <Badge variant="outline" className="bg-islamic-secondary/10 text-islamic-secondary border-islamic-secondary/20 text-xs">
+                            {santri.jenis_kelamin}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      {/* Achievement Value */}
+                      <div className="flex flex-col items-end justify-center bg-gradient-to-br from-background/80 to-islamic-accent/10 rounded-xl p-4 min-w-[100px] border border-islamic-primary/20 shadow-md">
+                        <div className="text-2xl font-bold bg-gradient-to-r from-islamic-primary to-islamic-secondary bg-clip-text text-transparent">
+                          {isHafalan ? santri.hafalanFormatted : santri.value}
+                        </div>
+                        {!isHafalan && (
+                          <div className="text-xs text-muted-foreground font-medium mt-1">
+                            {valueLabel}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg font-semibold text-islamic-primary">
-                      {isHafalan ? santri.hafalanFormatted : santri.value}
-                    </span>
-                    {!isHafalan && (
-                      <span className="text-xs text-muted-foreground ml-1">
-                        {valueLabel}
-                      </span>
-                    )}
-                  </div>
+                  
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-islamic-primary via-islamic-secondary to-islamic-accent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
               ))}
             </div>
@@ -218,145 +273,174 @@ const Achievements = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Prestasi Santri</h1>
-      </div>
-      
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-grow">
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari santri..."
-          />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10">
+      <div className="space-y-8 p-6">
+        {/* Header Section */}
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
+          <div className="flex items-center gap-6 mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
+              <Trophy className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Prestasi Santri</h1>
+              <p className="text-muted-foreground text-lg">Pencapaian terbaik dalam hafalan Al-Qur'an</p>
+            </div>
+          </div>
+          
+          {/* Filter Section */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-grow">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari santri..."
+              />
+            </div>
+            
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={filter === "all" ? "default" : "outline"}
+                onClick={() => setFilter("all")}
+                className={filter === "all" ? "bg-gradient-to-r from-islamic-primary to-islamic-secondary" : ""}
+              >
+                Semua
+              </Button>
+              <Button
+                variant={filter === "ikhwan" ? "default" : "outline"}
+                onClick={() => setFilter("ikhwan")}
+                className={filter === "ikhwan" ? "bg-gradient-to-r from-islamic-primary to-islamic-secondary" : ""}
+              >
+                Ikhwan
+              </Button>
+              <Button
+                variant={filter === "akhwat" ? "default" : "outline"}
+                onClick={() => setFilter("akhwat")}
+                className={filter === "akhwat" ? "bg-gradient-to-r from-islamic-primary to-islamic-secondary" : ""}
+              >
+                Akhwat
+              </Button>
+            </div>
+          </div>
         </div>
         
-        <div>
-          <Button
-            variant={filter === "all" ? "default" : "outline"}
-            onClick={() => setFilter("all")}
-            className="mr-2"
-          >
-            Semua
-          </Button>
-          <Button
-            variant={filter === "ikhwan" ? "default" : "outline"}
-            onClick={() => setFilter("ikhwan")}
-            className="mr-2"
-          >
-            Ikhwan
-          </Button>
-          <Button
-            variant={filter === "akhwat" ? "default" : "outline"}
-            onClick={() => setFilter("akhwat")}
-          >
-            Akhwat
-          </Button>
+        {/* Tabs Section */}
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border">
+          <Tabs defaultValue="hafalan" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 rounded-xl p-1">
+              <TabsTrigger value="hafalan" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-islamic-primary data-[state=active]:to-islamic-secondary data-[state=active]:text-white">
+                Hafalan Terbanyak
+              </TabsTrigger>
+              <TabsTrigger value="nilai" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-islamic-primary data-[state=active]:to-islamic-secondary data-[state=active]:text-white">
+                Nilai Terbaik
+              </TabsTrigger>
+              <TabsTrigger value="teratur" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-islamic-primary data-[state=active]:to-islamic-secondary data-[state=active]:text-white">
+                Hafalan Teratur
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="hafalan" className="mt-0">
+              {renderAchievementCard(
+                "Hafalan Terbanyak",
+                filteredHafalan,
+                "",
+                true
+              )}
+            </TabsContent>
+            <TabsContent value="nilai" className="mt-0">
+              {renderAchievementCard(
+                "Nilai Terbaik",
+                filteredNilai,
+                "rerata",
+                false
+              )}
+            </TabsContent>
+            <TabsContent value="teratur" className="mt-0">
+              {renderAchievementCard(
+                "Hafalan Teratur",
+                filteredTeratur,
+                "",
+                true
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
-      </div>
-      
-      <Tabs defaultValue="hafalan">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="hafalan">Hafalan Terbanyak</TabsTrigger>
-          <TabsTrigger value="nilai">Nilai Terbaik</TabsTrigger>
-          <TabsTrigger value="teratur">Hafalan Teratur</TabsTrigger>
-        </TabsList>
-        <TabsContent value="hafalan" className="pt-4">
-          {renderAchievementCard(
-            "Hafalan Terbanyak",
-            filteredHafalan,
-            "",
-            true
-          )}
-        </TabsContent>
-        <TabsContent value="nilai" className="pt-4">
-          {renderAchievementCard(
-            "Nilai Terbaik",
-            filteredNilai,
-            "rerata",
-            false
-          )}
-        </TabsContent>
-        <TabsContent value="teratur" className="pt-4">
-          {renderAchievementCard(
-            "Hafalan Teratur",
-            filteredTeratur,
-            "",
-            true
-          )}
-        </TabsContent>
-      </Tabs>
 
-      {/* Santri Detail Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Detail Santri</DialogTitle>
-            <DialogDescription>
-              Informasi dan riwayat setoran santri
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedSantri && (
-            <>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-medium">{selectedSantri.nama}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+        {/* Santri Detail Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-md bg-card border border-border">
+            <DialogHeader>
+              <DialogTitle className="text-foreground">Detail Santri</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Informasi dan riwayat setoran santri
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedSantri && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-islamic-primary/10 to-islamic-secondary/10 rounded-xl border border-islamic-primary/20">
+                  <Avatar className="w-16 h-16 shadow-lg border-2 border-background">
+                    <AvatarFallback className="bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white font-semibold">
+                      {getInitials(selectedSantri.nama)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-foreground">{selectedSantri.nama}</h3>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <Badge variant="secondary" className="bg-islamic-primary/10 text-islamic-primary border-islamic-primary/20">
                         Kelas {selectedSantri.kelas}
-                      </span>
-                      <span className="text-sm bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                      </Badge>
+                      <Badge variant="outline" className="bg-islamic-secondary/10 text-islamic-secondary border-islamic-secondary/20">
                         {selectedSantri.jenis_kelamin}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium">Total Hafalan</h4>
-                  <span className="text-xl font-bold text-islamic-primary">
+                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-islamic-accent/10 to-islamic-gold/10 rounded-xl border border-islamic-gold/30">
+                  <h4 className="font-semibold text-foreground">Total Hafalan</h4>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-islamic-primary to-islamic-secondary bg-clip-text text-transparent">
                     {getFormattedHafalanProgress(selectedSantri.total_hafalan || 0)}
                   </span>
                 </div>
                 
-                <div className="space-y-2">
-                  <h4 className="font-medium">Riwayat Setoran</h4>
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-foreground">Riwayat Setoran</h4>
                   {studentSetoran.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      Belum ada setoran
-                    </p>
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-islamic-primary/10 to-islamic-secondary/10 flex items-center justify-center">
+                        <BookOpen className="w-8 h-8 text-islamic-primary/60" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">Belum ada setoran</p>
+                    </div>
                   ) : (
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {studentSetoran.map((setoran) => (
-                        <div key={setoran.id} className="border rounded-md p-3 text-sm">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{setoran.surat}</span>
-                            <span className="text-xs text-muted-foreground">
+                        <div key={setoran.id} className="border border-border rounded-xl p-4 bg-gradient-to-r from-card to-islamic-light/5 dark:to-islamic-dark/5 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-semibold text-foreground">{setoran.surat}</span>
+                            <Badge variant="outline" className="text-xs">
                               {new Date(setoran.tanggal).toLocaleDateString("id-ID")}
-                            </span>
+                            </Badge>
                           </div>
-                          <div className="mt-1 text-xs">
+                          <div className="text-sm text-muted-foreground mb-3">
                             Ayat {setoran.awal_ayat} - {setoran.akhir_ayat}
                           </div>
-                          <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                            <div>
-                              <span className="text-muted-foreground">Kelancaran:</span>{" "}
-                              <span className="font-medium">{setoran.kelancaran}</span>
+                          <div className="grid grid-cols-3 gap-3 text-xs">
+                            <div className="text-center p-2 bg-background/50 rounded-lg border">
+                              <div className="text-muted-foreground mb-1">Kelancaran</div>
+                              <div className="font-semibold text-islamic-primary">{setoran.kelancaran}</div>
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Tajwid:</span>{" "}
-                              <span className="font-medium">{setoran.tajwid}</span>
+                            <div className="text-center p-2 bg-background/50 rounded-lg border">
+                              <div className="text-muted-foreground mb-1">Tajwid</div>
+                              <div className="font-semibold text-islamic-secondary">{setoran.tajwid}</div>
                             </div>
-                            <div>
-                              <span className="text-muted-foreground">Tahsin:</span>{" "}
-                              <span className="font-medium">{setoran.tahsin}</span>
+                            <div className="text-center p-2 bg-background/50 rounded-lg border">
+                              <div className="text-muted-foreground mb-1">Tahsin</div>
+                              <div className="font-semibold text-islamic-accent">{setoran.tahsin}</div>
                             </div>
                           </div>
                           {setoran.catatan && (
-                            <div className="mt-1 text-xs text-muted-foreground">
+                            <div className="mt-3 text-sm text-muted-foreground bg-background/30 p-2 rounded-lg border">
                               {setoran.catatan}
                             </div>
                           )}
@@ -366,10 +450,10 @@ const Achievements = () => {
                   )}
                 </div>
               </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };
