@@ -64,8 +64,8 @@ const AddSantri = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <Card className="islamic-card">
+    <div className="max-w-md mx-auto p-4 bg-white border border-islamic-primary/30 rounded-2xl shadow-lg">
+      <Card className="bg-transparent shadow-none border-none">
         <CardHeader>
           <CardTitle>Tambah Santri</CardTitle>
           <CardDescription>
