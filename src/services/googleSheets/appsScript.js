@@ -4,7 +4,7 @@
  * Ganti SPREADSHEET_ID dengan ID Spreadsheet kamu!
  */
 
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
+const SPREADSHEET_ID = '1FZgqf_Kc_R8MBDaGHMwrQef1KT4-PUWWRR41_L5xmxA'; // GANTI DENGAN MILIKMU
 
 function doGet(e) {
   return handleRequest(e);
@@ -42,6 +42,7 @@ function handleRequest(e) {
         return createResponse({error: 'Invalid action'}, 400);
     }
   } catch (error) {
+    Logger.log(error); // Untuk debug di log eksekusi
     return createResponse({error: error.toString()}, 500);
   }
 }
@@ -49,12 +50,7 @@ function handleRequest(e) {
 function createResponse(data, code = 200) {
   return ContentService
     .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // --------------------- SANTRI FUNCTIONS ---------------------
@@ -253,8 +249,9 @@ function updateTotalHafalan(santriId) {
   const santriData = santriSheet.getDataRange().getValues();
   for (let i = 1; i < santriData.length; i++) {
     if (santriData[i][0] === santriId) {
-      santriSheet.getRange(i + 1, 5).setValue(totalAyat); // column E = total_hafalan
+      santriSheet.getRange(i + 1, 5).setValue(totalAyat); // kolom E = total_hafalan
       break;
     }
   }
 }
+
