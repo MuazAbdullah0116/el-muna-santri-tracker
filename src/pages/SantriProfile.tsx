@@ -1,80 +1,92 @@
 
-import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Santri, Setoran } from "@/types";
-import { fetchSantriById, fetchSetoranBySantri } from "@/services/supabase";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import React from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import SantriProfileInfo from "@/components/santri-profile/SantriProfileInfo";
 import SantriProfileChart from "@/components/santri-profile/SantriProfileChart";
 import SantriProfileSetoranTable from "@/components/santri-profile/SantriProfileSetoranTable";
 import SantriProfileAchievement from "@/components/santri-profile/SantriProfileAchievement";
+import { fetchSantriById } from "@/services/supabase/santri.service";
+import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 
 const SantriProfile = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [santri, setSantri] = useState<Santri | null>(null);
-  const [setorans, setSetorans] = useState<Setoran[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadSantri = async () => {
-      setLoading(true);
-      if (!id) return;
-      try {
-        const data = await fetchSantriById(id);
-        setSantri(data);
-        if (data) {
-          const setoranData = await fetchSetoranBySantri(data.id);
-          setSetorans(setoranData);
-        }
-      } catch (err) {
-        // handle error
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSantri();
-  }, [id]);
+  const {
+    data: santri,
+    isLoading: isLoadingSantri,
+    error: santriError,
+  } = useQuery({
+    queryKey: ["santri", id],
+    queryFn: () => fetchSantriById(id!),
+    enabled: !!id,
+  });
 
-  if (loading) {
+  const {
+    data: setoran = [],
+    isLoading: isLoadingSetoran,
+  } = useQuery({
+    queryKey: ["setoran", id],
+    queryFn: () => fetchSetoranBySantri(id!),
+    enabled: !!id,
+  });
+
+  if (isLoadingSantri) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[30vh]">
-        <div className="spinner-border animate-spin w-10 h-10 border-4 border-islamic-primary rounded-full border-t-transparent mb-4"></div>
-        <div className="text-muted-foreground">Memuat profil santri...</div>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
       </div>
     );
   }
-  if (!santri) {
+
+  if (santriError || !santri) {
     return (
-      <div className="text-center py-10 text-lg text-muted-foreground">
-        Santri tidak ditemukan.
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
+        <Card className="bg-white/70 backdrop-blur-sm border-emerald-200">
+          <CardContent className="p-6">
+            <p className="text-red-600">Santri tidak ditemukan</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
+
   return (
-    <div className="mx-auto max-w-2xl p-2 md:p-6 space-y-6">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-3">
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Kembali
-      </Button>
-      <Card>
-        <CardContent className="py-6 flex flex-col gap-6">
-          <SantriProfileInfo santri={santri} />
-          <SantriProfileAchievement santri={santri} setorans={setorans} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="py-6 flex flex-col gap-6">
-          <SantriProfileChart setorans={setorans} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="py-6 flex flex-col gap-4">
-          <SantriProfileSetoranTable setorans={setorans} />
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <Card className="bg-white/70 backdrop-blur-sm border-emerald-200">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-emerald-800 text-center">
+              Profil Santri
+            </CardTitle>
+          </CardHeader>
+        </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <SantriProfileInfo santri={santri} />
+            <div className="mt-6">
+              <SantriProfileAchievement santri={santri} />
+            </div>
+          </div>
+
+          <div className="lg:col-span-2 space-y-6">
+            <SantriProfileChart
+              setoran={setoran}
+              isLoading={isLoadingSetoran}
+            />
+
+            <Separator />
+
+            <SantriProfileSetoranTable
+              setoran={setoran}
+              isLoading={isLoadingSetoran}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

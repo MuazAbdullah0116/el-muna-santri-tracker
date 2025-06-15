@@ -1,375 +1,293 @@
-
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Santri } from "@/types";
-import { fetchSantriById } from "@/services/sheetdb/santri.service";
-import { createSetoran } from "@/services/sheetdb/setoran.service";
-import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 import AddSetoranDatePicker from "@/components/add-setoran/AddSetoranDatePicker";
 import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminerInput";
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
-import { getSurahsInJuz, getSurahMinMaxAyatInJuz } from "@/services/quran/quranMapping";
+import { Setoran } from "@/types";
+import { fetchSantri } from "@/services/supabase/santri.service";
+import { createSetoran } from "@/services/supabase/setoran.service";
+import { getSurahsForJuz, getMinAyatForSurahInJuz, getMaxAyatForSurahInJuz } from "@/services/supabase/client";
 
 const AddSetoran = () => {
-  const { santriId } = useParams<{ santriId: string }>();
-  const [santri, setSantri] = useState<Santri | null>(null);
-  const [tanggal, setTanggal] = useState<Date | undefined>(new Date()); // Auto-populate with today's date
-  const [juz, setJuz] = useState<number>(1);
-  const [surat, setSurat] = useState<string>("");
-  const [awalAyat, setAwalAyat] = useState<string>("1");
-  const [akhirAyat, setAkhirAyat] = useState<string>("1");
-  const [kelancaran, setKelancaran] = useState<number>(5);
-  const [tajwid, setTajwid] = useState<number>(5);
-  const [tahsin, setTahsin] = useState<number>(5);
-  const [catatan, setCatatan] = useState<string>("");
-  const [diujiOleh, setDiujiOleh] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [availableSurahs, setAvailableSurahs] = useState<any[]>([]);
-  const [minAyat, setMinAyat] = useState<number>(1);
-  const [maxAyat, setMaxAyat] = useState<number>(1);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [formData, setFormData] = useState({
+    santri_id: "",
+    tanggal: new Date(),
+    juz: "",
+    surat: "",
+    awal_ayat: "",
+    akhir_ayat: "",
+    kelancaran: 5,
+    tajwid: 5,
+    tahsin: 5,
+    catatan: "",
+    diuji_oleh: "",
+  });
+
+  const { data: santris = [], isLoading: isLoadingSantris } = useQuery({
+    queryKey: ["santris"],
+    queryFn: () => fetchSantri(),
+  });
+
+  const createSetoranMutation = useMutation({
+    mutationFn: (setoranData: Omit<Setoran, 'id' | 'created_at'>) => 
+      createSetoran(setoranData),
+    onSuccess: () => {
+      toast.success("Setoran berhasil ditambahkan!");
+      queryClient.invalidateQueries({ queryKey: ["setoran"] });
+      queryClient.invalidateQueries({ queryKey: ["santris"] });
+      navigate("/");
+    },
+    onError: (error) => {
+      console.error("Error creating setoran:", error);
+      toast.error("Gagal menambahkan setoran. Silakan coba lagi.");
+    },
+  });
+
+  const availableSurahs = formData.juz ? getSurahsForJuz(formData.juz) : [];
+  const minAyat = formData.juz && formData.surat ? getMinAyatForSurahInJuz(formData.juz, formData.surat) : 1;
+  const maxAyat = formData.juz && formData.surat ? getMaxAyatForSurahInJuz(formData.juz, formData.surat) : 286;
 
   useEffect(() => {
-    const fetchSantriSupabase = async () => {
-      if (santriId) {
-        try {
-          const santriData = await fetchSantriById(santriId);
-          setSantri(santriData);
-        } catch (error) {
-          console.error("Error fetching santri:", error);
-          toast({
-            title: "Error",
-            description: "Gagal memuat data santri",
-            variant: "destructive",
-          });
-        } finally {
-          setLoading(false);
-        }
+    if (formData.juz && formData.surat) {
+      const min = getMinAyatForSurahInJuz(formData.juz, formData.surat);
+      if (!formData.awal_ayat) {
+        setFormData(prev => ({ ...prev, awal_ayat: min.toString() }));
       }
-    };
+    }
+  }, [formData.juz, formData.surat]);
 
-    fetchSantriSupabase();
-  }, [santriId, toast]);
-
-  // Update available surahs when juz changes
   useEffect(() => {
-    const surahs = getSurahsInJuz(juz);
-    setAvailableSurahs(surahs);
+    if (formData.awal_ayat && !formData.akhir_ayat) {
+      setFormData(prev => ({ ...prev, akhir_ayat: formData.awal_ayat }));
+    }
+  }, [formData.awal_ayat]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // Reset surat selection when juz changes
-    setSurat("");
-    setAwalAyat("1");
-    setAkhirAyat("1");
-    setMinAyat(1);
-    setMaxAyat(1);
-  }, [juz]);
-
-  // Update min/max ayat when surat changes
-  useEffect(() => {
-    if (surat) {
-      const ayatRange = getSurahMinMaxAyatInJuz(juz, surat);
-      setMinAyat(ayatRange.minAyat);
-      setMaxAyat(ayatRange.maxAyat);
-      
-      // Reset ayat values to valid range
-      setAwalAyat(ayatRange.minAyat.toString());
-      setAkhirAyat(ayatRange.minAyat.toString());
-    }
-  }, [surat, juz]);
-
-  const handleGoBack = () => {
-    navigate("/dashboard");
-  };
-
-  const handleTanggalChange = (date: Date | undefined) => {
-    setTanggal(date);
-  };
-
-  const handleKelancaranChange = (value: number) => {
-    setKelancaran(value);
-  };
-
-  const handleTajwidChange = (value: number) => {
-    setTajwid(value);
-  };
-
-  const handleTahsinChange = (value: number) => {
-    setTahsin(value);
-  };
-
-  const handleJuzChange = (value: string) => {
-    setJuz(Number(value));
-  };
-
-  const handleSuratChange = (value: string) => {
-    setSurat(value);
-  };
-
-  const handleAwalAyatChange = (value: string) => {
-    const numValue = parseInt(value) || 1;
-    if (numValue <= maxAyat && numValue >= minAyat) {
-      setAwalAyat(value);
-      // Ensure akhir ayat is not less than awal ayat
-      const akhirNum = parseInt(akhirAyat) || 1;
-      if (akhirNum < numValue) {
-        setAkhirAyat(numValue.toString());
-      }
-    } else {
-      setAwalAyat(value); // Allow typing but will validate on submit
-    }
-  };
-
-  const handleAkhirAyatChange = (value: string) => {
-    const numValue = parseInt(value) || 1;
-    const awalNum = parseInt(awalAyat) || 1;
-    if (numValue <= maxAyat && numValue >= awalNum) {
-      setAkhirAyat(value);
-    } else {
-      setAkhirAyat(value); // Allow typing but will validate on submit
-    }
-  };
-
-  const validateAyatInputs = () => {
-    const awalNum = parseInt(awalAyat) || 1;
-    const akhirNum = parseInt(akhirAyat) || 1;
-    
-    if (awalNum < minAyat || awalNum > maxAyat) {
-      toast({
-        title: "Error",
-        description: `Awal ayat harus antara ${minAyat} - ${maxAyat}`,
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    if (akhirNum < minAyat || akhirNum > maxAyat) {
-      toast({
-        title: "Error",
-        description: `Akhir ayat harus antara ${minAyat} - ${maxAyat}`,
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    if (awalNum > akhirNum) {
-      toast({
-        title: "Error",
-        description: "Awal ayat tidak boleh lebih besar dari akhir ayat",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    return true;
-  };
-
-  const handleAddSetoran = async () => {
-    if (!tanggal || !surat || !diujiOleh.trim()) {
-      toast({
-        title: "Error",
-        description: "Mohon lengkapi semua field yang wajib diisi",
-        variant: "destructive",
-      });
+    if (!formData.santri_id || !formData.juz || !formData.surat || 
+        !formData.awal_ayat || !formData.akhir_ayat || !formData.diuji_oleh) {
+      toast.error("Semua field yang wajib harus diisi!");
       return;
     }
 
-    if (!validateAyatInputs()) {
+    const awalAyat = parseInt(formData.awal_ayat);
+    const akhirAyat = parseInt(formData.akhir_ayat);
+    
+    if (awalAyat > akhirAyat) {
+      toast.error("Ayat awal tidak boleh lebih besar dari ayat akhir!");
       return;
     }
 
-    try {
-      setLoading(true);
-      const tanggalFormatted = tanggal ? tanggal.toISOString().split('T')[0] : '';
-      const setoran = {
-        santri_id: santriId,
-        tanggal: tanggalFormatted,
-        juz: juz,
-        surat: surat,
-        awal_ayat: parseInt(awalAyat),
-        akhir_ayat: parseInt(akhirAyat),
-        kelancaran: kelancaran,
-        tajwid: tajwid,
-        tahsin: tahsin,
-        catatan: catatan,
-        diuji_oleh: diujiOleh,
-      };
-
-      await createSetoran(setoran);
-      toast({
-        title: "Setoran berhasil disimpan",
-        description: "Data setoran baru telah ditambahkan.",
-      });
-
-      navigate("/dashboard");
-    } catch (error) {
-      toast({
-        title: "Gagal",
-        description: "Gagal menyimpan data setoran.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (awalAyat < minAyat || akhirAyat > maxAyat) {
+      toast.error(`Ayat harus dalam rentang ${minAyat}-${maxAyat} untuk ${formData.surat} di Juz ${formData.juz}!`);
+      return;
     }
+
+    createSetoranMutation.mutate({
+      santri_id: formData.santri_id,
+      tanggal: formData.tanggal.toISOString().split('T')[0],
+      juz: parseInt(formData.juz),
+      surat: formData.surat,
+      awal_ayat: awalAyat,
+      akhir_ayat: akhirAyat,
+      kelancaran: formData.kelancaran,
+      tajwid: formData.tajwid,
+      tahsin: formData.tahsin,
+      catatan: formData.catatan,
+      diuji_oleh: formData.diuji_oleh,
+    });
   };
 
-  if (loading) {
-    return <div className="text-center text-white">Loading...</div>;
-  }
-
-  if (!santri) {
-    return <div className="text-center text-white">Santri tidak ditemukan.</div>;
-  }
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   return (
-    <div className="min-h-screen bg-background py-2 px-2 sm:py-6 sm:px-4 flex flex-col justify-center">
-      <div className="relative w-full max-w-2xl mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary to-islamic-secondary shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-2xl sm:rounded-3xl"></div>
-        <div className="relative px-3 py-6 sm:px-6 sm:py-10 bg-card shadow-lg rounded-2xl sm:rounded-3xl border border-border">
-          <h1 className="text-lg sm:text-2xl font-bold text-white text-center mb-4 sm:mb-6">
-            Tambah Setoran untuk {santri?.nama || "..."}
-          </h1>
-          
-          <div className="space-y-4 sm:space-y-6">
-            <AddSetoranDatePicker tanggal={tanggal} onTanggalChange={handleTanggalChange} />
-            
-            {/* Juz Selection */}
-            <div>
-              <Label htmlFor="juz" className="block text-white text-sm font-bold mb-2">
-                Juz *
-              </Label>
-              <Select value={juz.toString()} onValueChange={handleJuzChange}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-white">
-                  <SelectValue placeholder="Pilih Juz" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 bg-popover border-border">
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNumber) => (
-                    <SelectItem key={juzNumber} value={juzNumber.toString()} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
-                      Juz {juzNumber}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 p-4">
+      <div className="max-w-2xl mx-auto">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="mb-4 text-white hover:text-emerald-200 hover:bg-emerald-800/50"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Dashboard
+        </Button>
 
-            {/* Surat Selection */}
-            <div>
-              <Label htmlFor="surat" className="block text-white text-sm font-bold mb-2">
-                Surat *
-              </Label>
-              <Select value={surat} onValueChange={handleSuratChange} disabled={!juz}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-white">
-                  <SelectValue placeholder="Pilih Surat" />
-                </SelectTrigger>
-                <SelectContent className="max-h-60 bg-popover border-border">
-                  {availableSurahs.map((surahInfo) => (
-                    <SelectItem key={surahInfo.name} value={surahInfo.name} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
-                      {surahInfo.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {juz && availableSurahs.length > 0 && (
-                <p className="text-xs text-white/70 mt-1">
-                  Surat yang tersedia untuk Juz {juz}
-                </p>
-              )}
-            </div>
-
-            {/* Ayat Range with text input */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label htmlFor="awalAyat" className="block text-white text-sm font-bold mb-2">
-                  Awal Ayat *
+        <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700 text-white">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-white text-center">
+              Tambah Setoran Baru
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="santri" className="text-white font-medium">
+                  Pilih Santri *
                 </Label>
-                <Input
-                  type="text"
-                  id="awalAyat"
-                  placeholder="Awal"
-                  value={awalAyat}
-                  onChange={(e) => handleAwalAyatChange(e.target.value)}
-                  disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-white placeholder:text-white/50"
-                />
+                <Select 
+                  onValueChange={(value) => handleInputChange("santri_id", value)}
+                  disabled={isLoadingSantris}
+                >
+                  <SelectTrigger className="bg-background border-border text-white">
+                    <SelectValue placeholder={isLoadingSantris ? "Memuat santri..." : "Pilih santri"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {santris.map((santri) => (
+                      <SelectItem key={santri.id} value={santri.id}>
+                        {santri.nama} - Kelas {santri.kelas} ({santri.jenis_kelamin})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div>
-                <Label htmlFor="akhirAyat" className="block text-white text-sm font-bold mb-2">
-                  Akhir Ayat *
-                </Label>
-                <Input
-                  type="text"
-                  id="akhirAyat"
-                  placeholder="Akhir"
-                  value={akhirAyat}
-                  onChange={(e) => handleAkhirAyatChange(e.target.value)}
-                  disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-white placeholder:text-white/50"
-                />
-              </div>
-            </div>
-            {surat && (
-              <p className="text-xs text-white/70">
-                Range ayat untuk {surat} dalam Juz {juz}: {minAyat} - {maxAyat}
-              </p>
-            )}
 
-            {/* Score Selection */}
-            <div>
+              <AddSetoranDatePicker
+                tanggal={formData.tanggal}
+                onTanggalChange={(date) => handleInputChange("tanggal", date || new Date())}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="juz" className="text-white font-medium">
+                    Juz *
+                  </Label>
+                  <Select onValueChange={(value) => {
+                    handleInputChange("juz", value);
+                    handleInputChange("surat", "");
+                    handleInputChange("awal_ayat", "");
+                    handleInputChange("akhir_ayat", "");
+                  }}>
+                    <SelectTrigger className="bg-background border-border text-white">
+                      <SelectValue placeholder="Pilih juz" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
+                        <SelectItem key={juz} value={juz.toString()}>
+                          Juz {juz}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="surat" className="text-white font-medium">
+                    Surat *
+                  </Label>
+                  <Select 
+                    onValueChange={(value) => {
+                      handleInputChange("surat", value);
+                      handleInputChange("awal_ayat", "");
+                      handleInputChange("akhir_ayat", "");
+                    }}
+                    disabled={!formData.juz}
+                  >
+                    <SelectTrigger className="bg-background border-border text-white">
+                      <SelectValue placeholder={formData.juz ? "Pilih surat" : "Pilih juz terlebih dahulu"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableSurahs.map((surat) => (
+                        <SelectItem key={surat.value} value={surat.value}>
+                          {surat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="awal_ayat" className="text-white font-medium">
+                    Ayat Awal *
+                  </Label>
+                  <Input
+                    id="awal_ayat"
+                    type="number"
+                    placeholder={`Min: ${minAyat}`}
+                    value={formData.awal_ayat}
+                    onChange={(e) => handleInputChange("awal_ayat", e.target.value)}
+                    min={minAyat}
+                    max={maxAyat}
+                    disabled={!formData.surat}
+                    className="bg-background border-border text-white placeholder:text-white/50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="akhir_ayat" className="text-white font-medium">
+                    Ayat Akhir *
+                  </Label>
+                  <Input
+                    id="akhir_ayat"
+                    type="number"
+                    placeholder={`Max: ${maxAyat}`}
+                    value={formData.akhir_ayat}
+                    onChange={(e) => handleInputChange("akhir_ayat", e.target.value)}
+                    min={formData.awal_ayat || minAyat}
+                    max={maxAyat}
+                    disabled={!formData.awal_ayat}
+                    className="bg-background border-border text-white placeholder:text-white/50"
+                  />
+                </div>
+              </div>
+
               <ScoreSelectGroup
-                kelancaran={kelancaran}
-                tajwid={tajwid}
-                tahsin={tahsin}
-                onKelancaranChange={handleKelancaranChange}
-                onTajwidChange={handleTajwidChange}
-                onTahsinChange={handleTahsinChange}
+                kelancaran={formData.kelancaran}
+                tajwid={formData.tajwid}
+                tahsin={formData.tahsin}
+                onKelancaranChange={(value) => handleInputChange("kelancaran", value)}
+                onTajwidChange={(value) => handleInputChange("tajwid", value)}
+                onTahsinChange={(value) => handleInputChange("tahsin", value)}
               />
-            </div>
 
-            {/* Notes */}
-            <div>
-              <Label htmlFor="catatan" className="block text-white text-sm font-bold mb-2">
-                Catatan
-              </Label>
-              <Textarea
-                id="catatan"
-                placeholder="Masukkan catatan"
-                value={catatan}
-                onChange={(e) => setCatatan(e.target.value)}
-                className="w-full min-h-20 text-sm sm:text-base resize-none bg-background border-border text-white placeholder:text-white/50"
-                rows={3}
+              <div className="space-y-2">
+                <Label htmlFor="catatan" className="text-white font-medium">
+                  Catatan
+                </Label>
+                <Textarea
+                  id="catatan"
+                  placeholder="Masukkan catatan (opsional)"
+                  value={formData.catatan}
+                  onChange={(e) => handleInputChange("catatan", e.target.value)}
+                  className="bg-background border-border text-white placeholder:text-white/50"
+                  rows={3}
+                />
+              </div>
+
+              <AddSetoranExaminerInput
+                diujiOleh={formData.diuji_oleh}
+                onDiujiOlehChange={(value) => handleInputChange("diuji_oleh", value)}
               />
-            </div>
 
-            {/* Examiner Input */}
-            <AddSetoranExaminerInput
-              diujiOleh={diujiOleh}
-              onDiujiOlehChange={setDiujiOleh}
-            />
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-              <Button 
-                onClick={handleGoBack} 
-                variant="outline"
-                className="w-full sm:w-auto order-2 sm:order-1 border-border text-white hover:bg-accent hover:text-accent-foreground"
+              <Button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={createSetoranMutation.isPending}
               >
-                Batal
+                {createSetoranMutation.isPending ? "Menambahkan..." : "Tambah Setoran"}
               </Button>
-              <Button 
-                onClick={handleAddSetoran} 
-                className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline order-1 sm:order-2 hover:opacity-90"
-                disabled={loading || !tanggal || !surat || !diujiOleh.trim()}
-              >
-                {loading ? "Menyimpan..." : "Simpan"}
-              </Button>
-            </div>
-          </div>
-        </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

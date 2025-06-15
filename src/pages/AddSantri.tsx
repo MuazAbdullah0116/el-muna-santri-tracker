@@ -1,173 +1,143 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Users, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { createSantri } from "@/services/sheetdb/santri.service";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import { Santri } from "@/types";
+import { createSantri } from "@/services/supabase/santri.service";
 
 const AddSantri = () => {
-  const [nama, setNama] = useState("");
-  const [kelas, setKelas] = useState<number>(7);
-  const [jenisKelamin, setJenisKelamin] = useState<"Ikhwan" | "Akhwat">("Ikhwan");
-  const [loading, setLoading] = useState(false);
-  
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  // Classes from 7 to 12
-  const classes = [7, 8, 9, 10, 11, 12];
+  const [formData, setFormData] = useState({
+    nama: "",
+    kelas: "",
+    jenis_kelamin: "" as "Ikhwan" | "Akhwat" | "",
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const createSantriMutation = useMutation({
+    mutationFn: (santriData: Omit<Santri, 'id' | 'created_at' | 'total_hafalan'>) => 
+      createSantri(santriData),
+    onSuccess: () => {
+      toast.success("Santri berhasil ditambahkan!");
+      queryClient.invalidateQueries({ queryKey: ["santris"] });
+      navigate("/");
+    },
+    onError: (error) => {
+      console.error("Error creating santri:", error);
+      toast.error("Gagal menambahkan santri. Silakan coba lagi.");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!nama.trim()) {
-      toast({
-        title: "Error",
-        description: "Nama santri harus diisi",
-        variant: "destructive",
-      });
+    if (!formData.nama || !formData.kelas || !formData.jenis_kelamin) {
+      toast.error("Semua field harus diisi!");
       return;
     }
 
-    setLoading(true);
-    try {
-      const santriData = {
-        nama: nama.trim(),
-        kelas,
-        jenis_kelamin: jenisKelamin,
-      };
-
-      await createSantri(santriData);
-      
-      toast({
-        title: "Berhasil",
-        description: "Santri baru berhasil ditambahkan",
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error creating santri:", error);
-      toast({
-        title: "Error",
-        description: "Gagal menambahkan santri baru",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    createSantriMutation.mutate({
+      nama: formData.nama,
+      kelas: parseInt(formData.kelas),
+      jenis_kelamin: formData.jenis_kelamin,
+    });
   };
 
-  const handleBack = () => {
-    navigate("/dashboard");
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10 py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="mb-4 hover:bg-islamic-primary/10"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali ke Dashboard
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="mb-4 text-emerald-700 hover:text-emerald-800 hover:bg-emerald-100"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Dashboard
+        </Button>
 
-        <Card className="shadow-2xl border-0 bg-card">
-          <CardHeader className="text-center pb-6">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-foreground">Tambah Santri Baru</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Masukkan data santri baru untuk memulai pencatatan hafalan
-            </CardDescription>
+        <Card className="bg-white/70 backdrop-blur-sm border-emerald-200">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-emerald-800 text-center">
+              Tambah Santri Baru
+            </CardTitle>
           </CardHeader>
-          
-          <CardContent className="space-y-6">
+          <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="nama" className="text-sm font-semibold text-foreground">
-                  Nama Santri
+                <Label htmlFor="nama" className="text-emerald-700 font-medium">
+                  Nama Lengkap *
                 </Label>
                 <Input
                   id="nama"
                   type="text"
                   placeholder="Masukkan nama lengkap santri"
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  className="h-12 rounded-xl border-2 focus:border-islamic-primary"
-                  required
+                  value={formData.nama}
+                  onChange={(e) => handleInputChange("nama", e.target.value)}
+                  className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="kelas" className="text-sm font-semibold text-foreground">
-                  Kelas
+                <Label htmlFor="kelas" className="text-emerald-700 font-medium">
+                  Kelas *
                 </Label>
-                <Select value={kelas.toString()} onValueChange={(value) => setKelas(parseInt(value))}>
-                  <SelectTrigger id="kelas" className="h-12 rounded-xl border-2 focus:border-islamic-primary">
-                    <SelectValue placeholder="Pilih Kelas" />
+                <Select onValueChange={(value) => handleInputChange("kelas", value)}>
+                  <SelectTrigger className="border-emerald-200 focus:border-emerald-400 focus:ring-emerald-400">
+                    <SelectValue placeholder="Pilih kelas" />
                   </SelectTrigger>
                   <SelectContent>
-                    {classes.map((kelasOption) => (
-                      <SelectItem key={kelasOption} value={kelasOption.toString()}>
-                        Kelas {kelasOption}
+                    {[7, 8, 9, 10, 11, 12].map((kelas) => (
+                      <SelectItem key={kelas} value={kelas.toString()}>
+                        Kelas {kelas}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="jenisKelamin" className="text-sm font-semibold text-foreground">
-                  Jenis Kelamin
+              <div className="space-y-3">
+                <Label className="text-emerald-700 font-medium">
+                  Jenis Kelamin *
                 </Label>
-                <Select value={jenisKelamin} onValueChange={(value: "Ikhwan" | "Akhwat") => setJenisKelamin(value)}>
-                  <SelectTrigger id="jenisKelamin" className="h-12 rounded-xl border-2 focus:border-islamic-primary">
-                    <SelectValue placeholder="Pilih Jenis Kelamin" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Ikhwan">Ikhwan (Laki-laki)</SelectItem>
-                    <SelectItem value="Akhwat">Akhwat (Perempuan)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <RadioGroup
+                  value={formData.jenis_kelamin}
+                  onValueChange={(value) => handleInputChange("jenis_kelamin", value)}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Ikhwan" id="ikhwan" />
+                    <Label htmlFor="ikhwan" className="text-emerald-700">Ikhwan</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Akhwat" id="akhwat" />
+                    <Label htmlFor="akhwat" className="text-emerald-700">Akhwat</Label>
+                  </div>
+                </RadioGroup>
               </div>
 
-              <div className="flex gap-4 pt-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleBack}
-                  className="flex-1 h-12 rounded-xl border-2"
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90 font-semibold shadow-lg"
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <Users className="mr-2 h-4 w-4" />
-                      Tambah Santri
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                disabled={createSantriMutation.isPending}
+              >
+                {createSantriMutation.isPending ? "Menambahkan..." : "Tambah Santri"}
+              </Button>
             </form>
           </CardContent>
         </Card>
