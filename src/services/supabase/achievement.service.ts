@@ -26,7 +26,7 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
       throw error;
     }
 
-    console.log("Top hafalan data retrieved:", data?.length);
+    console.log("Top hafalan data retrieved:", data?.length || 0);
     
     if (!data || data.length === 0) {
       return [];
@@ -53,7 +53,7 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
     return sortedData;
   } catch (err) {
     console.error("Exception in fetchTopHafalan:", err);
-    throw err;
+    return []; // Return empty array instead of throwing
   }
 };
 
@@ -63,48 +63,46 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
 export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
   console.log("Fetching top performers", gender ? `for ${gender}` : "for all");
   try {
-    // First, get all setoran records
-    const { data: setoranData, error: setoranError } = await supabase
+    // First, get all setoran records with santri data
+    let setoranQuery = supabase
       .from('setoran')
       .select(`
         santri_id,
         kelancaran,
         tajwid,
-        tahsin
+        tahsin,
+        santri:santri_id (
+          id,
+          nama,
+          kelas,
+          jenis_kelamin,
+          total_hafalan
+        )
       `);
+
+    const { data: setoranData, error: setoranError } = await setoranQuery;
     
     if (setoranError) {
       console.error("Error fetching setoran for top performers:", setoranError);
-      throw setoranError;
-    }
-
-    // Then, get all santri
-    const { data: santriData, error: santriError } = await supabase
-      .from('santri')
-      .select('id, nama, kelas, jenis_kelamin, total_hafalan');
-    
-    if (santriError) {
-      console.error("Error fetching santri for top performers:", santriError);
-      throw santriError;
-    }
-
-    if (!santriData || !setoranData) {
       return [];
     }
 
-    // Filter santri by gender if specified
-    const filteredSantri = gender 
-      ? santriData.filter(s => s.jenis_kelamin === gender) 
-      : santriData;
-    
-    if (filteredSantri.length === 0) {
+    if (!setoranData || setoranData.length === 0) {
+      console.log("No setoran data found for top performers");
       return [];
     }
-    
-    // Process data to get average scores
+
+    // Filter by gender if specified and group by santri
     const scoreMap = new Map();
     
     setoranData.forEach(item => {
+      const santri = item.santri;
+      
+      // Skip if no santri data or doesn't match gender filter
+      if (!santri || (gender && santri.jenis_kelamin !== gender)) {
+        return;
+      }
+
       const santriId = item.santri_id;
       const avgScore = (item.kelancaran + item.tajwid + item.tahsin) / 3;
       
@@ -116,20 +114,14 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
           count: current.count + 1
         });
       } else {
-        // Find the santri from the filtered list
-        const santri = filteredSantri.find(s => s.id === santriId);
-        
-        // Only include if the santri exists and matches gender filter
-        if (santri) {
-          scoreMap.set(santriId, {
-            santri: {
-              ...santri,
-              jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat"
-            },
-            totalScore: avgScore,
-            count: 1
-          });
-        }
+        scoreMap.set(santriId, {
+          santri: {
+            ...santri,
+            jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat"
+          },
+          totalScore: avgScore,
+          count: 1
+        });
       }
     });
     
@@ -151,7 +143,7 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     return result;
   } catch (err) {
     console.error("Exception in fetchTopPerformers:", err);
-    throw err;
+    return []; // Return empty array instead of throwing
   }
 };
 
@@ -176,7 +168,7 @@ export const fetchTopRegularity = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     
     if (error) {
       console.error("Error fetching top regularity:", error);
-      throw error;
+      return [];
     }
     
     if (!data || data.length === 0) {
@@ -206,6 +198,6 @@ export const fetchTopRegularity = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     return sortedData;
   } catch (err) {
     console.error("Exception in fetchTopRegularity:", err);
-    throw err;
+    return []; // Return empty array instead of throwing
   }
 };

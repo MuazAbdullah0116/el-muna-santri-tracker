@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Medal, Target, Crown } from "lucide-react";
+import SearchBar from "@/components/dashboard/SearchBar";
 import { fetchTopHafalan, fetchTopPerformers, fetchTopRegularity } from "@/services/supabase/achievement.service";
 
 const Achievements = () => {
   const [selectedGender, setSelectedGender] = useState<"all" | "Ikhwan" | "Akhwat">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const {
     data: topHafalan = [],
@@ -33,6 +35,18 @@ const Achievements = () => {
     queryKey: ["topRegularity", selectedGender === "all" ? undefined : selectedGender],
     queryFn: () => fetchTopRegularity(selectedGender === "all" ? undefined : selectedGender),
   });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Filter data based on search query
+  const filterData = (data: any[]) => {
+    if (!searchQuery) return data;
+    return data.filter(item => 
+      item.nama?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -61,6 +75,8 @@ const Achievements = () => {
   };
 
   const renderRankingCard = (data: any[], isLoading: boolean, title: string, valueKey?: string) => {
+    const filteredData = filterData(data);
+
     if (isLoading) {
       return (
         <div className="space-y-4">
@@ -71,18 +87,20 @@ const Achievements = () => {
       );
     }
 
-    if (data.length === 0) {
+    if (filteredData.length === 0) {
       return (
         <div className="text-center py-8">
           <Target className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-          <p className="text-gray-500">Belum ada data ranking</p>
+          <p className="text-gray-500">
+            {searchQuery ? `Tidak ada santri yang cocok dengan "${searchQuery}"` : "Belum ada data ranking"}
+          </p>
         </div>
       );
     }
 
     return (
       <div className="space-y-4">
-        {data.slice(0, 10).map((item, index) => {
+        {filteredData.slice(0, 10).map((item, index) => {
           const rank = index + 1;
           return (
             <Card key={item.id} className={`${getRankColor(rank)} text-white border-none`}>
@@ -137,6 +155,15 @@ const Achievements = () => {
               Prestasi Santri
             </CardTitle>
           </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={handleSearchChange}
+                placeholder="Cari santri berdasarkan nama..."
+              />
+            </div>
+          </CardContent>
         </Card>
 
         <div className="mb-6">
