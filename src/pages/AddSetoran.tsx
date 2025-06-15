@@ -181,26 +181,27 @@ const AddSetoran = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary to-islamic-secondary shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
-          <h1 className="text-2xl font-bold text-gray-900 text-center">
-            Tambah Setoran untuk {santri.nama}
+    <div className="min-h-screen bg-gray-100 py-2 px-2 sm:py-6 sm:px-4 flex flex-col justify-center">
+      <div className="relative w-full max-w-2xl mx-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary to-islamic-secondary shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-2xl sm:rounded-3xl"></div>
+        <div className="relative px-3 py-6 sm:px-6 sm:py-10 bg-white shadow-lg rounded-2xl sm:rounded-3xl">
+          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 text-center mb-4 sm:mb-6">
+            Tambah Setoran untuk {santri?.nama || "..."}
           </h1>
-          <div className="mt-6">
+          
+          <div className="space-y-4 sm:space-y-6">
             <AddSetoranDatePicker tanggal={tanggal} onTanggalChange={handleTanggalChange} />
             
             {/* Juz Selection */}
-            <div className="mb-4">
+            <div>
               <Label htmlFor="juz" className="block text-gray-700 text-sm font-bold mb-2">
                 Juz *
               </Label>
               <Select value={juz.toString()} onValueChange={handleJuzChange}>
-                <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
                   <SelectValue placeholder="Pilih Juz" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNumber) => (
                     <SelectItem key={juzNumber} value={juzNumber.toString()}>
                       Juz {juzNumber}
@@ -211,15 +212,15 @@ const AddSetoran = () => {
             </div>
 
             {/* Surat Selection */}
-            <div className="mb-4">
+            <div>
               <Label htmlFor="surat" className="block text-gray-700 text-sm font-bold mb-2">
                 Surat *
               </Label>
               <Select value={surat} onValueChange={handleSuratChange} disabled={!juz}>
-                <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
                   <SelectValue placeholder="Pilih Surat" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {availableSurahs.map((surahInfo) => (
                     <SelectItem key={surahInfo.name} value={surahInfo.name}>
                       {surahInfo.name}
@@ -235,7 +236,7 @@ const AddSetoran = () => {
             </div>
 
             {/* Ayat Range with validation */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="awalAyat" className="block text-gray-700 text-sm font-bold mb-2">
                   Awal Ayat *
@@ -249,7 +250,7 @@ const AddSetoran = () => {
                   max={maxAyat}
                   onChange={(e) => handleAwalAyatChange(Number(e.target.value))}
                   disabled={!surat}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full h-10 text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -265,17 +266,18 @@ const AddSetoran = () => {
                   max={maxAyat}
                   onChange={(e) => handleAkhirAyatChange(Number(e.target.value))}
                   disabled={!surat}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full h-10 text-sm sm:text-base"
                 />
               </div>
             </div>
             {surat && (
-              <p className="text-xs text-gray-500 mb-4">
+              <p className="text-xs text-gray-500">
                 Range ayat untuk {surat} dalam Juz {juz}: {minAyat} - {maxAyat}
               </p>
             )}
 
-            <div className="mb-4">
+            {/* Score Selection */}
+            <div>
               <ScoreSelectGroup
                 kelancaran={kelancaran}
                 tajwid={tajwid}
@@ -285,7 +287,9 @@ const AddSetoran = () => {
                 onTahsinChange={handleTahsinChange}
               />
             </div>
-            <div className="mb-4">
+
+            {/* Notes */}
+            <div>
               <Label htmlFor="catatan" className="block text-gray-700 text-sm font-bold mb-2">
                 Catatan
               </Label>
@@ -294,20 +298,29 @@ const AddSetoran = () => {
                 placeholder="Masukkan catatan"
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="w-full min-h-20 text-sm sm:text-base resize-none"
+                rows={3}
               />
             </div>
+
+            {/* Examiner Input */}
             <AddSetoranExaminerInput
               diujiOleh={diujiOleh}
               onDiujiOlehChange={setDiujiOleh}
             />
-            <div className="flex items-center justify-between">
-              <Button onClick={handleGoBack} variant="ghost">
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+              <Button 
+                onClick={handleGoBack} 
+                variant="outline"
+                className="w-full sm:w-auto order-2 sm:order-1"
+              >
                 Batal
               </Button>
               <Button 
                 onClick={handleAddSetoran} 
-                className="bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline order-1 sm:order-2"
                 disabled={loading || !tanggal || !surat || !diujiOleh.trim()}
               >
                 {loading ? "Menyimpan..." : "Simpan"}
