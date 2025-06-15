@@ -1,3 +1,4 @@
+
 /**
  * Google Apps Script for Santri & Setoran management
  * Ganti SPREADSHEET_ID dengan ID Spreadsheet kamu!
@@ -105,12 +106,18 @@ function createSantri(santriData) {
 }
 
 function deleteSantri(id) {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === id) {
-      sheet.deleteRow(i + 1);
-      return createResponse({success: true});
+  const santriSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
+  const setoranSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
+  
+  // First, delete all setoran records for this santri
+  deleteAllSetoranBySantriId(id);
+  
+  // Then delete the santri record
+  const santriData = santriSheet.getDataRange().getValues();
+  for (let i = 1; i < santriData.length; i++) {
+    if (santriData[i][0] === id) {
+      santriSheet.deleteRow(i + 1);
+      return createResponse({success: true, message: 'Santri dan semua riwayat setoran berhasil dihapus'});
     }
   }
   return createResponse({error: 'Santri not found'}, 404);
@@ -229,6 +236,27 @@ function deleteSetoran(id) {
     }
   }
   return createResponse({error: 'Setoran not found'}, 404);
+}
+
+/**
+ * Helper function to delete all setoran records for a specific santri
+ * Called when a santri is deleted to maintain data consistency
+ */
+function deleteAllSetoranBySantriId(santriId) {
+  const setoranSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
+  const data = setoranSheet.getDataRange().getValues();
+  
+  if (data.length <= 1) return; // No data to delete
+  
+  // Start from the bottom to avoid index shifting issues when deleting rows
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (data[i][1] === santriId) { // santri_id is in column B (index 1)
+      setoranSheet.deleteRow(i + 1);
+      Logger.log(`Deleted setoran record at row ${i + 1} for santri ${santriId}`);
+    }
+  }
+  
+  Logger.log(`All setoran records deleted for santri ${santriId}`);
 }
 
 function updateTotalHafalan(santriId) {
