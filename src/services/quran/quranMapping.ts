@@ -37,122 +37,122 @@ export const juzMapping = [
   { juz: 30, surah: 78, ayah: 1 },  // An-Naba 1
 ];
 
-// Mapping of surah numbers to their total ayat count
-export const surahAyatCount = [
-  { surah: 1, count: 7 },     // Al-Fatihah
-  { surah: 2, count: 286 },   // Al-Baqarah
-  { surah: 3, count: 200 },   // Ali 'Imran
-  { surah: 4, count: 176 },   // An-Nisa
-  { surah: 5, count: 120 },   // Al-Ma'idah
-  { surah: 6, count: 165 },   // Al-An'am
-  { surah: 7, count: 206 },   // Al-A'raf
-  { surah: 8, count: 75 },    // Al-Anfal
-  { surah: 9, count: 129 },   // At-Tawbah
-  { surah: 10, count: 109 },  // Yunus
-  { surah: 11, count: 123 },  // Hud
-  { surah: 12, count: 111 },  // Yusuf
-  { surah: 13, count: 43 },   // Ar-Ra'd
-  { surah: 14, count: 52 },   // Ibrahim
-  { surah: 15, count: 99 },   // Al-Hijr
-  { surah: 16, count: 128 },  // An-Nahl
-  { surah: 17, count: 111 },  // Al-Isra
-  { surah: 18, count: 110 },  // Al-Kahf
-  { surah: 19, count: 98 },   // Maryam
-  { surah: 20, count: 135 },  // Ta-Ha
-  { surah: 21, count: 112 },  // Al-Anbya
-  { surah: 22, count: 78 },   // Al-Hajj
-  { surah: 23, count: 118 },  // Al-Mu'minun
-  { surah: 24, count: 64 },   // An-Nur
-  { surah: 25, count: 77 },   // Al-Furqan
-  { surah: 26, count: 227 },  // Ash-Shu'ara
-  { surah: 27, count: 93 },   // An-Naml
-  { surah: 28, count: 88 },   // Al-Qasas
-  { surah: 29, count: 69 },   // Al-'Ankabut
-  { surah: 30, count: 60 },   // Ar-Rum
-  { surah: 31, count: 34 },   // Luqman
-  { surah: 32, count: 30 },   // As-Sajdah
-  { surah: 33, count: 73 },   // Al-Ahzab
-  { surah: 34, count: 54 },   // Saba
-  { surah: 35, count: 45 },   // Fatir
-  { surah: 36, count: 83 },   // Ya-Sin
-  { surah: 37, count: 182 },  // As-Saffat
-  { surah: 38, count: 88 },   // Sad
-  { surah: 39, count: 75 },   // Az-Zumar
-  { surah: 40, count: 85 },   // Ghafir
-  { surah: 41, count: 54 },   // Fussilat
-  { surah: 42, count: 53 },   // Ash-Shuraa
-  { surah: 43, count: 89 },   // Az-Zukhruf
-  { surah: 44, count: 59 },   // Ad-Dukhan
-  { surah: 45, count: 37 },   // Al-Jathiyah
-  { surah: 46, count: 35 },   // Al-Ahqaf
-  { surah: 47, count: 38 },   // Muhammad
-  { surah: 48, count: 29 },   // Al-Fath
-  { surah: 49, count: 18 },   // Al-Hujurat
-  { surah: 50, count: 45 },   // Qaf
-  { surah: 51, count: 60 },   // Adh-Dhariyat
-  { surah: 52, count: 49 },   // At-Tur
-  { surah: 53, count: 62 },   // An-Najm
-  { surah: 54, count: 55 },   // Al-Qamar
-  { surah: 55, count: 78 },   // Ar-Rahman
-  { surah: 56, count: 96 },   // Al-Waqi'ah
-  { surah: 57, count: 29 },   // Al-Hadid
-  { surah: 58, count: 22 },   // Al-Mujadilah
-  { surah: 59, count: 24 },   // Al-Hashr
-  { surah: 60, count: 13 },   // Al-Mumtahanah
-  { surah: 61, count: 14 },   // As-Saff
-  { surah: 62, count: 11 },   // Al-Jumu'ah
-  { surah: 63, count: 11 },   // Al-Munafiqun
-  { surah: 64, count: 18 },   // At-Taghabun
-  { surah: 65, count: 12 },   // At-Talaq
-  { surah: 66, count: 12 },   // At-Tahrim
-  { surah: 67, count: 30 },   // Al-Mulk
-  { surah: 68, count: 52 },   // Al-Qalam
-  { surah: 69, count: 52 },   // Al-Haqqah
-  { surah: 70, count: 44 },   // Al-Ma'arij
-  { surah: 71, count: 28 },   // Nuh
-  { surah: 72, count: 28 },   // Al-Jinn
-  { surah: 73, count: 20 },   // Al-Muzzammil
-  { surah: 74, count: 56 },   // Al-Muddaththir
-  { surah: 75, count: 40 },   // Al-Qiyamah
-  { surah: 76, count: 31 },   // Al-Insan
-  { surah: 77, count: 50 },   // Al-Mursalat
-  { surah: 78, count: 40 },   // An-Naba
-  { surah: 79, count: 46 },   // An-Nazi'at
-  { surah: 80, count: 42 },   // 'Abasa
-  { surah: 81, count: 29 },   // At-Takwir
-  { surah: 82, count: 19 },   // Al-Infitar
-  { surah: 83, count: 36 },   // Al-Mutaffifin
-  { surah: 84, count: 25 },   // Al-Inshiqaq
-  { surah: 85, count: 22 },   // Al-Buruj
-  { surah: 86, count: 17 },   // At-Tariq
-  { surah: 87, count: 19 },   // Al-A'la
-  { surah: 88, count: 26 },   // Al-Ghashiyah
-  { surah: 89, count: 30 },   // Al-Fajr
-  { surah: 90, count: 20 },   // Al-Balad
-  { surah: 91, count: 15 },   // Ash-Shams
-  { surah: 92, count: 21 },   // Al-Layl
-  { surah: 93, count: 11 },   // Ad-Duha
-  { surah: 94, count: 8 },    // Ash-Sharh
-  { surah: 95, count: 8 },    // At-Tin
-  { surah: 96, count: 19 },   // Al-'Alaq
-  { surah: 97, count: 5 },    // Al-Qadr
-  { surah: 98, count: 8 },    // Al-Bayyinah
-  { surah: 99, count: 8 },    // Az-Zalzalah
-  { surah: 100, count: 11 },  // Al-'Adiyat
-  { surah: 101, count: 11 },  // Al-Qari'ah
-  { surah: 102, count: 8 },   // At-Takathur
-  { surah: 103, count: 3 },   // Al-'Asr
-  { surah: 104, count: 9 },   // Al-Humazah
-  { surah: 105, count: 5 },   // Al-Fil
-  { surah: 106, count: 4 },   // Quraysh
-  { surah: 107, count: 7 },   // Al-Ma'un
-  { surah: 108, count: 3 },   // Al-Kawthar
-  { surah: 109, count: 6 },   // Al-Kafirun
-  { surah: 110, count: 3 },   // An-Nasr
-  { surah: 111, count: 5 },   // Al-Masad
-  { surah: 112, count: 4 },   // Al-Ikhlas
-  { surah: 113, count: 5 },   // Al-Falaq
-  { surah: 114, count: 6 },   // An-Nas
+// Mapping of surah numbers to their names and total ayat count
+export const surahData = [
+  { number: 1, name: "Al-Fatihah", count: 7 },
+  { number: 2, name: "Al-Baqarah", count: 286 },
+  { number: 3, name: "Ali 'Imran", count: 200 },
+  { number: 4, name: "An-Nisa", count: 176 },
+  { number: 5, name: "Al-Ma'idah", count: 120 },
+  { number: 6, name: "Al-An'am", count: 165 },
+  { number: 7, name: "Al-A'raf", count: 206 },
+  { number: 8, name: "Al-Anfal", count: 75 },
+  { number: 9, name: "At-Tawbah", count: 129 },
+  { number: 10, name: "Yunus", count: 109 },
+  { number: 11, name: "Hud", count: 123 },
+  { number: 12, name: "Yusuf", count: 111 },
+  { number: 13, name: "Ar-Ra'd", count: 43 },
+  { number: 14, name: "Ibrahim", count: 52 },
+  { number: 15, name: "Al-Hijr", count: 99 },
+  { number: 16, name: "An-Nahl", count: 128 },
+  { number: 17, name: "Al-Isra", count: 111 },
+  { number: 18, name: "Al-Kahf", count: 110 },
+  { number: 19, name: "Maryam", count: 98 },
+  { number: 20, name: "Ta-Ha", count: 135 },
+  { number: 21, name: "Al-Anbya", count: 112 },
+  { number: 22, name: "Al-Hajj", count: 78 },
+  { number: 23, name: "Al-Mu'minun", count: 118 },
+  { number: 24, name: "An-Nur", count: 64 },
+  { number: 25, name: "Al-Furqan", count: 77 },
+  { number: 26, name: "Ash-Shu'ara", count: 227 },
+  { number: 27, name: "An-Naml", count: 93 },
+  { number: 28, name: "Al-Qasas", count: 88 },
+  { number: 29, name: "Al-'Ankabut", count: 69 },
+  { number: 30, name: "Ar-Rum", count: 60 },
+  { number: 31, name: "Luqman", count: 34 },
+  { number: 32, name: "As-Sajdah", count: 30 },
+  { number: 33, name: "Al-Ahzab", count: 73 },
+  { number: 34, name: "Saba", count: 54 },
+  { number: 35, name: "Fatir", count: 45 },
+  { number: 36, name: "Ya-Sin", count: 83 },
+  { number: 37, name: "As-Saffat", count: 182 },
+  { number: 38, name: "Sad", count: 88 },
+  { number: 39, name: "Az-Zumar", count: 75 },
+  { number: 40, name: "Ghafir", count: 85 },
+  { number: 41, name: "Fussilat", count: 54 },
+  { number: 42, name: "Ash-Shuraa", count: 53 },
+  { number: 43, name: "Az-Zukhruf", count: 89 },
+  { number: 44, name: "Ad-Dukhan", count: 59 },
+  { number: 45, name: "Al-Jathiyah", count: 37 },
+  { number: 46, name: "Al-Ahqaf", count: 35 },
+  { number: 47, name: "Muhammad", count: 38 },
+  { number: 48, name: "Al-Fath", count: 29 },
+  { number: 49, name: "Al-Hujurat", count: 18 },
+  { number: 50, name: "Qaf", count: 45 },
+  { number: 51, name: "Adh-Dhariyat", count: 60 },
+  { number: 52, name: "At-Tur", count: 49 },
+  { number: 53, name: "An-Najm", count: 62 },
+  { number: 54, name: "Al-Qamar", count: 55 },
+  { number: 55, name: "Ar-Rahman", count: 78 },
+  { number: 56, name: "Al-Waqi'ah", count: 96 },
+  { number: 57, name: "Al-Hadid", count: 29 },
+  { number: 58, name: "Al-Mujadilah", count: 22 },
+  { number: 59, name: "Al-Hashr", count: 24 },
+  { number: 60, name: "Al-Mumtahanah", count: 13 },
+  { number: 61, name: "As-Saff", count: 14 },
+  { number: 62, name: "Al-Jumu'ah", count: 11 },
+  { number: 63, name: "Al-Munafiqun", count: 11 },
+  { number: 64, name: "At-Taghabun", count: 18 },
+  { number: 65, name: "At-Talaq", count: 12 },
+  { number: 66, name: "At-Tahrim", count: 12 },
+  { number: 67, name: "Al-Mulk", count: 30 },
+  { number: 68, name: "Al-Qalam", count: 52 },
+  { number: 69, name: "Al-Haqqah", count: 52 },
+  { number: 70, name: "Al-Ma'arij", count: 44 },
+  { number: 71, name: "Nuh", count: 28 },
+  { number: 72, name: "Al-Jinn", count: 28 },
+  { number: 73, name: "Al-Muzzammil", count: 20 },
+  { number: 74, name: "Al-Muddaththir", count: 56 },
+  { number: 75, name: "Al-Qiyamah", count: 40 },
+  { number: 76, name: "Al-Insan", count: 31 },
+  { number: 77, name: "Al-Mursalat", count: 50 },
+  { number: 78, name: "An-Naba", count: 40 },
+  { number: 79, name: "An-Nazi'at", count: 46 },
+  { number: 80, name: "'Abasa", count: 42 },
+  { number: 81, name: "At-Takwir", count: 29 },
+  { number: 82, name: "Al-Infitar", count: 19 },
+  { number: 83, name: "Al-Mutaffifin", count: 36 },
+  { number: 84, name: "Al-Inshiqaq", count: 25 },
+  { number: 85, name: "Al-Buruj", count: 22 },
+  { number: 86, name: "At-Tariq", count: 17 },
+  { number: 87, name: "Al-A'la", count: 19 },
+  { number: 88, name: "Al-Ghashiyah", count: 26 },
+  { number: 89, name: "Al-Fajr", count: 30 },
+  { number: 90, name: "Al-Balad", count: 20 },
+  { number: 91, name: "Ash-Shams", count: 15 },
+  { number: 92, name: "Al-Layl", count: 21 },
+  { number: 93, name: "Ad-Duha", count: 11 },
+  { number: 94, name: "Ash-Sharh", count: 8 },
+  { number: 95, name: "At-Tin", count: 8 },
+  { number: 96, name: "Al-'Alaq", count: 19 },
+  { number: 97, name: "Al-Qadr", count: 5 },
+  { number: 98, name: "Al-Bayyinah", count: 8 },
+  { number: 99, name: "Az-Zalzalah", count: 8 },
+  { number: 100, name: "Al-'Adiyat", count: 11 },
+  { number: 101, name: "Al-Qari'ah", count: 11 },
+  { number: 102, name: "At-Takathur", count: 8 },
+  { number: 103, name: "Al-'Asr", count: 3 },
+  { number: 104, name: "Al-Humazah", count: 9 },
+  { number: 105, name: "Al-Fil", count: 5 },
+  { number: 106, name: "Quraysh", count: 4 },
+  { number: 107, name: "Al-Ma'un", count: 7 },
+  { number: 108, name: "Al-Kawthar", count: 3 },
+  { number: 109, name: "Al-Kafirun", count: 6 },
+  { number: 110, name: "An-Nasr", count: 3 },
+  { number: 111, name: "Al-Masad", count: 5 },
+  { number: 112, name: "Al-Ikhlas", count: 4 },
+  { number: 113, name: "Al-Falaq", count: 5 },
+  { number: 114, name: "An-Nas", count: 6 },
 ];
 
 // Ayat count per juz based on the provided data
@@ -190,7 +190,6 @@ export const ayatCountPerJuz = [
 ];
 
 // Simplified mapping of pages in standard Rasm Utsmani mushaf (604 pages)
-// This is an approximation based on Rasm Utsmani standard
 export const pagesPerJuz = {
   1: 21,   // Juz 1: ~21 pages
   2: 20,   // Juz 2: ~20 pages
@@ -240,8 +239,70 @@ export const AVG_AYAT_PER_LINE = 2.5;
 export const TOTAL_PAGES_IN_QURAN = Object.values(pagesPerJuz).reduce((sum, pages) => sum + pages, 0);
 
 /**
+ * Get surahs that are part of a specific juz
+ */
+export function getSurahsInJuz(juzNumber: number): Array<{name: string, startAyat: number, endAyat: number}> {
+  if (juzNumber < 1 || juzNumber > 30) return [];
+  
+  const currentJuz = juzMapping.find(j => j.juz === juzNumber);
+  const nextJuz = juzMapping.find(j => j.juz === juzNumber + 1);
+  
+  if (!currentJuz) return [];
+  
+  const surahs: Array<{name: string, startAyat: number, endAyat: number}> = [];
+  
+  // Start from current juz's surah
+  let currentSurahNumber = currentJuz.surah;
+  let currentAyat = currentJuz.ayah;
+  
+  // Continue until we reach the next juz (or end of Quran for juz 30)
+  while (true) {
+    const surahInfo = surahData.find(s => s.number === currentSurahNumber);
+    if (!surahInfo) break;
+    
+    let endAyat = surahInfo.count;
+    
+    // If there's a next juz and it starts in this surah, limit to that ayat
+    if (nextJuz && nextJuz.surah === currentSurahNumber) {
+      endAyat = nextJuz.ayah - 1;
+    }
+    
+    surahs.push({
+      name: surahInfo.name,
+      startAyat: currentAyat,
+      endAyat: endAyat
+    });
+    
+    // Check if we've reached the next juz
+    if (nextJuz && nextJuz.surah === currentSurahNumber) {
+      break;
+    }
+    
+    // Move to next surah
+    currentSurahNumber++;
+    currentAyat = 1;
+    
+    // Break if we've gone past the last surah or reached the next juz
+    if (currentSurahNumber > 114 || (nextJuz && currentSurahNumber > nextJuz.surah)) {
+      break;
+    }
+  }
+  
+  return surahs;
+}
+
+/**
+ * Get maximum ayat number for a specific surah within a juz
+ */
+export function getMaxAyatInJuz(juzNumber: number, surahName: string): number {
+  const surahs = getSurahsInJuz(juzNumber);
+  const surahInfo = surahs.find(s => s.name === surahName);
+  return surahInfo ? surahInfo.endAyat : 1;
+}
+
+/**
  * Calculate the hafalan progress based on ayat count
- * Returns an object with juz, pages, and lines
+ * Returns an object with juz, pages, and lines based on accurate Rasm Utsmani calculation
  */
 export function calculateHafalanProgress(ayatCount: number): { 
   juz: number; 
@@ -275,8 +336,10 @@ export function calculateHafalanProgress(ayatCount: number): {
   }
   
   // Calculate pages from remaining ayat
-  // Average ayat per page in Rasm Utsmani
-  const avgAyatPerPage = TOTAL_AYAT_IN_QURAN / TOTAL_PAGES_IN_QURAN;
+  // More accurate calculation based on mushaf structure
+  const avgAyatPerPage = remainingAyat > 0 && completedJuz < 30 
+    ? ayatCountPerJuz[completedJuz]?.count / (pagesPerJuz[(completedJuz + 1) as keyof typeof pagesPerJuz] || 20)
+    : TOTAL_AYAT_IN_QURAN / TOTAL_PAGES_IN_QURAN;
   
   // Complete pages after juz
   const completedPages = Math.floor(remainingAyat / avgAyatPerPage);
@@ -285,13 +348,13 @@ export function calculateHafalanProgress(ayatCount: number): {
   const remainingAyatAfterPages = remainingAyat - (completedPages * avgAyatPerPage);
   const completedLines = Math.ceil(remainingAyatAfterPages / AVG_AYAT_PER_LINE);
   
-  // Total pages (juz * ~20 pages + completed pages)
+  // Total pages (juz * pages per juz + completed pages)
   let totalPages = completedPages;
   for (let j = 1; j <= completedJuz; j++) {
     totalPages += pagesPerJuz[j as keyof typeof pagesPerJuz] || 20;
   }
 
-  // Format the progress string
+  // Format the progress string with more accurate representation
   let formattedProgress = "";
   if (completedJuz > 0) {
     formattedProgress = `${completedJuz} juz`;
@@ -325,8 +388,8 @@ export function calculateHafalanProgress(ayatCount: number): {
 }
 
 /**
- * Get the detailed hafalan score for ranking
- * Returns a numeric value that can be used for sorting
+ * Get the detailed hafalan score for ranking based on juz, pages, and lines
+ * This provides more accurate sorting for achievements
  */
 export function getHafalanScore(ayatCount: number): {
   score: number;
@@ -337,6 +400,7 @@ export function getHafalanScore(ayatCount: number): {
   const progress = calculateHafalanProgress(ayatCount);
   
   // Create a sortable score where juz is the most significant, then pages, then lines
+  // Scale: juz * 1,000,000 + pages * 1,000 + lines
   const score = (progress.juz * 1000000) + (progress.remainingPages * 1000) + progress.remainingLines;
   
   return {

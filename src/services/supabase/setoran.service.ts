@@ -148,7 +148,8 @@ export const updateTotalHafalan = async (santriId: string): Promise<void> => {
     
     console.log("Calculated total hafalan ayat count:", totalAyat);
 
-    // Update santri record
+    // Update santri record with total ayat count
+    // The display formatting will be handled by calculateHafalanProgress function
     const { error: updateError } = await supabase
       .from('santri')
       .update({ total_hafalan: totalAyat })

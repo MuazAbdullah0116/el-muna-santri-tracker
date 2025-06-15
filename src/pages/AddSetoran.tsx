@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,10 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { Santri } from "@/types";
 import { fetchSantriById } from "@/services/sheetdb/santri.service";
 import { createSetoran } from "@/services/sheetdb/setoran.service";
@@ -17,6 +14,7 @@ import AddSetoranDatePicker from "@/components/add-setoran/AddSetoranDatePicker"
 import AddSetoranAyatRange from "@/components/add-setoran/AddSetoranAyatRange";
 import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminerInput";
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
+import { getSurahsInJuz, getMaxAyatInJuz } from "@/services/quran/quranMapping";
 
 const AddSetoran = () => {
   const { santriId } = useParams<{ santriId: string }>();
@@ -32,6 +30,8 @@ const AddSetoran = () => {
   const [catatan, setCatatan] = useState<string>("");
   const [diujiOleh, setDiujiOleh] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [availableSurahs, setAvailableSurahs] = useState<any[]>([]);
+  const [maxAyat, setMaxAyat] = useState<number>(1);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -57,6 +57,34 @@ const AddSetoran = () => {
     fetchSantriSupabase();
   }, [santriId, toast]);
 
+  // Update available surahs when juz changes
+  useEffect(() => {
+    const surahs = getSurahsInJuz(juz);
+    setAvailableSurahs(surahs);
+    
+    // Reset surat selection when juz changes
+    setSurat("");
+    setAwalAyat(1);
+    setAkhirAyat(1);
+    setMaxAyat(1);
+  }, [juz]);
+
+  // Update max ayat when surat changes
+  useEffect(() => {
+    if (surat) {
+      const maxAyatInJuz = getMaxAyatInJuz(juz, surat);
+      setMaxAyat(maxAyatInJuz);
+      
+      // Reset ayat values if they exceed the new maximum
+      if (awalAyat > maxAyatInJuz) {
+        setAwalAyat(1);
+      }
+      if (akhirAyat > maxAyatInJuz) {
+        setAkhirAyat(maxAyatInJuz);
+      }
+    }
+  }, [surat, juz, awalAyat, akhirAyat]);
+
   const handleGoBack = () => {
     navigate("/dashboard");
   };
@@ -77,7 +105,40 @@ const AddSetoran = () => {
     setTahsin(value);
   };
 
-  const handleAddSetoran = async (setoranData: any) => {
+  const handleJuzChange = (value: string) => {
+    setJuz(Number(value));
+  };
+
+  const handleSuratChange = (value: string) => {
+    setSurat(value);
+  };
+
+  const handleAwalAyatChange = (value: number) => {
+    if (value <= maxAyat && value >= 1) {
+      setAwalAyat(value);
+      // Ensure akhir ayat is not less than awal ayat
+      if (akhirAyat < value) {
+        setAkhirAyat(value);
+      }
+    }
+  };
+
+  const handleAkhirAyatChange = (value: number) => {
+    if (value <= maxAyat && value >= awalAyat) {
+      setAkhirAyat(value);
+    }
+  };
+
+  const handleAddSetoran = async () => {
+    if (!tanggal || !surat || !diujiOleh.trim()) {
+      toast({
+        title: "Error",
+        description: "Mohon lengkapi semua field yang wajib diisi",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
       const tanggalFormatted = tanggal ? tanggal.toISOString().split('T')[0] : '';
@@ -101,17 +162,6 @@ const AddSetoran = () => {
         description: "Data setoran baru telah ditambahkan.",
       });
 
-      const TARGET_HAFALAN = 30;
-      if (
-        setoranData &&
-        setoranData.total_hafalan &&
-        setoranData.total_hafalan >= TARGET_HAFALAN
-      ) {
-        toast({
-          title: "Selamat!",
-          description: `Santri telah mencapai target hafalan ${TARGET_HAFALAN} juz!`,
-        });
-      }
       navigate("/dashboard");
     } catch (error) {
       toast({
@@ -142,38 +192,91 @@ const AddSetoran = () => {
           </h1>
           <div className="mt-6">
             <AddSetoranDatePicker tanggal={tanggal} onTanggalChange={handleTanggalChange} />
+            
+            {/* Juz Selection */}
             <div className="mb-4">
               <Label htmlFor="juz" className="block text-gray-700 text-sm font-bold mb-2">
-                Juz
+                Juz *
               </Label>
-              <Input
-                type="number"
-                id="juz"
-                placeholder="Masukkan juz"
-                value={juz}
-                onChange={(e) => setJuz(Number(e.target.value))}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
+              <Select value={juz.toString()} onValueChange={handleJuzChange}>
+                <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                  <SelectValue placeholder="Pilih Juz" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNumber) => (
+                    <SelectItem key={juzNumber} value={juzNumber.toString()}>
+                      Juz {juzNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Surat Selection */}
             <div className="mb-4">
               <Label htmlFor="surat" className="block text-gray-700 text-sm font-bold mb-2">
-                Surat
+                Surat *
               </Label>
-              <Input
-                type="text"
-                id="surat"
-                placeholder="Masukkan nama surat"
-                value={surat}
-                onChange={(e) => setSurat(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
+              <Select value={surat} onValueChange={handleSuratChange} disabled={!juz}>
+                <SelectTrigger className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                  <SelectValue placeholder="Pilih Surat" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableSurahs.map((surahInfo) => (
+                    <SelectItem key={surahInfo.name} value={surahInfo.name}>
+                      {surahInfo.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {juz && availableSurahs.length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Surat yang tersedia untuk Juz {juz}
+                </p>
+              )}
             </div>
-            <AddSetoranAyatRange
-              awalAyat={awalAyat}
-              akhirAyat={akhirAyat}
-              onAwalAyatChange={setAwalAyat}
-              onAkhirAyatChange={setAkhirAyat}
-            />
+
+            {/* Ayat Range with validation */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <Label htmlFor="awalAyat" className="block text-gray-700 text-sm font-bold mb-2">
+                  Awal Ayat *
+                </Label>
+                <Input
+                  type="number"
+                  id="awalAyat"
+                  placeholder="Awal"
+                  value={awalAyat}
+                  min={1}
+                  max={maxAyat}
+                  onChange={(e) => handleAwalAyatChange(Number(e.target.value))}
+                  disabled={!surat}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+              <div>
+                <Label htmlFor="akhirAyat" className="block text-gray-700 text-sm font-bold mb-2">
+                  Akhir Ayat *
+                </Label>
+                <Input
+                  type="number"
+                  id="akhirAyat"
+                  placeholder="Akhir"
+                  value={akhirAyat}
+                  min={awalAyat}
+                  max={maxAyat}
+                  onChange={(e) => handleAkhirAyatChange(Number(e.target.value))}
+                  disabled={!surat}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                />
+              </div>
+            </div>
+            {surat && (
+              <p className="text-xs text-gray-500 mb-4">
+                Maksimal ayat untuk {surat} dalam Juz {juz}: {maxAyat}
+              </p>
+            )}
+
             <div className="mb-4">
               <ScoreSelectGroup
                 kelancaran={kelancaran}
@@ -204,8 +307,12 @@ const AddSetoran = () => {
               <Button onClick={handleGoBack} variant="ghost">
                 Batal
               </Button>
-              <Button onClick={() => handleAddSetoran({ total_hafalan: 30 })} className="bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                Simpan
+              <Button 
+                onClick={handleAddSetoran} 
+                className="bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                disabled={loading || !tanggal || !surat || !diujiOleh.trim()}
+              >
+                {loading ? "Menyimpan..." : "Simpan"}
               </Button>
             </div>
           </div>
