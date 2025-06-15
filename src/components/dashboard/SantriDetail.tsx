@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Trash, Edit, User, Calendar, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -275,7 +276,7 @@ const SantriDetail = ({
               <Label htmlFor="edit-class">Kelas</Label>
               <Select 
                 value={editForm.kelas.toString()} 
-                onValueChange={(value) => setEditForm({...editForm, kelas: parseInt(value)})
+                onValueChange={(value) => setEditForm({...editForm, kelas: parseInt(value)})}
               >
                 <SelectTrigger id="edit-class" className="rounded-xl">
                   <SelectValue placeholder="Pilih Kelas" />
