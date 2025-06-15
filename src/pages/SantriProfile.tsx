@@ -10,6 +10,8 @@ import SantriProfileInfo from "@/components/santri-profile/SantriProfileInfo";
 import SantriProfileChart from "@/components/santri-profile/SantriProfileChart";
 import SantriProfileSetoranTable from "@/components/santri-profile/SantriProfileSetoranTable";
 import SantriProfileAchievement from "@/components/santri-profile/SantriProfileAchievement";
+import EditSantriDialog from "@/components/santri-profile/EditSantriDialog";
+import DeleteSantriDialog from "@/components/santri-profile/DeleteSantriDialog";
 import { fetchSantriById } from "@/services/supabase/santri.service";
 import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 
@@ -85,13 +87,17 @@ const SantriProfile = () => {
                   Profil Santri
                 </CardTitle>
               </div>
-              <Button
-                onClick={() => navigate(`/add-setoran/${santri.id}`)}
-                className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Tambah Setoran
-              </Button>
+              <div className="flex gap-2">
+                <EditSantriDialog santri={santri} />
+                <DeleteSantriDialog santri={santri} />
+                <Button
+                  onClick={() => navigate(`/add-setoran/${santri.id}`)}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Tambah Setoran
+                </Button>
+              </div>
             </div>
           </CardHeader>
         </Card>

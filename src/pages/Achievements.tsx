@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Target, Crown } from "lucide-react";
+import { Trophy, Medal, Target } from "lucide-react";
 import SearchBar from "@/components/dashboard/SearchBar";
+import TopHafalanCard from "@/components/achievements/TopHafalanCard";
+import TopPerformersCard from "@/components/achievements/TopPerformersCard";
+import TopRegularityCard from "@/components/achievements/TopRegularityCard";
 import { fetchTopHafalan, fetchTopPerformers, fetchTopRegularity } from "@/services/supabase/achievement.service";
 
 const Achievements = () => {
@@ -38,111 +40,6 @@ const Achievements = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-  };
-
-  // Filter data based on search query
-  const filterData = (data: any[]) => {
-    if (!searchQuery) return data;
-    return data.filter(item => 
-      item.nama?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
-
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown className="h-5 w-5 text-yellow-500" />;
-      case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
-      case 3:
-        return <Medal className="h-5 w-5 text-amber-600" />;
-      default:
-        return <Trophy className="h-5 w-5 text-emerald-600" />;
-    }
-  };
-
-  const getRankColor = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return "bg-gradient-to-r from-yellow-400 to-yellow-600";
-      case 2:
-        return "bg-gradient-to-r from-gray-300 to-gray-500";
-      case 3:
-        return "bg-gradient-to-r from-amber-400 to-amber-600";
-      default:
-        return "bg-gradient-to-r from-emerald-400 to-emerald-600";
-    }
-  };
-
-  const renderRankingCard = (data: any[], isLoading: boolean, title: string, valueKey?: string) => {
-    const filteredData = filterData(data);
-
-    if (isLoading) {
-      return (
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-200 h-16 rounded-lg"></div>
-          ))}
-        </div>
-      );
-    }
-
-    if (filteredData.length === 0) {
-      return (
-        <div className="text-center py-8">
-          <Target className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-          <p className="text-gray-500">
-            {searchQuery ? `Tidak ada santri yang cocok dengan "${searchQuery}"` : "Belum ada data ranking"}
-          </p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-4">
-        {filteredData.slice(0, 10).map((item, index) => {
-          const rank = index + 1;
-          return (
-            <Card key={item.id} className={`${getRankColor(rank)} text-white border-none`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {getRankIcon(rank)}
-                    <div>
-                      <h3 className="font-semibold">{item.nama}</h3>
-                      <div className="flex items-center space-x-2 text-sm opacity-90">
-                        <span>Kelas {item.kelas}</span>
-                        <Badge variant="secondary" className="text-xs">
-                          {item.jenis_kelamin}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold">#{rank}</div>
-                    {valueKey && (
-                      <div className="text-sm opacity-90">
-                        {valueKey === 'nilai_rata' 
-                          ? `${item[valueKey]?.toFixed(1) || 0}/10`
-                          : item[valueKey] || 0
-                        }
-                      </div>
-                    )}
-                    {item.hafalanJuz !== undefined && (
-                      <div className="text-xs opacity-75">
-                        {item.hafalanJuz > 0 && `${item.hafalanJuz} Juz `}
-                        {item.hafalanPages > 0 && `${item.hafalanPages} Hal `}
-                        {item.hafalanLines > 0 && `${item.hafalanLines} Baris`}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    );
   };
 
   return (
@@ -181,11 +78,15 @@ const Achievements = () => {
             <CardHeader>
               <CardTitle className="text-emerald-800 flex items-center gap-2">
                 <Trophy className="h-5 w-5" />
-                Top Hafalan
+                Hafalan Terbanyak
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {renderRankingCard(topHafalan, isLoadingHafalan, "Hafalan", "total_hafalan")}
+              <TopHafalanCard 
+                data={topHafalan} 
+                isLoading={isLoadingHafalan} 
+                searchQuery={searchQuery}
+              />
             </CardContent>
           </Card>
 
@@ -193,11 +94,15 @@ const Achievements = () => {
             <CardHeader>
               <CardTitle className="text-emerald-800 flex items-center gap-2">
                 <Medal className="h-5 w-5" />
-                Top Nilai
+                Nilai Tertinggi
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {renderRankingCard(topPerformers, isLoadingPerformers, "Nilai", "nilai_rata")}
+              <TopPerformersCard 
+                data={topPerformers} 
+                isLoading={isLoadingPerformers} 
+                searchQuery={searchQuery}
+              />
             </CardContent>
           </Card>
 
@@ -205,11 +110,15 @@ const Achievements = () => {
             <CardHeader>
               <CardTitle className="text-emerald-800 flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Top Konsistensi
+                Setoran Terkonsisten
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {renderRankingCard(topRegularity, isLoadingRegularity, "Konsistensi", "total_hafalan")}
+              <TopRegularityCard 
+                data={topRegularity} 
+                isLoading={isLoadingRegularity} 
+                searchQuery={searchQuery}
+              />
             </CardContent>
           </Card>
         </div>
