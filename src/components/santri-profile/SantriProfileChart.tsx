@@ -2,7 +2,21 @@
 import { Setoran } from "@/types";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
-const SantriProfileChart = ({ setorans }: { setorans: Setoran[] }) => {
+const SantriProfileChart = ({ 
+  setorans, 
+  isLoading 
+}: { 
+  setorans: Setoran[];
+  isLoading?: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <div className="text-muted-foreground text-sm">
+        Memuat data grafik...
+      </div>
+    );
+  }
+
   // Data untuk grafik perkembangan (akumulasi hafalan)
   let progress = 0;
   const graphData = setorans

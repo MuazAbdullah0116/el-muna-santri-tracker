@@ -2,8 +2,29 @@
 import { Setoran } from "@/types";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 
-const SantriProfileSetoranTable = ({ setorans }: { setorans: Setoran[] }) => {
-  if (!setorans.length) return <div className="text-muted-foreground text-sm">Belum ada riwayat setoran.</div>;
+const SantriProfileSetoranTable = ({ 
+  setorans, 
+  isLoading 
+}: { 
+  setorans: Setoran[];
+  isLoading?: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <div className="text-muted-foreground text-sm">
+        Memuat data setoran...
+      </div>
+    );
+  }
+
+  if (!setorans.length) {
+    return (
+      <div className="text-muted-foreground text-sm">
+        Belum ada riwayat setoran.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="font-semibold mb-2">Riwayat Setoran Terbaru</div>
@@ -38,4 +59,5 @@ const SantriProfileSetoranTable = ({ setorans }: { setorans: Setoran[] }) => {
     </div>
   );
 };
+
 export default SantriProfileSetoranTable;
