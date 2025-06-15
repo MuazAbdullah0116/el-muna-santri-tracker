@@ -1,6 +1,6 @@
 
 import { Santri, Setoran } from "@/types";
-import { Award, TrendingUp, BarChart3, Star } from "lucide-react";
+import { Award, TrendingUp, BarChart3, Star, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const SantriProfileAchievement = ({
