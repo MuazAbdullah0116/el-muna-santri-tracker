@@ -1,4 +1,3 @@
-
 /**
  * Google Apps Script for Santri & Setoran management
  * Ganti SPREADSHEET_ID dengan ID Spreadsheet kamu!
@@ -254,4 +253,3 @@ function updateTotalHafalan(santriId) {
     }
   }
 }
-
