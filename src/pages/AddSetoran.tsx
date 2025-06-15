@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ import { getSurahsInJuz, getSurahMinMaxAyatInJuz } from "@/services/quran/quranM
 const AddSetoran = () => {
   const { santriId } = useParams<{ santriId: string }>();
   const [santri, setSantri] = useState<Santri | null>(null);
-  const [tanggal, setTanggal] = useState<Date | undefined>(undefined);
+  const [tanggal, setTanggal] = useState<Date | undefined>(new Date()); // Auto-populate with today's date
   const [juz, setJuz] = useState<number>(1);
   const [surat, setSurat] = useState<string>("");
   const [awalAyat, setAwalAyat] = useState<number>(1);
@@ -181,11 +180,11 @@ const AddSetoran = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-2 px-2 sm:py-6 sm:px-4 flex flex-col justify-center">
+    <div className="min-h-screen bg-background py-2 px-2 sm:py-6 sm:px-4 flex flex-col justify-center">
       <div className="relative w-full max-w-2xl mx-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary to-islamic-secondary shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-2xl sm:rounded-3xl"></div>
-        <div className="relative px-3 py-6 sm:px-6 sm:py-10 bg-white shadow-lg rounded-2xl sm:rounded-3xl">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-900 text-center mb-4 sm:mb-6">
+        <div className="relative px-3 py-6 sm:px-6 sm:py-10 bg-card shadow-lg rounded-2xl sm:rounded-3xl border border-border">
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground text-center mb-4 sm:mb-6">
             Tambah Setoran untuk {santri?.nama || "..."}
           </h1>
           
@@ -194,16 +193,16 @@ const AddSetoran = () => {
             
             {/* Juz Selection */}
             <div>
-              <Label htmlFor="juz" className="block text-gray-700 text-sm font-bold mb-2">
+              <Label htmlFor="juz" className="block text-foreground text-sm font-bold mb-2">
                 Juz *
               </Label>
               <Select value={juz.toString()} onValueChange={handleJuzChange}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-foreground">
                   <SelectValue placeholder="Pilih Juz" />
                 </SelectTrigger>
-                <SelectContent className="max-h-60">
+                <SelectContent className="max-h-60 bg-popover border-border">
                   {Array.from({ length: 30 }, (_, i) => i + 1).map((juzNumber) => (
-                    <SelectItem key={juzNumber} value={juzNumber.toString()}>
+                    <SelectItem key={juzNumber} value={juzNumber.toString()} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                       Juz {juzNumber}
                     </SelectItem>
                   ))}
@@ -213,23 +212,23 @@ const AddSetoran = () => {
 
             {/* Surat Selection */}
             <div>
-              <Label htmlFor="surat" className="block text-gray-700 text-sm font-bold mb-2">
+              <Label htmlFor="surat" className="block text-foreground text-sm font-bold mb-2">
                 Surat *
               </Label>
               <Select value={surat} onValueChange={handleSuratChange} disabled={!juz}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-foreground">
                   <SelectValue placeholder="Pilih Surat" />
                 </SelectTrigger>
-                <SelectContent className="max-h-60">
+                <SelectContent className="max-h-60 bg-popover border-border">
                   {availableSurahs.map((surahInfo) => (
-                    <SelectItem key={surahInfo.name} value={surahInfo.name}>
+                    <SelectItem key={surahInfo.name} value={surahInfo.name} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                       {surahInfo.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {juz && availableSurahs.length > 0 && (
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Surat yang tersedia untuk Juz {juz}
                 </p>
               )}
@@ -238,7 +237,7 @@ const AddSetoran = () => {
             {/* Ayat Range with validation */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="awalAyat" className="block text-gray-700 text-sm font-bold mb-2">
+                <Label htmlFor="awalAyat" className="block text-foreground text-sm font-bold mb-2">
                   Awal Ayat *
                 </Label>
                 <Input
@@ -250,11 +249,11 @@ const AddSetoran = () => {
                   max={maxAyat}
                   onChange={(e) => handleAwalAyatChange(Number(e.target.value))}
                   disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base"
+                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
                 />
               </div>
               <div>
-                <Label htmlFor="akhirAyat" className="block text-gray-700 text-sm font-bold mb-2">
+                <Label htmlFor="akhirAyat" className="block text-foreground text-sm font-bold mb-2">
                   Akhir Ayat *
                 </Label>
                 <Input
@@ -266,12 +265,12 @@ const AddSetoran = () => {
                   max={maxAyat}
                   onChange={(e) => handleAkhirAyatChange(Number(e.target.value))}
                   disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base"
+                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
                 />
               </div>
             </div>
             {surat && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Range ayat untuk {surat} dalam Juz {juz}: {minAyat} - {maxAyat}
               </p>
             )}
@@ -290,7 +289,7 @@ const AddSetoran = () => {
 
             {/* Notes */}
             <div>
-              <Label htmlFor="catatan" className="block text-gray-700 text-sm font-bold mb-2">
+              <Label htmlFor="catatan" className="block text-foreground text-sm font-bold mb-2">
                 Catatan
               </Label>
               <Textarea
@@ -298,7 +297,7 @@ const AddSetoran = () => {
                 placeholder="Masukkan catatan"
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
-                className="w-full min-h-20 text-sm sm:text-base resize-none"
+                className="w-full min-h-20 text-sm sm:text-base resize-none bg-background border-border text-foreground"
                 rows={3}
               />
             </div>
@@ -314,13 +313,13 @@ const AddSetoran = () => {
               <Button 
                 onClick={handleGoBack} 
                 variant="outline"
-                className="w-full sm:w-auto order-2 sm:order-1"
+                className="w-full sm:w-auto order-2 sm:order-1 border-border text-foreground hover:bg-accent hover:text-accent-foreground"
               >
                 Batal
               </Button>
               <Button 
                 onClick={handleAddSetoran} 
-                className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline order-1 sm:order-2"
+                className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline order-1 sm:order-2 hover:opacity-90"
                 disabled={loading || !tanggal || !surat || !diujiOleh.trim()}
               >
                 {loading ? "Menyimpan..." : "Simpan"}
