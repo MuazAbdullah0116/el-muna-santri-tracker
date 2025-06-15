@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Settings as SettingsIcon, Database, Palette, Users, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -174,9 +173,9 @@ const Settings = () => {
                     <p className="text-muted-foreground">Fitur manajemen pengguna akan tersedia pada versi mendatang</p>
                   </div>
                 </CardContent>
-              </Tabs>
-            </div>
-          </div>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
