@@ -73,29 +73,31 @@ const SantriProfile = () => {
         {/* Header */}
         <Card className="bg-white/70 backdrop-blur-sm border-emerald-200">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => navigate("/dashboard")}
-                  className="hover:bg-emerald-50"
+                  className="hover:bg-emerald-50 h-8 w-8 sm:h-10 sm:w-10"
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
-                <CardTitle className="text-2xl font-bold text-emerald-800">
+                <CardTitle className="text-lg sm:text-2xl font-bold text-emerald-800">
                   Profil Santri
                 </CardTitle>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1 sm:gap-2 flex-wrap">
                 <EditSantriDialog santri={santri} />
                 <DeleteSantriDialog santri={santri} />
                 <Button
                   onClick={() => navigate(`/add-setoran/${santri.id}`)}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10"
+                  size="sm"
                 >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Tambah Setoran
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Tambah Setoran</span>
+                  <span className="sm:hidden">Tambah</span>
                 </Button>
               </div>
             </div>

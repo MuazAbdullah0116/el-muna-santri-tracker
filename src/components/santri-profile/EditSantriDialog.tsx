@@ -55,9 +55,10 @@ const EditSantriDialog = ({ santri }: EditSantriDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Edit className="w-4 h-4" />
-          Edit Profil
+        <Button variant="outline" size="sm" className="gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 h-8 sm:h-9">
+          <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">Edit Profil</span>
+          <span className="sm:hidden">Edit</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
