@@ -2,17 +2,26 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Santri } from "@/types";
 import { User, Award, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface SantriCardProps {
   santri: Santri;
-  onClick: (santri: Santri) => void;
+  onClick?: (santri: Santri) => void;
 }
 
 const SantriCard = ({ santri, onClick }: SantriCardProps) => {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    if (onClick) {
+      onClick(santri);
+    } else {
+      navigate(`/santri/${santri.id}`);
+    }
+  };
   return (
     <Card 
       className="group relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-[1.02] bg-gradient-to-br from-card via-card to-islamic-light/30 dark:to-islamic-dark/30 border border-islamic-primary/20 hover:border-islamic-primary/40" 
-      onClick={() => onClick(santri)}
+      onClick={handleClick}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-islamic-primary/5 to-islamic-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       

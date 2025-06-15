@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -19,6 +18,7 @@ import Settings from "./pages/Settings";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 import QuranAudioPlayer from "./components/QuranAudioPlayer";
+import SantriProfile from "./pages/SantriProfile";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +122,7 @@ const App = () => {
                 <Route path="/quran/:surahNumber" element={<Layout><SurahDetail /></Layout>} />
                 <Route path="/achievements" element={<Layout><Achievements /></Layout>} />
                 <Route path="/settings" element={<Layout><Settings /></Layout>} />
+                <Route path="/santri/:id" element={<Layout><SantriProfile /></Layout>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
