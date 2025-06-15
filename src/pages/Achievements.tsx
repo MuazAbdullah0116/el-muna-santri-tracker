@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +9,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Santri, SantriWithAchievement } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import SearchBar from "@/components/dashboard/SearchBar";
-import { fetchSantri } from "@/services/googleSheets/santri.service";
-import { fetchSetoranBySantri } from "@/services/googleSheets/setoran.service";
-import { getFormattedHafalanProgress } from "@/services/googleSheets/setoran.service";
+import { fetchSantri } from "@/services/sheetdb/santri.service";
+import { fetchSetoranBySantri } from "@/services/sheetdb/setoran.service";
+import { getFormattedHafalanProgress } from "@/services/sheetdb/setoran.service";
 import { Crown, Trophy, Star, User, BookOpen } from "lucide-react";
 import RankingDiffIndicator from "@/components/dashboard/RankingDiffIndicator";
 
@@ -30,12 +31,12 @@ const Achievements = () => {
   
   const { toast } = useToast();
   
-  // Load data from Google Sheets
+  // Load data from SheetDB
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        console.log("Loading achievement data from Google Sheets...");
+        console.log("Loading achievement data from SheetDB...");
         
         // Fetch all santri data
         const allSantri = await fetchSantri();
@@ -131,7 +132,7 @@ const Achievements = () => {
         console.error("Error loading achievement data:", error);
         toast({
           title: "Error",
-          description: "Gagal memuat data prestasi dari Google Sheets",
+          description: "Gagal memuat data prestasi dari SheetDB",
           variant: "destructive",
         });
       } finally {
@@ -161,9 +162,9 @@ const Achievements = () => {
     try {
       setSelectedSantri(santri);
       
-      // Fetch setoran data from Google Sheets
+      // Fetch setoran data from SheetDB
       const setoran = await fetchSetoranBySantri(santri.id);
-      console.log("Fetched setoran data from Google Sheets:", setoran);
+      console.log("Fetched setoran data from SheetDB:", setoran);
       setStudentSetoran(setoran);
       
       // Open dialog
@@ -205,7 +206,7 @@ const Achievements = () => {
           <CardContent>
             <div className="text-center py-8 md:py-10">
               <div className="inline-block animate-spin rounded-full h-6 w-6 md:h-8 md:w-8 border-2 md:border-4 border-islamic-primary border-t-transparent"></div>
-              <p className="mt-2 text-xs md:text-sm text-muted-foreground">Memuat data dari Google Sheets...</p>
+              <p className="mt-2 text-xs md:text-sm text-muted-foreground">Memuat data dari SheetDB...</p>
             </div>
           </CardContent>
         </Card>
@@ -320,7 +321,7 @@ const Achievements = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-xl md:text-3xl font-bold text-foreground mb-1 md:mb-2 truncate">Prestasi Santri</h1>
-              <p className="text-sm md:text-lg text-muted-foreground">Pencapaian terbaik dalam hafalan Al-Qur'an dari Google Sheets</p>
+              <p className="text-sm md:text-lg text-muted-foreground">Pencapaian terbaik dalam hafalan Al-Qur'an dari SheetDB</p>
             </div>
           </div>
           
