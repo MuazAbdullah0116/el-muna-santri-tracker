@@ -56,6 +56,25 @@ const Dashboard = () => {
     fetchSantris();
   }, [selectedClass, searchQuery, toast]);
 
+  useEffect(() => {
+    // Asumsi, misal setelah fetch santris, deteksi perubahan ranking
+    if (santris && santris.length > 0) {
+      santris.forEach((santri) => {
+        if (santri.rankingDiff === 1) {
+          toast({
+            title: "Ranking Naik",
+            description: `Santri ${santri.nama} mengalami kenaikan ranking.`,
+          });
+        } else if (santri.rankingDiff === -1) {
+          toast({
+            title: "Ranking Turun",
+            description: `Santri ${santri.nama} turun ranking.`,
+          });
+        }
+      });
+    }
+  }, [santris, toast]);
+
   const handleAddSantri = () => {
     navigate("/add-santri");
   };
