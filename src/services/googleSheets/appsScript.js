@@ -1,8 +1,10 @@
 
-// Copy kode ini ke Google Apps Script
-// File > New > Script project, lalu paste kode ini
+/**
+ * Google Apps Script for Santri & Setoran management
+ * Ganti SPREADSHEET_ID dengan ID Spreadsheet kamu!
+ */
 
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; // Ganti dengan ID spreadsheet Anda
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID_HERE';
 
 function doGet(e) {
   return handleRequest(e);
@@ -15,8 +17,6 @@ function doPost(e) {
 function handleRequest(e) {
   try {
     const action = e.parameter.action;
-    const sheet = e.parameter.sheet;
-    
     switch (action) {
       case 'getAllSantri':
         return getAllSantri();
@@ -57,44 +57,31 @@ function createResponse(data, code = 200) {
     });
 }
 
-// SANTRI FUNCTIONS
+// --------------------- SANTRI FUNCTIONS ---------------------
 function getAllSantri() {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse([]);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
   const santris = rows.map(row => {
     const santri = {};
-    headers.forEach((header, index) => {
-      santri[header.toLowerCase()] = row[index];
-    });
+    headers.forEach((header, i) => { santri[header.toLowerCase()] = row[i]; });
     return santri;
   });
-  
   return createResponse(santris);
 }
 
 function getSantriById(id) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse(null);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
   const santriRow = rows.find(row => row[0] === id);
   if (!santriRow) return createResponse(null);
-  
   const santri = {};
-  headers.forEach((header, index) => {
-    santri[header.toLowerCase()] = santriRow[index];
-  });
-  
+  headers.forEach((header, i) => { santri[header.toLowerCase()] = santriRow[i]; });
   return createResponse(santri);
 }
 
@@ -102,7 +89,6 @@ function createSantri(santriData) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const id = Utilities.getUuid();
   const timestamp = new Date().toISOString();
-  
   const newRow = [
     id,
     santriData.nama,
@@ -111,9 +97,7 @@ function createSantri(santriData) {
     0, // total_hafalan default
     timestamp
   ];
-  
   sheet.appendRow(newRow);
-  
   const createdSantri = {
     id: id,
     nama: santriData.nama,
@@ -122,110 +106,80 @@ function createSantri(santriData) {
     total_hafalan: 0,
     created_at: timestamp
   };
-  
   return createResponse(createdSantri);
 }
 
 function deleteSantri(id) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const data = sheet.getDataRange().getValues();
-  
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === id) {
       sheet.deleteRow(i + 1);
       return createResponse({success: true});
     }
   }
-  
   return createResponse({error: 'Santri not found'}, 404);
 }
 
 function searchSantri(query) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse([]);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
   const filteredRows = rows.filter(row => 
-    row[1].toLowerCase().includes(query.toLowerCase()) // Search by nama (column B)
+    String(row[1]).toLowerCase().includes(String(query).toLowerCase())
   );
-  
   const santris = filteredRows.map(row => {
     const santri = {};
-    headers.forEach((header, index) => {
-      santri[header.toLowerCase()] = row[index];
-    });
+    headers.forEach((header, i) => { santri[header.toLowerCase()] = row[i]; });
     return santri;
   });
-  
   return createResponse(santris);
 }
 
 function getSantriByClass(kelas) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse([]);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
-  const filteredRows = rows.filter(row => row[2] == kelas); // Filter by kelas (column C)
-  
+  const filteredRows = rows.filter(row => String(row[2]) === String(kelas));
   const santris = filteredRows.map(row => {
     const santri = {};
-    headers.forEach((header, index) => {
-      santri[header.toLowerCase()] = row[index];
-    });
+    headers.forEach((header, i) => { santri[header.toLowerCase()] = row[i]; });
     return santri;
   });
-  
   return createResponse(santris);
 }
 
-// SETORAN FUNCTIONS
+// --------------------- SETORAN FUNCTIONS ---------------------
 function getAllSetoran() {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse([]);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
   const setorans = rows.map(row => {
     const setoran = {};
-    headers.forEach((header, index) => {
-      setoran[header.toLowerCase()] = row[index];
-    });
+    headers.forEach((header, i) => { setoran[header.toLowerCase()] = row[i]; });
     return setoran;
   });
-  
   return createResponse(setorans);
 }
 
 function getSetoranBySantri(santriId) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
   const data = sheet.getDataRange().getValues();
-  
   if (data.length <= 1) return createResponse([]);
-  
   const headers = data[0];
   const rows = data.slice(1);
-  
-  const filteredRows = rows.filter(row => row[1] === santriId); // Filter by santri_id (column B)
-  
+  const filteredRows = rows.filter(row => row[1] === santriId);
   const setorans = filteredRows.map(row => {
     const setoran = {};
-    headers.forEach((header, index) => {
-      setoran[header.toLowerCase()] = row[index];
-    });
+    headers.forEach((header, i) => { setoran[header.toLowerCase()] = row[i]; });
     return setoran;
   });
-  
   return createResponse(setorans);
 }
 
@@ -233,7 +187,6 @@ function createSetoran(setoranData) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
   const id = Utilities.getUuid();
   const timestamp = new Date().toISOString();
-  
   const newRow = [
     id,
     setoranData.santri_id,
@@ -249,12 +202,8 @@ function createSetoran(setoranData) {
     setoranData.diuji_oleh,
     timestamp
   ];
-  
   sheet.appendRow(newRow);
-  
-  // Update total hafalan santri
   updateTotalHafalan(setoranData.santri_id);
-  
   const createdSetoran = {
     id: id,
     santri_id: setoranData.santri_id,
@@ -270,50 +219,41 @@ function createSetoran(setoranData) {
     diuji_oleh: setoranData.diuji_oleh,
     created_at: timestamp
   };
-  
   return createResponse(createdSetoran);
 }
 
 function deleteSetoran(id) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
   const data = sheet.getDataRange().getValues();
-  
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === id) {
-      const santriId = data[i][1]; // Get santri_id before deleting
+      const santriId = data[i][1];
       sheet.deleteRow(i + 1);
-      updateTotalHafalan(santriId); // Update total hafalan after deletion
+      updateTotalHafalan(santriId);
       return createResponse({success: true});
     }
   }
-  
   return createResponse({error: 'Setoran not found'}, 404);
 }
 
 function updateTotalHafalan(santriId) {
   const setoranSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Setoran');
   const santriSheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Santri');
-  
-  // Get all setoran for this santri
   const setoranData = setoranSheet.getDataRange().getValues();
   let totalAyat = 0;
-  
   if (setoranData.length > 1) {
     const setoranRows = setoranData.slice(1);
     const santriSetorans = setoranRows.filter(row => row[1] === santriId);
-    
     totalAyat = santriSetorans.reduce((sum, row) => {
-      const awalAyat = row[5]; // column F
-      const akhirAyat = row[6]; // column G
+      const awalAyat = Number(row[5]);
+      const akhirAyat = Number(row[6]);
       return sum + (akhirAyat - awalAyat + 1);
     }, 0);
   }
-  
-  // Update santri total hafalan
   const santriData = santriSheet.getDataRange().getValues();
   for (let i = 1; i < santriData.length; i++) {
     if (santriData[i][0] === santriId) {
-      santriSheet.getRange(i + 1, 5).setValue(totalAyat); // column E (total_hafalan)
+      santriSheet.getRange(i + 1, 5).setValue(totalAyat); // column E = total_hafalan
       break;
     }
   }
