@@ -53,7 +53,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-islamic-light via-background to-islamic-primary/10">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background dark:bg-background">
       <div className="w-full max-w-md space-y-6">
         {/* Logo and Title Section */}
         <div className="text-center space-y-4">
@@ -61,7 +61,7 @@ const Login = () => {
             <IslamicLogo size="md" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold text-islamic-dark">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
               Pengelola Setoran Santri
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -71,10 +71,10 @@ const Login = () => {
         </div>
         
         {/* Login Card */}
-        <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+        <Card className="shadow-xl border bg-card/90 backdrop-blur-sm">
           <CardHeader className="space-y-2 text-center pb-4">
-            <CardTitle className="text-xl text-islamic-dark">Login</CardTitle>
-            <CardDescription className="text-sm">
+            <CardTitle className="text-xl text-foreground">Login</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
               Masuk sebagai tim pondok atau lewati sebagai wali
             </CardDescription>
           </CardHeader>
@@ -82,9 +82,7 @@ const Login = () => {
           <CardContent className="space-y-4">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-sm font-medium">
-                  Username
-                </Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
                   id="username"
                   placeholder="Masukkan username"
@@ -96,9 +94,7 @@ const Login = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -113,7 +109,7 @@ const Login = () => {
               <Button 
                 type="submit" 
                 disabled={isLoading} 
-                className="w-full h-11 bg-islamic-primary hover:bg-islamic-primary/90 text-white font-medium"
+                className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition"
               >
                 {isLoading ? "Memproses..." : "Login"}
               </Button>
@@ -124,7 +120,7 @@ const Login = () => {
             <Button 
               variant="outline" 
               onClick={handleSkipLogin}
-              className="w-full h-11 border-islamic-primary text-islamic-primary hover:bg-islamic-primary/5"
+              className="w-full h-11 border-primary text-primary hover:bg-primary/10 hover:text-primary"
             >
               Lewati sebagai Wali Santri
             </Button>
