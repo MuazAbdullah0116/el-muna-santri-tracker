@@ -13,6 +13,9 @@ import { Santri } from "@/types";
 import { fetchSantriById } from "@/services/googleSheets/santri.service";
 import { createSetoran } from "@/services/googleSheets/setoran.service";
 import { useToast } from "@/hooks/use-toast";
+import AddSetoranDatePicker from "@/components/add-setoran/AddSetoranDatePicker";
+import AddSetoranAyatRange from "@/components/add-setoran/AddSetoranAyatRange";
+import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminerInput";
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
 
 const AddSetoran = () => {
@@ -138,36 +141,7 @@ const AddSetoran = () => {
             Tambah Setoran untuk {santri.nama}
           </h1>
           <div className="mt-6">
-            <div className="mb-4">
-              <Label htmlFor="tanggal" className="block text-gray-700 text-sm font-bold mb-2">
-                Tanggal
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !tanggal && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {tanggal ? tanggal.toLocaleDateString() : <span>Pilih tanggal</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={tanggal}
-                    onSelect={handleTanggalChange}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("2021-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+            <AddSetoranDatePicker tanggal={tanggal} onTanggalChange={handleTanggalChange} />
             <div className="mb-4">
               <Label htmlFor="juz" className="block text-gray-700 text-sm font-bold mb-2">
                 Juz
@@ -194,38 +168,13 @@ const AddSetoran = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <Label htmlFor="awalAyat" className="block text-gray-700 text-sm font-bold mb-2">
-                  Awal Ayat
-                </Label>
-                <Input
-                  type="number"
-                  id="awalAyat"
-                  placeholder="Awal"
-                  value={awalAyat}
-                  onChange={(e) => setAwalAyat(Number(e.target.value))}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <Label htmlFor="akhirAyat" className="block text-gray-700 text-sm font-bold mb-2">
-                  Akhir Ayat
-                </Label>
-                <Input
-                  type="number"
-                  id="akhirAyat"
-                  placeholder="Akhir"
-                  value={akhirAyat}
-                  onChange={(e) => setAkhirAyat(Number(e.target.value))}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-            </div>
+            <AddSetoranAyatRange
+              awalAyat={awalAyat}
+              akhirAyat={akhirAyat}
+              onAwalAyatChange={setAwalAyat}
+              onAkhirAyatChange={setAkhirAyat}
+            />
             <div className="mb-4">
-              <Label className="block text-gray-700 text-sm font-bold mb-2">
-                Penilaian
-              </Label>
               <ScoreSelectGroup
                 kelancaran={kelancaran}
                 tajwid={tajwid}
@@ -247,19 +196,10 @@ const AddSetoran = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
-            <div className="mb-6">
-              <Label htmlFor="diujiOleh" className="block text-gray-700 text-sm font-bold mb-2">
-                Diuji Oleh
-              </Label>
-              <Input
-                type="text"
-                id="diujiOleh"
-                placeholder="Masukkan nama penguji"
-                value={diujiOleh}
-                onChange={(e) => setDiujiOleh(e.target.value)}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
+            <AddSetoranExaminerInput
+              diujiOleh={diujiOleh}
+              onDiujiOlehChange={setDiujiOleh}
+            />
             <div className="flex items-center justify-between">
               <Button onClick={handleGoBack} variant="ghost">
                 Batal
