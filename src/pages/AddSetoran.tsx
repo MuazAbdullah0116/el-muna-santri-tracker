@@ -13,6 +13,7 @@ import { Santri } from "@/types";
 import { fetchSantriById } from "@/services/googleSheets/santri.service";
 import { createSetoran } from "@/services/googleSheets/setoran.service";
 import { useToast } from "@/hooks/use-toast";
+import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
 
 const AddSetoran = () => {
   const { santriId } = useParams<{ santriId: string }>();
@@ -225,59 +226,14 @@ const AddSetoran = () => {
               <Label className="block text-gray-700 text-sm font-bold mb-2">
                 Penilaian
               </Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="kelancaran" className="block text-gray-700 text-xs font-bold mb-1">
-                    Kelancaran
-                  </Label>
-                  <Select onValueChange={(value) => handleKelancaranChange(Number(value))}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Nilai" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <SelectItem key={value} value={String(value)}>
-                          {value}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="tajwid" className="block text-gray-700 text-xs font-bold mb-1">
-                    Tajwid
-                  </Label>
-                  <Select onValueChange={(value) => handleTajwidChange(Number(value))}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Nilai" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <SelectItem key={value} value={String(value)}>
-                          {value}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="tahsin" className="block text-gray-700 text-xs font-bold mb-1">
-                    Tahsin
-                  </Label>
-                  <Select onValueChange={(value) => handleTahsinChange(Number(value))}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Pilih Nilai" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5].map((value) => (
-                        <SelectItem key={value} value={String(value)}>
-                          {value}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <ScoreSelectGroup
+                kelancaran={kelancaran}
+                tajwid={tajwid}
+                tahsin={tahsin}
+                onKelancaranChange={handleKelancaranChange}
+                onTajwidChange={handleTajwidChange}
+                onTahsinChange={handleTahsinChange}
+              />
             </div>
             <div className="mb-4">
               <Label htmlFor="catatan" className="block text-gray-700 text-sm font-bold mb-2">
