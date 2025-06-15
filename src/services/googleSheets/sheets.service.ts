@@ -1,5 +1,5 @@
 
-const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'; // Ganti dengan URL Web App Anda
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwp0785N0vzMTJl4wTKxLrpTSyDhLGJhQH7hppuO1UDs9bqyaNpDZraiZKqOvYtlgS3/exec'; // Ganti dengan URL Web App Anda
 
 class GoogleSheetsService {
   private async makeRequest(action: string, params: Record<string, any> = {}) {
@@ -72,3 +72,4 @@ class GoogleSheetsService {
 }
 
 export const googleSheetsService = new GoogleSheetsService();
+
