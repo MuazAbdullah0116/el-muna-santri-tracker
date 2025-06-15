@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -17,6 +16,9 @@ import { Setoran } from "@/types";
 import { fetchSantri } from "@/services/supabase/santri.service";
 import { createSetoran } from "@/services/supabase/setoran.service";
 import { getSurahsForJuz, getMinAyatForSurahInJuz, getMaxAyatForSurahInJuz } from "@/services/supabase/client";
+import SelectJuz from "@/components/add-setoran/SelectJuz";
+import SelectSurah from "@/components/add-setoran/SelectSurah";
+import AyatRangeInput from "@/components/add-setoran/AyatRangeInput";
 
 const AddSetoran = () => {
   const navigate = useNavigate();
@@ -142,7 +144,7 @@ const AddSetoran = () => {
           Kembali ke Dashboard
         </Button>
 
-        <Card className="bg-gray-800/90 backdrop-blur-sm border-gray-700 text-white">
+        <Card className="bg-gray-900/95 backdrop-blur-sm border-emerald-700 text-white">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-white text-center">
               Tambah Setoran Baru
@@ -178,90 +180,37 @@ const AddSetoran = () => {
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="juz" className="text-white font-medium">
-                    Juz *
-                  </Label>
-                  <Select onValueChange={(value) => {
+                <SelectJuz
+                  value={formData.juz}
+                  onChange={(value) => {
                     handleInputChange("juz", value);
                     handleInputChange("surat", "");
                     handleInputChange("awal_ayat", "");
                     handleInputChange("akhir_ayat", "");
-                  }}>
-                    <SelectTrigger className="bg-background border-border text-white">
-                      <SelectValue placeholder="Pilih juz" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 30 }, (_, i) => i + 1).map((juz) => (
-                        <SelectItem key={juz} value={juz.toString()}>
-                          Juz {juz}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                  }}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="surat" className="text-white font-medium">
-                    Surat *
-                  </Label>
-                  <Select 
-                    onValueChange={(value) => {
-                      handleInputChange("surat", value);
-                      handleInputChange("awal_ayat", "");
-                      handleInputChange("akhir_ayat", "");
-                    }}
-                    disabled={!formData.juz}
-                  >
-                    <SelectTrigger className="bg-background border-border text-white">
-                      <SelectValue placeholder={formData.juz ? "Pilih surat" : "Pilih juz terlebih dahulu"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableSurahs.map((surat) => (
-                        <SelectItem key={surat.value} value={surat.value}>
-                          {surat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <SelectSurah
+                  value={formData.surat}
+                  onChange={(value) => {
+                    handleInputChange("surat", value);
+                    handleInputChange("awal_ayat", "");
+                    handleInputChange("akhir_ayat", "");
+                  }}
+                  availableSurahs={availableSurahs}
+                  disabled={!formData.juz}
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="awal_ayat" className="text-white font-medium">
-                    Ayat Awal *
-                  </Label>
-                  <Input
-                    id="awal_ayat"
-                    type="number"
-                    placeholder={`Min: ${minAyat}`}
-                    value={formData.awal_ayat}
-                    onChange={(e) => handleInputChange("awal_ayat", e.target.value)}
-                    min={minAyat}
-                    max={maxAyat}
-                    disabled={!formData.surat}
-                    className="bg-background border-border text-white placeholder:text-white/50"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="akhir_ayat" className="text-white font-medium">
-                    Ayat Akhir *
-                  </Label>
-                  <Input
-                    id="akhir_ayat"
-                    type="number"
-                    placeholder={`Max: ${maxAyat}`}
-                    value={formData.akhir_ayat}
-                    onChange={(e) => handleInputChange("akhir_ayat", e.target.value)}
-                    min={formData.awal_ayat || minAyat}
-                    max={maxAyat}
-                    disabled={!formData.awal_ayat}
-                    className="bg-background border-border text-white placeholder:text-white/50"
-                  />
-                </div>
-              </div>
+              <AyatRangeInput
+                awalAyat={formData.awal_ayat}
+                akhirAyat={formData.akhir_ayat}
+                minAyat={minAyat}
+                maxAyat={maxAyat}
+                onAwalAyatChange={(v) => handleInputChange("awal_ayat", v)}
+                onAkhirAyatChange={(v) => handleInputChange("akhir_ayat", v)}
+                disabled={!formData.surat}
+              />
 
               <ScoreSelectGroup
                 kelancaran={formData.kelancaran}
@@ -281,7 +230,7 @@ const AddSetoran = () => {
                   placeholder="Masukkan catatan (opsional)"
                   value={formData.catatan}
                   onChange={(e) => handleInputChange("catatan", e.target.value)}
-                  className="bg-background border-border text-white placeholder:text-white/50"
+                  className="bg-background border border-emerald-600 text-white placeholder:text-white/60 focus:border-emerald-400"
                   rows={3}
                 />
               </div>
