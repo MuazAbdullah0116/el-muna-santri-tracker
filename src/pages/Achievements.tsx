@@ -12,6 +12,7 @@ import { fetchSantri } from "@/services/googleSheets/santri.service";
 import { fetchSetoranBySantri } from "@/services/googleSheets/setoran.service";
 import { getFormattedHafalanProgress } from "@/services/googleSheets/setoran.service";
 import { Crown, Trophy, Star, User, BookOpen } from "lucide-react";
+import RankingDiffIndicator from "@/components/dashboard/RankingDiffIndicator";
 
 const Achievements = () => {
   const [filter, setFilter] = useState<"all" | "ikhwan" | "akhwat">("all");
@@ -49,16 +50,28 @@ const Achievements = () => {
               return true;
             });
         
+        // === TAMBAH mock rankingDiff -1/0/1 ===
+        function injectRankingDiff(arr: any[]) {
+          // Sebagai contoh acak, gunakan Math.random 
+          // Ke depan, ganti dengan data ranking riil jika sudah tersedia
+          return arr.map(item => ({
+            ...item,
+            rankingDiff: [1,0,-1][Math.floor(Math.random() * 3)]
+          }));
+        }
+
         // Calculate achievements for hafalan (top by total hafalan)
-        const hafalanData = filteredSantri
-          .map(santri => ({
-            ...santri,
-            achievement: "hafalan" as "hafalan",
-            value: santri.total_hafalan || 0,
-            hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
-          }))
-          .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
-          .slice(0, 10);
+        const hafalanData = injectRankingDiff(
+          filteredSantri
+            .map(santri => ({
+              ...santri,
+              achievement: "hafalan" as "hafalan",
+              value: santri.total_hafalan || 0,
+              hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
+            }))
+            .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
+            .slice(0, 10)
+        );
         
         setTopHafalan(hafalanData);
         
@@ -88,20 +101,23 @@ const Achievements = () => {
           }
         }
         
-        nilaiData.sort((a, b) => (b.nilai_rata || 0) - (a.nilai_rata || 0));
-        setTopNilai(nilaiData.slice(0, 10));
+        // inject rankingDiff (dummy)
+        const nilaiDataWithDiff = injectRankingDiff(nilaiData.sort((a, b) => (b.nilai_rata || 0) - (a.nilai_rata || 0)).slice(0, 10));
+        setTopNilai(nilaiDataWithDiff);
         
         // For teratur (regularity), we use santri with most consistent setoran
-        const regularityData = filteredSantri
-          .filter(santri => (santri.total_hafalan || 0) > 0)
-          .map(santri => ({
-            ...santri,
-            achievement: "teratur" as "teratur", 
-            value: santri.total_hafalan || 0,
-            hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
-          }))
-          .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
-          .slice(0, 10);
+        const regularityData = injectRankingDiff(
+          filteredSantri
+            .filter(santri => (santri.total_hafalan || 0) > 0)
+            .map(santri => ({
+              ...santri,
+              achievement: "teratur" as "teratur", 
+              value: santri.total_hafalan || 0,
+              hafalanFormatted: getFormattedHafalanProgress(santri.total_hafalan || 0)
+            }))
+            .sort((a, b) => (b.total_hafalan || 0) - (a.total_hafalan || 0))
+            .slice(0, 10)
+        );
         
         setTopTeratur(regularityData);
         
@@ -243,7 +259,10 @@ const Achievements = () => {
                         }`}>
                           {getRankIcon(index)}
                         </div>
-                        
+                        {/* === Indikator Ranking Naik Turun === */}
+                        <div title="Perubahan peringkat dibanding periode sebelumnya">
+                          <RankingDiffIndicator diff={santri.rankingDiff ?? 0}/>
+                        </div>
                         <Avatar className="w-8 h-8 md:w-12 md:h-12 shadow-md border-2 border-background flex-shrink-0">
                           <AvatarFallback className="bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white font-semibold text-xs md:text-base">
                             {getInitials(santri.nama)}
