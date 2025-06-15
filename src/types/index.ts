@@ -1,4 +1,3 @@
-
 export interface Santri {
   id: string;
   nama: string;
@@ -57,4 +56,5 @@ export interface SantriWithAchievement extends Santri {
   hafalanLines?: number;
   hafalanScore?: number;
   nilai_rata?: number;
+  rankingDiff?: number;
 }
