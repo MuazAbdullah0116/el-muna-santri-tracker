@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Trash, Edit, User, Calendar, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/services/supabase/client";
 import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { sheetdbFetch, SHEETDB_CONFIG } from "@/services/sheetdb/client";
+import { getFormattedHafalanProgress } from "@/services/sheetdb/setoran.service";
 
 interface SantriDetailProps {
   selectedSantri: Santri | null;
@@ -66,16 +67,16 @@ const SantriDetail = ({
     if (!selectedSantri) return;
     
     try {
-      const { error } = await supabase
-        .from('santri')
-        .update({
-          nama: editForm.nama.trim(),
-          kelas: editForm.kelas,
-          jenis_kelamin: editForm.jenis_kelamin
-        })
-        .eq('id', selectedSantri.id);
-      
-      if (error) throw error;
+      await sheetdbFetch(`${SHEETDB_CONFIG.SANTRI_API_URL}/id/${selectedSantri.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          data: {
+            nama: editForm.nama.trim(),
+            kelas: editForm.kelas,
+            jenis_kelamin: editForm.jenis_kelamin
+          }
+        }),
+      });
       
       toast({
         title: "Berhasil",

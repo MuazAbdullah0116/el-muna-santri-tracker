@@ -1,153 +1,177 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Users, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createSantri } from "@/services/supabase/santri.service";
+import { createSantri } from "@/services/sheetdb/santri.service";
 
 const AddSantri = () => {
-  const [name, setName] = useState("");
-  const [classroom, setClassroom] = useState<string>("");
-  const [gender, setGender] = useState<"Ikhwan" | "Akhwat">("Ikhwan");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nama, setNama] = useState("");
+  const [kelas, setKelas] = useState<number>(7);
+  const [jenisKelamin, setJenisKelamin] = useState<"Ikhwan" | "Akhwat">("Ikhwan");
+  const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Classes from 7 to 12
+  const classes = [7, 8, 9, 10, 11, 12];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !classroom) {
+    if (!nama.trim()) {
       toast({
-        title: "Data tidak lengkap",
-        description: "Mohon lengkapi semua field",
+        title: "Error",
+        description: "Nama santri harus diisi",
         variant: "destructive",
       });
       return;
     }
-    
-    setIsSubmitting(true);
-    
+
+    setLoading(true);
     try {
-      console.log("Submitting santri data:", {
-        nama: name,
-        kelas: parseInt(classroom),
-        jenis_kelamin: gender
-      });
-      
-      await createSantri({
-        nama: name,
-        kelas: parseInt(classroom),
-        jenis_kelamin: gender,
-      });
+      const santriData = {
+        nama: nama.trim(),
+        kelas,
+        jenis_kelamin: jenisKelamin,
+      };
+
+      await createSantri(santriData);
       
       toast({
         title: "Berhasil",
-        description: "Data santri berhasil ditambahkan",
+        description: "Santri baru berhasil ditambahkan",
       });
       
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error adding santri:", error);
+      console.error("Error creating santri:", error);
       toast({
         title: "Error",
-        description: "Gagal menambahkan data santri. Mohon coba lagi.",
+        description: "Gagal menambahkan santri baru",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
+  const handleBack = () => {
+    navigate("/dashboard");
+  };
+
   return (
-    <div className="max-w-md mx-auto p-4 bg-white dark:bg-gray-900 border border-islamic-primary/30 rounded-2xl shadow-lg">
-      <Card className="bg-transparent shadow-none border-none">
-        <CardHeader>
-          <CardTitle className="text-gray-900 dark:text-white">Tambah Santri</CardTitle>
-          <CardDescription className="text-gray-600 dark:text-gray-300">
-            Tambahkan data santri baru ke sistem
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-900 dark:text-white">Nama Santri</Label>
-              <Input
-                id="name"
-                placeholder="Masukkan nama santri"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
-              />
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-islamic-accent/10 py-6 px-4">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={handleBack}
+            className="mb-4 hover:bg-islamic-primary/10"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Kembali ke Dashboard
+          </Button>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="classroom" className="text-gray-900 dark:text-white">Kelas</Label>
-              <Select
-                value={classroom}
-                onValueChange={setClassroom}
-                required
-              >
-                <SelectTrigger id="classroom" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600">
-                  <SelectValue placeholder="Pilih kelas" />
-                </SelectTrigger>
-                <SelectContent className="z-50 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 shadow-xl">
-                  {[7, 8, 9, 10, 11, 12].map((kelas) => (
-                    <SelectItem 
-                      key={kelas} 
-                      value={kelas.toString()}
-                      className="text-gray-900 dark:text-white hover:bg-islamic-primary/10 focus:bg-islamic-primary/10"
-                    >
-                      Kelas {kelas}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Card className="shadow-2xl border-0 bg-card">
+          <CardHeader className="text-center pb-6">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary flex items-center justify-center shadow-xl">
+              <User className="w-8 h-8 text-white" />
             </div>
+            <CardTitle className="text-2xl font-bold text-foreground">Tambah Santri Baru</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Masukkan data santri baru untuk memulai pencatatan hafalan
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="nama" className="text-sm font-semibold text-foreground">
+                  Nama Santri
+                </Label>
+                <Input
+                  id="nama"
+                  type="text"
+                  placeholder="Masukkan nama lengkap santri"
+                  value={nama}
+                  onChange={(e) => setNama(e.target.value)}
+                  className="h-12 rounded-xl border-2 focus:border-islamic-primary"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label className="text-gray-900 dark:text-white">Jenis Kelamin</Label>
-              <RadioGroup
-                value={gender}
-                onValueChange={(val) => setGender(val as "Ikhwan" | "Akhwat")}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Ikhwan" id="ikhwan" className="border-islamic-primary focus:ring-islamic-primary" />
-                  <Label htmlFor="ikhwan" className="text-gray-900 dark:text-white">Ikhwan</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Akhwat" id="akhwat" className="border-islamic-primary focus:ring-islamic-primary" />
-                  <Label htmlFor="akhwat" className="text-gray-900 dark:text-white">Akhwat</Label>
-                </div>
-              </RadioGroup>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="kelas" className="text-sm font-semibold text-foreground">
+                  Kelas
+                </Label>
+                <Select value={kelas.toString()} onValueChange={(value) => setKelas(parseInt(value))}>
+                  <SelectTrigger id="kelas" className="h-12 rounded-xl border-2 focus:border-islamic-primary">
+                    <SelectValue placeholder="Pilih Kelas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((kelasOption) => (
+                      <SelectItem key={kelasOption} value={kelasOption.toString()}>
+                        Kelas {kelasOption}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="flex gap-3 pt-2">
-              <Button
-                type="button"
-                variant="destructive"
-                className="flex-1"
-                onClick={() => navigate("/dashboard")}
-              >
-                Batal
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="flex-1 bg-islamic-primary hover:bg-islamic-primary/90 text-white shadow font-semibold"
-              >
-                {isSubmitting ? "Menyimpan..." : "Simpan"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="jenisKelamin" className="text-sm font-semibold text-foreground">
+                  Jenis Kelamin
+                </Label>
+                <Select value={jenisKelamin} onValueChange={(value: "Ikhwan" | "Akhwat") => setJenisKelamin(value)}>
+                  <SelectTrigger id="jenisKelamin" className="h-12 rounded-xl border-2 focus:border-islamic-primary">
+                    <SelectValue placeholder="Pilih Jenis Kelamin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Ikhwan">Ikhwan (Laki-laki)</SelectItem>
+                    <SelectItem value="Akhwat">Akhwat (Perempuan)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-4 pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                  className="flex-1 h-12 rounded-xl border-2"
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90 font-semibold shadow-lg"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Users className="mr-2 h-4 w-4" />
+                      Tambah Santri
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

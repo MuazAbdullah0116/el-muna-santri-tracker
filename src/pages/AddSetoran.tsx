@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,8 +10,8 @@ import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Santri } from "@/types";
-import { fetchSantriById } from "@/services/supabase/santri.service";
-import { createSetoran } from "@/services/supabase/setoran.service";
+import { fetchSantriById } from "@/services/sheetdb/santri.service";
+import { createSetoran } from "@/services/sheetdb/setoran.service";
 import { useToast } from "@/hooks/use-toast";
 import AddSetoranDatePicker from "@/components/add-setoran/AddSetoranDatePicker";
 import AddSetoranAyatRange from "@/components/add-setoran/AddSetoranAyatRange";
