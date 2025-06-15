@@ -5,6 +5,7 @@ export interface Santri {
   jenis_kelamin: "Ikhwan" | "Akhwat";
   created_at?: string;
   total_hafalan?: number;
+  rankingDiff?: number;
 }
 
 export interface Setoran {

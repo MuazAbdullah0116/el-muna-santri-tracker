@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Santri } from "@/types";
 import { fetchSantriById } from "@/services/googleSheets/santri.service";
-import { addSetoran } from "@/services/googleSheets/setoran.service";
+import { createSetoran } from "@/services/googleSheets/setoran.service";
 import { useToast } from "@/hooks/use-toast";
 
 const AddSetoran = () => {
@@ -91,7 +91,7 @@ const AddSetoran = () => {
         diuji_oleh: diujiOleh,
       };
 
-      await addSetoran(setoran);
+      await createSetoran(setoran);
       toast({
         title: "Setoran berhasil disimpan",
         description: "Data setoran baru telah ditambahkan.",
