@@ -219,11 +219,11 @@ const AddSetoran = () => {
   };
 
   if (loading) {
-    return <div className="text-center">Loading...</div>;
+    return <div className="text-center text-white">Loading...</div>;
   }
 
   if (!santri) {
-    return <div className="text-center">Santri tidak ditemukan.</div>;
+    return <div className="text-center text-white">Santri tidak ditemukan.</div>;
   }
 
   return (
@@ -231,7 +231,7 @@ const AddSetoran = () => {
       <div className="relative w-full max-w-2xl mx-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-islamic-primary to-islamic-secondary shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 rounded-2xl sm:rounded-3xl"></div>
         <div className="relative px-3 py-6 sm:px-6 sm:py-10 bg-card shadow-lg rounded-2xl sm:rounded-3xl border border-border">
-          <h1 className="text-lg sm:text-2xl font-bold text-foreground text-center mb-4 sm:mb-6">
+          <h1 className="text-lg sm:text-2xl font-bold text-white text-center mb-4 sm:mb-6">
             Tambah Setoran untuk {santri?.nama || "..."}
           </h1>
           
@@ -240,11 +240,11 @@ const AddSetoran = () => {
             
             {/* Juz Selection */}
             <div>
-              <Label htmlFor="juz" className="block text-foreground text-sm font-bold mb-2">
+              <Label htmlFor="juz" className="block text-white text-sm font-bold mb-2">
                 Juz *
               </Label>
               <Select value={juz.toString()} onValueChange={handleJuzChange}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-foreground">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-white">
                   <SelectValue placeholder="Pilih Juz" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60 bg-popover border-border">
@@ -259,11 +259,11 @@ const AddSetoran = () => {
 
             {/* Surat Selection */}
             <div>
-              <Label htmlFor="surat" className="block text-foreground text-sm font-bold mb-2">
+              <Label htmlFor="surat" className="block text-white text-sm font-bold mb-2">
                 Surat *
               </Label>
               <Select value={surat} onValueChange={handleSuratChange} disabled={!juz}>
-                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-foreground">
+                <SelectTrigger className="w-full h-10 sm:h-11 text-sm sm:text-base bg-background border-border text-white">
                   <SelectValue placeholder="Pilih Surat" />
                 </SelectTrigger>
                 <SelectContent className="max-h-60 bg-popover border-border">
@@ -275,7 +275,7 @@ const AddSetoran = () => {
                 </SelectContent>
               </Select>
               {juz && availableSurahs.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-white/70 mt-1">
                   Surat yang tersedia untuk Juz {juz}
                 </p>
               )}
@@ -284,7 +284,7 @@ const AddSetoran = () => {
             {/* Ayat Range with text input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <Label htmlFor="awalAyat" className="block text-foreground text-sm font-bold mb-2">
+                <Label htmlFor="awalAyat" className="block text-white text-sm font-bold mb-2">
                   Awal Ayat *
                 </Label>
                 <Input
@@ -294,11 +294,11 @@ const AddSetoran = () => {
                   value={awalAyat}
                   onChange={(e) => handleAwalAyatChange(e.target.value)}
                   disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
+                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-white placeholder:text-white/50"
                 />
               </div>
               <div>
-                <Label htmlFor="akhirAyat" className="block text-foreground text-sm font-bold mb-2">
+                <Label htmlFor="akhirAyat" className="block text-white text-sm font-bold mb-2">
                   Akhir Ayat *
                 </Label>
                 <Input
@@ -308,12 +308,12 @@ const AddSetoran = () => {
                   value={akhirAyat}
                   onChange={(e) => handleAkhirAyatChange(e.target.value)}
                   disabled={!surat}
-                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
+                  className="w-full h-10 text-sm sm:text-base bg-background border-border text-white placeholder:text-white/50"
                 />
               </div>
             </div>
             {surat && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-white/70">
                 Range ayat untuk {surat} dalam Juz {juz}: {minAyat} - {maxAyat}
               </p>
             )}
@@ -332,7 +332,7 @@ const AddSetoran = () => {
 
             {/* Notes */}
             <div>
-              <Label htmlFor="catatan" className="block text-foreground text-sm font-bold mb-2">
+              <Label htmlFor="catatan" className="block text-white text-sm font-bold mb-2">
                 Catatan
               </Label>
               <Textarea
@@ -340,7 +340,7 @@ const AddSetoran = () => {
                 placeholder="Masukkan catatan"
                 value={catatan}
                 onChange={(e) => setCatatan(e.target.value)}
-                className="w-full min-h-20 text-sm sm:text-base resize-none bg-background border-border text-foreground"
+                className="w-full min-h-20 text-sm sm:text-base resize-none bg-background border-border text-white placeholder:text-white/50"
                 rows={3}
               />
             </div>
@@ -356,7 +356,7 @@ const AddSetoran = () => {
               <Button 
                 onClick={handleGoBack} 
                 variant="outline"
-                className="w-full sm:w-auto order-2 sm:order-1 border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                className="w-full sm:w-auto order-2 sm:order-1 border-border text-white hover:bg-accent hover:text-accent-foreground"
               >
                 Batal
               </Button>

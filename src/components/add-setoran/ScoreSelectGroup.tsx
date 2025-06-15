@@ -23,21 +23,21 @@ const ScoreSelectGroup: React.FC<ScoreSelectGroupProps> = ({
 
   return (
     <div className="mb-4">
-      <Label className="block text-gray-700 text-sm font-bold mb-2">
+      <Label className="block text-white text-sm font-bold mb-2">
         Penilaian
       </Label>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="kelancaran" className="block text-gray-700 text-xs font-bold mb-1">
+          <Label htmlFor="kelancaran" className="block text-white text-xs font-bold mb-1">
             Kelancaran
           </Label>
           <Select value={String(kelancaran)} onValueChange={(value) => onKelancaranChange(Number(value))}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background border-border text-white">
               <SelectValue placeholder="Pilih Nilai" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border-border">
               {options.map((value) => (
-                <SelectItem key={value} value={String(value)}>
+                <SelectItem key={value} value={String(value)} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                   {value}
                 </SelectItem>
               ))}
@@ -45,16 +45,16 @@ const ScoreSelectGroup: React.FC<ScoreSelectGroupProps> = ({
           </Select>
         </div>
         <div>
-          <Label htmlFor="tajwid" className="block text-gray-700 text-xs font-bold mb-1">
+          <Label htmlFor="tajwid" className="block text-white text-xs font-bold mb-1">
             Tajwid
           </Label>
           <Select value={String(tajwid)} onValueChange={(value) => onTajwidChange(Number(value))}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background border-border text-white">
               <SelectValue placeholder="Pilih Nilai" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border-border">
               {options.map((value) => (
-                <SelectItem key={value} value={String(value)}>
+                <SelectItem key={value} value={String(value)} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                   {value}
                 </SelectItem>
               ))}
@@ -62,16 +62,16 @@ const ScoreSelectGroup: React.FC<ScoreSelectGroupProps> = ({
           </Select>
         </div>
         <div>
-          <Label htmlFor="tahsin" className="block text-gray-700 text-xs font-bold mb-1">
+          <Label htmlFor="tahsin" className="block text-white text-xs font-bold mb-1">
             Tahsin
           </Label>
           <Select value={String(tahsin)} onValueChange={(value) => onTahsinChange(Number(value))}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full bg-background border-border text-white">
               <SelectValue placeholder="Pilih Nilai" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover border-border">
               {options.map((value) => (
-                <SelectItem key={value} value={String(value)}>
+                <SelectItem key={value} value={String(value)} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                   {value}
                 </SelectItem>
               ))}
@@ -84,4 +84,3 @@ const ScoreSelectGroup: React.FC<ScoreSelectGroupProps> = ({
 };
 
 export default ScoreSelectGroup;
-

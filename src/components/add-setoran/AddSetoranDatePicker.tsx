@@ -15,7 +15,7 @@ interface AddSetoranDatePickerProps {
 const AddSetoranDatePicker: React.FC<AddSetoranDatePickerProps> = ({ tanggal, onTanggalChange }) => {
   return (
     <div className="mb-4">
-      <Label htmlFor="tanggal" className="block text-foreground text-sm font-bold mb-2">
+      <Label htmlFor="tanggal" className="block text-white text-sm font-bold mb-2">
         Tanggal *
       </Label>
       <Popover>
@@ -23,8 +23,8 @@ const AddSetoranDatePicker: React.FC<AddSetoranDatePickerProps> = ({ tanggal, on
           <Button
             variant={"outline"}
             className={cn(
-              "w-full justify-start text-left font-normal bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground",
-              !tanggal && "text-muted-foreground"
+              "w-full justify-start text-left font-normal bg-background border-border text-white hover:bg-accent hover:text-accent-foreground",
+              !tanggal && "text-white/50"
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
