@@ -9,8 +9,6 @@ import { Santri } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/services/supabase/client";
-import { getFormattedHafalanProgress } from "@/services/supabase/setoran.service";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sheetdbFetch, SHEETDB_CONFIG } from "@/services/sheetdb/client";
 import { getFormattedHafalanProgress } from "@/services/sheetdb/setoran.service";
@@ -277,7 +275,7 @@ const SantriDetail = ({
               <Label htmlFor="edit-class">Kelas</Label>
               <Select 
                 value={editForm.kelas.toString()} 
-                onValueChange={(value) => setEditForm({...editForm, kelas: parseInt(value)})}
+                onValueChange={(value) => setEditForm({...editForm, kelas: parseInt(value)})
               >
                 <SelectTrigger id="edit-class" className="rounded-xl">
                   <SelectValue placeholder="Pilih Kelas" />
