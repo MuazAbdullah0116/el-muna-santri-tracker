@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Medal, Crown, Star } from "lucide-react";
 
@@ -8,9 +8,10 @@ interface TopPerformersCardProps {
   data: any[];
   isLoading: boolean;
   searchQuery: string;
+  onSantriClick?: (santriId: string) => void;
 }
 
-const TopPerformersCard = ({ data, isLoading, searchQuery }: TopPerformersCardProps) => {
+const TopPerformersCard = ({ data, isLoading, searchQuery, onSantriClick }: TopPerformersCardProps) => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -67,7 +68,11 @@ const TopPerformersCard = ({ data, isLoading, searchQuery }: TopPerformersCardPr
       {filteredData.slice(0, 10).map((item, index) => {
         const rank = index + 1;
         return (
-          <Card key={item.id} className={`${getRankColor(rank)} text-white border-none`}>
+          <Card 
+            key={item.id} 
+            className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+            onClick={() => onSantriClick?.(item.id)}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">

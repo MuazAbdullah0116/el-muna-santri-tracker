@@ -1,16 +1,18 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Medal } from "lucide-react";
+import { Trophy, Crown, Medal, Star } from "lucide-react";
+import { getHafalanScore } from "@/services/quran/quranMapping";
 
 interface TopHafalanCardProps {
   data: any[];
   isLoading: boolean;
   searchQuery: string;
+  onSantriClick?: (santriId: string) => void;
 }
 
-const TopHafalanCard = ({ data, isLoading, searchQuery }: TopHafalanCardProps) => {
+const TopHafalanCard = ({ data, isLoading, searchQuery, onSantriClick }: TopHafalanCardProps) => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -66,8 +68,14 @@ const TopHafalanCard = ({ data, isLoading, searchQuery }: TopHafalanCardProps) =
     <div className="space-y-4">
       {filteredData.slice(0, 10).map((item, index) => {
         const rank = index + 1;
+        const hafalanScore = getHafalanScore(item.total_hafalan || 0);
+        
         return (
-          <Card key={item.id} className={`${getRankColor(rank)} text-white border-none`}>
+          <Card 
+            key={item.id} 
+            className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+            onClick={() => onSantriClick?.(item.id)}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -85,15 +93,11 @@ const TopHafalanCard = ({ data, isLoading, searchQuery }: TopHafalanCardProps) =
                 <div className="text-right">
                   <div className="text-lg font-bold">#{rank}</div>
                   <div className="text-sm opacity-90">
-                    {item.total_hafalan || 0} ayat
+                    {hafalanScore.juz} Juz {hafalanScore.pages} Hal {hafalanScore.lines} Baris
                   </div>
-                  {item.hafalanJuz !== undefined && (
-                    <div className="text-xs opacity-75">
-                      {item.hafalanJuz > 0 && `${item.hafalanJuz} Juz `}
-                      {item.hafalanPages > 0 && `${item.hafalanPages} Hal `}
-                      {item.hafalanLines > 0 && `${item.hafalanLines} Baris`}
-                    </div>
-                  )}
+                  <div className="text-xs opacity-75">
+                    {item.total_hafalan || 0} Ayat
+                  </div>
                 </div>
               </div>
             </CardContent>

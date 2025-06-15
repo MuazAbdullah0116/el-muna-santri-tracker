@@ -1,16 +1,18 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Target, Crown, Medal } from "lucide-react";
+import { Target, Crown, Medal, Trophy } from "lucide-react";
+import { getHafalanScore } from "@/services/quran/quranMapping";
 
 interface TopRegularityCardProps {
   data: any[];
   isLoading: boolean;
   searchQuery: string;
+  onSantriClick?: (santriId: string) => void;
 }
 
-const TopRegularityCard = ({ data, isLoading, searchQuery }: TopRegularityCardProps) => {
+const TopRegularityCard = ({ data, isLoading, searchQuery, onSantriClick }: TopRegularityCardProps) => {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -20,7 +22,7 @@ const TopRegularityCard = ({ data, isLoading, searchQuery }: TopRegularityCardPr
       case 3:
         return <Medal className="h-5 w-5 text-amber-600" />;
       default:
-        return <Target className="h-5 w-5 text-emerald-600" />;
+        return <Target className="h-5 w-5 text-purple-600" />;
     }
   };
 
@@ -66,8 +68,14 @@ const TopRegularityCard = ({ data, isLoading, searchQuery }: TopRegularityCardPr
     <div className="space-y-4">
       {filteredData.slice(0, 10).map((item, index) => {
         const rank = index + 1;
+        const hafalanScore = getHafalanScore(item.total_hafalan || 0);
+        
         return (
-          <Card key={item.id} className={`${getRankColor(rank)} text-white border-none`}>
+          <Card 
+            key={item.id} 
+            className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+            onClick={() => onSantriClick?.(item.id)}
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -85,15 +93,11 @@ const TopRegularityCard = ({ data, isLoading, searchQuery }: TopRegularityCardPr
                 <div className="text-right">
                   <div className="text-lg font-bold">#{rank}</div>
                   <div className="text-sm opacity-90">
-                    {item.total_hafalan || 0} ayat
+                    {hafalanScore.juz} Juz {hafalanScore.pages} Hal
                   </div>
-                  {item.hafalanJuz !== undefined && (
-                    <div className="text-xs opacity-75">
-                      {item.hafalanJuz > 0 && `${item.hafalanJuz} Juz `}
-                      {item.hafalanPages > 0 && `${item.hafalanPages} Hal `}
-                      {item.hafalanLines > 0 && `${item.hafalanLines} Baris`}
-                    </div>
-                  )}
+                  <div className="text-xs opacity-75">
+                    {item.total_hafalan || 0} Ayat Total
+                  </div>
                 </div>
               </div>
             </CardContent>
