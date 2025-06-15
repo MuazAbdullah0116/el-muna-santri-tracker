@@ -1,22 +1,24 @@
 
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Trophy, Medal, Target, BookOpen, Star, TrendingUp } from "lucide-react";
 import SearchBar from "@/components/dashboard/SearchBar";
 import TopHafalanCard from "@/components/achievements/TopHafalanCard";
 import TopPerformersCard from "@/components/achievements/TopPerformersCard";
 import TopRegularityCard from "@/components/achievements/TopRegularityCard";
+import SantriDetailModal from "@/components/achievements/SantriDetailModal";
 import { fetchTopHafalan, fetchTopPerformers, fetchTopRegularity } from "@/services/supabase/achievement.service";
 
 const Achievements = () => {
   const [selectedGender, setSelectedGender] = useState<"all" | "Ikhwan" | "Akhwat">("all");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(["hafalan", "nilai", "konsistensi"]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("hafalan");
   const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
+  const [selectedSantriId, setSelectedSantriId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     data: topHafalan = [],
@@ -47,7 +49,13 @@ const Achievements = () => {
   };
 
   const handleSantriClick = (santriId: string) => {
-    navigate(`/santri/${santriId}`);
+    setSelectedSantriId(santriId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSantriId(null);
   };
 
   const categoryConfig = [
@@ -80,19 +88,19 @@ const Achievements = () => {
     }
   ];
 
-  const visibleCategories = categoryConfig.filter(cat => selectedCategories.includes(cat.id));
+  const selectedCategoryConfig = categoryConfig.find(cat => cat.id === selectedCategory);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        <Card className="mb-6 bg-white/70 backdrop-blur-sm border-emerald-200">
+      <div className="max-w-4xl mx-auto">
+        <Card className="mb-6 bg-white/80 backdrop-blur-sm border-emerald-200">
           <CardHeader>
             <CardTitle className="text-2xl sm:text-3xl font-bold text-emerald-800 text-center flex items-center justify-center gap-2">
               <Trophy className="h-6 w-6 sm:h-8 sm:w-8" />
               Prestasi Santri
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <SearchBar
               searchQuery={searchQuery}
               onSearchChange={handleSearchChange}
@@ -100,78 +108,90 @@ const Achievements = () => {
             />
             
             {/* Category Filter */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Kategori Prestasi:</label>
-              <ToggleGroup 
-                type="multiple" 
-                value={selectedCategories} 
-                onValueChange={setSelectedCategories}
-                className="flex flex-wrap justify-center gap-2"
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-emerald-800">Kategori Prestasi:</label>
+              <RadioGroup 
+                value={selectedCategory} 
+                onValueChange={setSelectedCategory}
+                className="flex flex-wrap justify-center gap-4"
               >
-                <ToggleGroupItem value="hafalan" aria-label="Hafalan Terbanyak" size="sm">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Hafalan</span>
-                  <span className="sm:hidden">H</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem value="nilai" aria-label="Nilai Tertinggi" size="sm">
-                  <Star className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Nilai</span>
-                  <span className="sm:hidden">N</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem value="konsistensi" aria-label="Setoran Terkonsisten" size="sm">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Konsistensi</span>
-                  <span className="sm:hidden">K</span>
-                </ToggleGroupItem>
-              </ToggleGroup>
+                {categoryConfig.map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <div key={category.id} className="flex items-center space-x-2">
+                      <RadioGroupItem 
+                        value={category.id} 
+                        id={category.id}
+                        className="border-emerald-500 text-emerald-600"
+                      />
+                      <Label 
+                        htmlFor={category.id} 
+                        className="flex items-center gap-2 cursor-pointer text-sm font-medium text-emerald-700 hover:text-emerald-800"
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="hidden sm:inline">{category.label}</span>
+                        <span className="sm:hidden">
+                          {category.id === "hafalan" ? "Hafalan" : 
+                           category.id === "nilai" ? "Nilai" : "Konsistensi"}
+                        </span>
+                      </Label>
+                    </div>
+                  );
+                })}
+              </RadioGroup>
             </div>
           </CardContent>
         </Card>
 
         <div className="mb-6">
           <Tabs value={selectedGender} onValueChange={(value) => setSelectedGender(value as any)}>
-            <TabsList className="grid w-full grid-cols-3 bg-white/70 backdrop-blur-sm">
-              <TabsTrigger value="all">Semua</TabsTrigger>
-              <TabsTrigger value="Ikhwan">Ikhwan</TabsTrigger>
-              <TabsTrigger value="Akhwat">Akhwat</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm border border-emerald-200">
+              <TabsTrigger 
+                value="all" 
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+              >
+                Semua
+              </TabsTrigger>
+              <TabsTrigger 
+                value="Ikhwan"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+              >
+                Ikhwan
+              </TabsTrigger>
+              <TabsTrigger 
+                value="Akhwat"
+                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white"
+              >
+                Akhwat
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
-        {visibleCategories.length === 0 ? (
-          <Card className="bg-white/70 backdrop-blur-sm border-emerald-200">
-            <CardContent className="p-8 text-center">
-              <Trophy className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Pilih minimal satu kategori prestasi untuk ditampilkan</p>
+        {selectedCategoryConfig && (
+          <Card className="bg-white/80 backdrop-blur-sm border-emerald-200">
+            <CardHeader>
+              <CardTitle className={`${selectedCategoryConfig.color} flex items-center gap-2 text-lg sm:text-xl`}>
+                <selectedCategoryConfig.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                {selectedCategoryConfig.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <selectedCategoryConfig.component 
+                data={selectedCategoryConfig.data} 
+                isLoading={selectedCategoryConfig.isLoading} 
+                searchQuery={searchQuery}
+                onSantriClick={handleSantriClick}
+              />
             </CardContent>
           </Card>
-        ) : (
-          <div className={`grid grid-cols-1 ${visibleCategories.length === 2 ? 'lg:grid-cols-2' : visibleCategories.length >= 3 ? 'lg:grid-cols-3' : ''} gap-6`}>
-            {visibleCategories.map(category => {
-              const Component = category.component;
-              const Icon = category.icon;
-              
-              return (
-                <Card key={category.id} className="bg-white/70 backdrop-blur-sm border-emerald-200">
-                  <CardHeader>
-                    <CardTitle className={`${category.color} flex items-center gap-2 text-sm sm:text-base`}>
-                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                      {category.label}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Component 
-                      data={category.data} 
-                      isLoading={category.isLoading} 
-                      searchQuery={searchQuery}
-                      onSantriClick={handleSantriClick}
-                    />
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
         )}
+
+        <SantriDetailModal 
+          santriId={selectedSantriId}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
       </div>
     </div>
   );

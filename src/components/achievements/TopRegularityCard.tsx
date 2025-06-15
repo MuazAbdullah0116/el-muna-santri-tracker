@@ -16,26 +16,26 @@ const TopRegularityCard = ({ data, isLoading, searchQuery, onSantriClick }: TopR
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="h-5 w-5 text-yellow-500" />;
+        return <Crown className="h-5 w-5 text-yellow-600" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Medal className="h-5 w-5 text-gray-500" />;
       case 3:
-        return <Medal className="h-5 w-5 text-amber-600" />;
+        return <Medal className="h-5 w-5 text-amber-700" />;
       default:
-        return <Target className="h-5 w-5 text-purple-600" />;
+        return <Target className="h-5 w-5 text-purple-700" />;
     }
   };
 
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return "bg-gradient-to-r from-yellow-400 to-yellow-600";
+        return "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700";
       case 2:
-        return "bg-gradient-to-r from-gray-300 to-gray-500";
+        return "bg-gradient-to-r from-gray-400 to-gray-500 hover:from-gray-500 hover:to-gray-600";
       case 3:
-        return "bg-gradient-to-r from-amber-400 to-amber-600";
+        return "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700";
       default:
-        return "bg-gradient-to-r from-purple-400 to-purple-600";
+        return "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700";
     }
   };
 
@@ -73,7 +73,7 @@ const TopRegularityCard = ({ data, isLoading, searchQuery, onSantriClick }: TopR
         return (
           <Card 
             key={item.id} 
-            className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+            className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer transition-all duration-200' : ''}`}
             onClick={() => onSantriClick?.(item.id)}
           >
             <CardContent className="p-4">
@@ -84,7 +84,7 @@ const TopRegularityCard = ({ data, isLoading, searchQuery, onSantriClick }: TopR
                     <h3 className="font-semibold">{item.nama}</h3>
                     <div className="flex items-center space-x-2 text-sm opacity-90">
                       <span>Kelas {item.kelas}</span>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
                         {item.jenis_kelamin}
                       </Badge>
                     </div>
