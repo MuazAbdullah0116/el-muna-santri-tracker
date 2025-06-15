@@ -29,8 +29,10 @@ const Dashboard = () => {
     },
   });
 
-  // Get unique classes from santris data
-  const classes = [...new Set(santris.map(santri => santri.kelas))].sort((a, b) => a - b);
+  // Generate all classes from 7 to 12, plus any existing classes from data
+  const existingClasses = [...new Set(santris.map(santri => santri.kelas))];
+  const allClasses = [7, 8, 9, 10, 11, 12];
+  const classes = [...new Set([...allClasses, ...existingClasses])].sort((a, b) => a - b);
 
   const handleDeleteSantri = async (id: string) => {
     try {
@@ -69,19 +71,24 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-1">
+            <div className="flex flex-col gap-6">
+              {/* Search Bar */}
+              <div className="w-full">
                 <SearchBar
                   searchQuery={searchQuery}
                   onSearchChange={handleSearchChange}
                 />
               </div>
-              <ClassFilter
-                selectedClass={selectedClass}
-                onClassSelect={handleClassSelect}
-                classes={classes}
-                refreshData={refreshData}
-              />
+              
+              {/* Class Filter */}
+              <div className="w-full">
+                <ClassFilter
+                  selectedClass={selectedClass}
+                  onClassSelect={handleClassSelect}
+                  classes={classes}
+                  refreshData={refreshData}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -102,7 +109,14 @@ const Dashboard = () => {
                 </div>
               ) : santris.length === 0 ? (
                 <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500">Tidak ada santri yang ditemukan</p>
+                  <p className="text-gray-500">
+                    {selectedClass 
+                      ? `Tidak ada santri di kelas ${selectedClass}` 
+                      : searchQuery 
+                        ? `Tidak ada santri yang ditemukan untuk "${searchQuery}"` 
+                        : "Tidak ada santri yang ditemukan"
+                    }
+                  </p>
                 </div>
               ) : (
                 santris.map((santri) => (
@@ -132,6 +146,11 @@ const Dashboard = () => {
                     />
                   ))
               )}
+              {santris.filter((santri) => santri.jenis_kelamin === "Ikhwan").length === 0 && !isLoading && (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">Tidak ada santri Ikhwan yang ditemukan</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -151,6 +170,11 @@ const Dashboard = () => {
                       santri={santri}
                     />
                   ))
+              )}
+              {santris.filter((santri) => santri.jenis_kelamin === "Akhwat").length === 0 && !isLoading && (
+                <div className="col-span-full text-center py-8">
+                  <p className="text-gray-500">Tidak ada santri Akhwat yang ditemukan</p>
+                </div>
               )}
             </div>
           </TabsContent>
