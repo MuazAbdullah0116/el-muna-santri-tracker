@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,8 +21,8 @@ const AddSetoran = () => {
   const [tanggal, setTanggal] = useState<Date | undefined>(new Date()); // Auto-populate with today's date
   const [juz, setJuz] = useState<number>(1);
   const [surat, setSurat] = useState<string>("");
-  const [awalAyat, setAwalAyat] = useState<number>(1);
-  const [akhirAyat, setAkhirAyat] = useState<number>(1);
+  const [awalAyat, setAwalAyat] = useState<string>("1");
+  const [akhirAyat, setAkhirAyat] = useState<string>("1");
   const [kelancaran, setKelancaran] = useState<number>(5);
   const [tajwid, setTajwid] = useState<number>(5);
   const [tahsin, setTahsin] = useState<number>(5);
@@ -63,8 +64,8 @@ const AddSetoran = () => {
     
     // Reset surat selection when juz changes
     setSurat("");
-    setAwalAyat(1);
-    setAkhirAyat(1);
+    setAwalAyat("1");
+    setAkhirAyat("1");
     setMinAyat(1);
     setMaxAyat(1);
   }, [juz]);
@@ -77,8 +78,8 @@ const AddSetoran = () => {
       setMaxAyat(ayatRange.maxAyat);
       
       // Reset ayat values to valid range
-      setAwalAyat(ayatRange.minAyat);
-      setAkhirAyat(ayatRange.minAyat);
+      setAwalAyat(ayatRange.minAyat.toString());
+      setAkhirAyat(ayatRange.minAyat.toString());
     }
   }, [surat, juz]);
 
@@ -110,20 +111,62 @@ const AddSetoran = () => {
     setSurat(value);
   };
 
-  const handleAwalAyatChange = (value: number) => {
-    if (value <= maxAyat && value >= minAyat) {
+  const handleAwalAyatChange = (value: string) => {
+    const numValue = parseInt(value) || 1;
+    if (numValue <= maxAyat && numValue >= minAyat) {
       setAwalAyat(value);
       // Ensure akhir ayat is not less than awal ayat
-      if (akhirAyat < value) {
-        setAkhirAyat(value);
+      const akhirNum = parseInt(akhirAyat) || 1;
+      if (akhirNum < numValue) {
+        setAkhirAyat(numValue.toString());
       }
+    } else {
+      setAwalAyat(value); // Allow typing but will validate on submit
     }
   };
 
-  const handleAkhirAyatChange = (value: number) => {
-    if (value <= maxAyat && value >= awalAyat) {
+  const handleAkhirAyatChange = (value: string) => {
+    const numValue = parseInt(value) || 1;
+    const awalNum = parseInt(awalAyat) || 1;
+    if (numValue <= maxAyat && numValue >= awalNum) {
       setAkhirAyat(value);
+    } else {
+      setAkhirAyat(value); // Allow typing but will validate on submit
     }
+  };
+
+  const validateAyatInputs = () => {
+    const awalNum = parseInt(awalAyat) || 1;
+    const akhirNum = parseInt(akhirAyat) || 1;
+    
+    if (awalNum < minAyat || awalNum > maxAyat) {
+      toast({
+        title: "Error",
+        description: `Awal ayat harus antara ${minAyat} - ${maxAyat}`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (akhirNum < minAyat || akhirNum > maxAyat) {
+      toast({
+        title: "Error",
+        description: `Akhir ayat harus antara ${minAyat} - ${maxAyat}`,
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    if (awalNum > akhirNum) {
+      toast({
+        title: "Error",
+        description: "Awal ayat tidak boleh lebih besar dari akhir ayat",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
+    return true;
   };
 
   const handleAddSetoran = async () => {
@@ -136,6 +179,10 @@ const AddSetoran = () => {
       return;
     }
 
+    if (!validateAyatInputs()) {
+      return;
+    }
+
     try {
       setLoading(true);
       const tanggalFormatted = tanggal ? tanggal.toISOString().split('T')[0] : '';
@@ -144,8 +191,8 @@ const AddSetoran = () => {
         tanggal: tanggalFormatted,
         juz: juz,
         surat: surat,
-        awal_ayat: awalAyat,
-        akhir_ayat: akhirAyat,
+        awal_ayat: parseInt(awalAyat),
+        akhir_ayat: parseInt(akhirAyat),
         kelancaran: kelancaran,
         tajwid: tajwid,
         tahsin: tahsin,
@@ -234,20 +281,18 @@ const AddSetoran = () => {
               )}
             </div>
 
-            {/* Ayat Range with validation */}
+            {/* Ayat Range with text input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="awalAyat" className="block text-foreground text-sm font-bold mb-2">
                   Awal Ayat *
                 </Label>
                 <Input
-                  type="number"
+                  type="text"
                   id="awalAyat"
                   placeholder="Awal"
                   value={awalAyat}
-                  min={minAyat}
-                  max={maxAyat}
-                  onChange={(e) => handleAwalAyatChange(Number(e.target.value))}
+                  onChange={(e) => handleAwalAyatChange(e.target.value)}
                   disabled={!surat}
                   className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
                 />
@@ -257,13 +302,11 @@ const AddSetoran = () => {
                   Akhir Ayat *
                 </Label>
                 <Input
-                  type="number"
+                  type="text"
                   id="akhirAyat"
                   placeholder="Akhir"
                   value={akhirAyat}
-                  min={awalAyat}
-                  max={maxAyat}
-                  onChange={(e) => handleAkhirAyatChange(Number(e.target.value))}
+                  onChange={(e) => handleAkhirAyatChange(e.target.value)}
                   disabled={!surat}
                   className="w-full h-10 text-sm sm:text-base bg-background border-border text-foreground"
                 />
