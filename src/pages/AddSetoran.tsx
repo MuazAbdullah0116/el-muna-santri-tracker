@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +21,11 @@ import { getSurahsForJuz, getMinAyatForSurahInJuz, getMaxAyatForSurahInJuz } fro
 const AddSetoran = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  
+  const { santriId } = useParams<{ santriId: string }>();
+
+  // Initialize formData with santri_id from the URL
   const [formData, setFormData] = useState({
-    santri_id: "",
+    santri_id: santriId || "",
     tanggal: new Date(),
     juz: "",
     surat: "",
@@ -35,10 +38,19 @@ const AddSetoran = () => {
     diuji_oleh: "",
   });
 
-  const { data: santris = [], isLoading: isLoadingSantris } = useQuery({
-    queryKey: ["santris"],
-    queryFn: () => fetchSantri(),
-  });
+  // Whenever the params change, update the formData.santri_id
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      santri_id: santriId ?? "",
+    }));
+  }, [santriId]);
+
+  // Tidak perlu fetch santri lagi
+  // const { data: santris = [], isLoading: isLoadingSantris } = useQuery({
+  //   queryKey: ["santris"],
+  //   queryFn: () => fetchSantri(),
+  // });
 
   const createSetoranMutation = useMutation({
     mutationFn: (setoranData: Omit<Setoran, 'id' | 'created_at'>) => 
@@ -138,7 +150,8 @@ const AddSetoran = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
+              {/* FIELD PILIH SANTRI DIHAPUS */}
+              {/* <div className="space-y-2">
                 <Label htmlFor="santri" className="text-white font-medium">
                   Pilih Santri *
                 </Label>
@@ -157,7 +170,7 @@ const AddSetoran = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               <AddSetoranDatePicker
                 tanggal={formData.tanggal}
