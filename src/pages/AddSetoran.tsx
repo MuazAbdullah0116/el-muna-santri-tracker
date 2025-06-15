@@ -11,10 +11,9 @@ import { fetchSantriById } from "@/services/sheetdb/santri.service";
 import { createSetoran } from "@/services/sheetdb/setoran.service";
 import { useToast } from "@/hooks/use-toast";
 import AddSetoranDatePicker from "@/components/add-setoran/AddSetoranDatePicker";
-import AddSetoranAyatRange from "@/components/add-setoran/AddSetoranAyatRange";
 import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminerInput";
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
-import { getSurahsInJuz, getMaxAyatInJuz } from "@/services/quran/quranMapping";
+import { getSurahsInJuz, getSurahMinMaxAyatInJuz } from "@/services/quran/quranMapping";
 
 const AddSetoran = () => {
   const { santriId } = useParams<{ santriId: string }>();
@@ -31,6 +30,7 @@ const AddSetoran = () => {
   const [diujiOleh, setDiujiOleh] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [availableSurahs, setAvailableSurahs] = useState<any[]>([]);
+  const [minAyat, setMinAyat] = useState<number>(1);
   const [maxAyat, setMaxAyat] = useState<number>(1);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -66,24 +66,22 @@ const AddSetoran = () => {
     setSurat("");
     setAwalAyat(1);
     setAkhirAyat(1);
+    setMinAyat(1);
     setMaxAyat(1);
   }, [juz]);
 
-  // Update max ayat when surat changes
+  // Update min/max ayat when surat changes
   useEffect(() => {
     if (surat) {
-      const maxAyatInJuz = getMaxAyatInJuz(juz, surat);
-      setMaxAyat(maxAyatInJuz);
+      const ayatRange = getSurahMinMaxAyatInJuz(juz, surat);
+      setMinAyat(ayatRange.minAyat);
+      setMaxAyat(ayatRange.maxAyat);
       
-      // Reset ayat values if they exceed the new maximum
-      if (awalAyat > maxAyatInJuz) {
-        setAwalAyat(1);
-      }
-      if (akhirAyat > maxAyatInJuz) {
-        setAkhirAyat(maxAyatInJuz);
-      }
+      // Reset ayat values to valid range
+      setAwalAyat(ayatRange.minAyat);
+      setAkhirAyat(ayatRange.minAyat);
     }
-  }, [surat, juz, awalAyat, akhirAyat]);
+  }, [surat, juz]);
 
   const handleGoBack = () => {
     navigate("/dashboard");
@@ -114,7 +112,7 @@ const AddSetoran = () => {
   };
 
   const handleAwalAyatChange = (value: number) => {
-    if (value <= maxAyat && value >= 1) {
+    if (value <= maxAyat && value >= minAyat) {
       setAwalAyat(value);
       // Ensure akhir ayat is not less than awal ayat
       if (akhirAyat < value) {
@@ -247,7 +245,7 @@ const AddSetoran = () => {
                   id="awalAyat"
                   placeholder="Awal"
                   value={awalAyat}
-                  min={1}
+                  min={minAyat}
                   max={maxAyat}
                   onChange={(e) => handleAwalAyatChange(Number(e.target.value))}
                   disabled={!surat}
@@ -273,7 +271,7 @@ const AddSetoran = () => {
             </div>
             {surat && (
               <p className="text-xs text-gray-500 mb-4">
-                Maksimal ayat untuk {surat} dalam Juz {juz}: {maxAyat}
+                Range ayat untuk {surat} dalam Juz {juz}: {minAyat} - {maxAyat}
               </p>
             )}
 

@@ -1,4 +1,3 @@
-
 /**
  * Quran mapping data according to Rasm Utsmani mushaf standard
  */
@@ -289,6 +288,53 @@ export function getSurahsInJuz(juzNumber: number): Array<{name: string, startAya
   }
   
   return surahs;
+}
+
+/**
+ * Get minimum and maximum ayat for a specific surah within a juz
+ * This considers if the surah spans across multiple juz
+ */
+export function getSurahMinMaxAyatInJuz(juzNumber: number, surahName: string): { 
+  minAyat: number; 
+  maxAyat: number;
+} {
+  if (juzNumber < 1 || juzNumber > 30) {
+    return { minAyat: 1, maxAyat: 1 };
+  }
+  
+  const currentJuz = juzMapping.find(j => j.juz === juzNumber);
+  const nextJuz = juzMapping.find(j => j.juz === juzNumber + 1);
+  
+  if (!currentJuz) {
+    return { minAyat: 1, maxAyat: 1 };
+  }
+  
+  // Find the surah data
+  const surahData_found = surahData.find(s => s.name === surahName);
+  if (!surahData_found) {
+    return { minAyat: 1, maxAyat: 1 };
+  }
+  
+  // Check if this surah is the starting surah of current juz
+  const isStartingSurah = surahData_found.number === currentJuz.surah;
+  
+  // Check if this surah is where the next juz starts
+  const isEndingSurah = nextJuz && surahData_found.number === nextJuz.surah;
+  
+  let minAyat = 1;
+  let maxAyat = surahData_found.count;
+  
+  // If this is the starting surah of the juz, minimum ayat is from juz start
+  if (isStartingSurah) {
+    minAyat = currentJuz.ayah;
+  }
+  
+  // If this is where next juz starts, maximum ayat is limited by next juz start
+  if (isEndingSurah && nextJuz) {
+    maxAyat = nextJuz.ayah - 1;
+  }
+  
+  return { minAyat, maxAyat };
 }
 
 /**
