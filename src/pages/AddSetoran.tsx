@@ -230,7 +230,7 @@ const AddSetoran = () => {
                   placeholder="Masukkan catatan (opsional)"
                   value={formData.catatan}
                   onChange={(e) => handleInputChange("catatan", e.target.value)}
-                  className="bg-background border border-emerald-600 text-white placeholder:text-white/60 focus:border-emerald-400"
+                  className="bg-white bg-opacity-20 border border-emerald-300 text-white placeholder:text-white/70 focus:border-emerald-400"
                   rows={3}
                 />
               </div>

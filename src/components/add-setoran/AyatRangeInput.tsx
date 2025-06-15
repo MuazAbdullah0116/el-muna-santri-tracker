@@ -36,7 +36,7 @@ const AyatRangeInput: React.FC<AyatRangeInputProps> = ({
         min={minAyat}
         max={maxAyat}
         disabled={disabled}
-        className="bg-background border border-emerald-600 text-white placeholder:text-white/60 focus:border-emerald-400"
+        className="bg-white bg-opacity-20 border border-emerald-300 text-white placeholder:text-white/70 focus:border-emerald-400"
       />
     </div>
 
@@ -53,7 +53,7 @@ const AyatRangeInput: React.FC<AyatRangeInputProps> = ({
         min={awalAyat || minAyat}
         max={maxAyat}
         disabled={!awalAyat || disabled}
-        className="bg-background border border-emerald-600 text-white placeholder:text-white/60 focus:border-emerald-400"
+        className="bg-white bg-opacity-20 border border-emerald-300 text-white placeholder:text-white/70 focus:border-emerald-400"
       />
     </div>
   </div>
