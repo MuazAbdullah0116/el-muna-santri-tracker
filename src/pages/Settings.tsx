@@ -1,14 +1,30 @@
 
 import { useState } from "react";
-import { Settings as SettingsIcon, Database, Palette, Users } from "lucide-react";
+import { Settings as SettingsIcon, Database, Palette, Users, LogOut } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import ThemeSettings from "@/components/settings/ThemeSettings";
 import IslamicLogo from "@/components/IslamicLogo";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("general");
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    logout();
+    toast({
+      title: "Logout berhasil",
+      description: "Anda telah keluar dari aplikasi",
+    });
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,6 +68,39 @@ const Settings = () => {
             </TabsList>
 
             <TabsContent value="general" className="space-y-6">
+              {/* Account Section - Show only if user is logged in */}
+              {user && user !== "Wali" && (
+                <Card className="bg-card border border-border text-foreground">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-islamic-primary">
+                      <LogOut className="w-5 h-5" />
+                      Akun
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground">
+                      Kelola akun dan sesi login Anda
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-islamic-light/10 rounded-lg border border-islamic-primary/20">
+                      <div>
+                        <p className="font-medium text-foreground">Status Login</p>
+                        <p className="text-sm text-muted-foreground">
+                          Masuk sebagai: <span className="font-semibold text-islamic-primary">{user}</span>
+                        </p>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        onClick={handleLogout}
+                        className="flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Card className="bg-card border border-border text-foreground">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-islamic-primary">
@@ -125,9 +174,9 @@ const Settings = () => {
                     <p className="text-muted-foreground">Fitur manajemen pengguna akan tersedia pada versi mendatang</p>
                   </div>
                 </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              </Tabs>
+            </div>
+          </div>
         </div>
       </div>
     </div>
