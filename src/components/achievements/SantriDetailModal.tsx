@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trophy, BookOpen, Star, Calendar, TrendingUp } from "lucide-react";
 import { fetchSantriById } from "@/services/supabase/santri.service";
-import { fetchSetoranBySantriId } from "@/services/supabase/setoran.service";
+import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 import { getHafalanScore } from "@/services/quran/quranMapping";
 
 interface SantriDetailModalProps {
@@ -25,7 +24,7 @@ const SantriDetailModal = ({ santriId, isOpen, onClose }: SantriDetailModalProps
 
   const { data: setorans = [], isLoading: isLoadingSetorans } = useQuery({
     queryKey: ["setorans", santriId],
-    queryFn: () => fetchSetoranBySantriId(santriId!),
+    queryFn: () => fetchSetoranBySantri(santriId!),
     enabled: !!santriId,
   });
 
