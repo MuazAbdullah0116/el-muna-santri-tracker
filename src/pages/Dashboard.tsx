@@ -29,6 +29,9 @@ const Dashboard = () => {
     },
   });
 
+  // Get unique classes from santris data
+  const classes = [...new Set(santris.map(santri => santri.kelas))].sort((a, b) => a - b);
+
   const handleDeleteSantri = async (id: string) => {
     try {
       await deleteSantri(id);
@@ -38,6 +41,18 @@ const Dashboard = () => {
       console.error("Error deleting santri:", error);
       toast.error("Gagal menghapus santri");
     }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleClassSelect = (kelas: number) => {
+    setSelectedClass(selectedClass === kelas ? null : kelas);
+  };
+
+  const refreshData = async () => {
+    await refetch();
   };
 
   if (error) {
@@ -58,12 +73,14 @@ const Dashboard = () => {
               <div className="flex-1">
                 <SearchBar
                   searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
+                  onSearchChange={handleSearchChange}
                 />
               </div>
               <ClassFilter
                 selectedClass={selectedClass}
-                onClassChange={setSelectedClass}
+                onClassSelect={handleClassSelect}
+                classes={classes}
+                refreshData={refreshData}
               />
             </div>
           </CardContent>
@@ -92,7 +109,6 @@ const Dashboard = () => {
                   <SantriCard
                     key={santri.id}
                     santri={santri}
-                    onDelete={handleDeleteSantri}
                   />
                 ))
               )}
@@ -113,7 +129,6 @@ const Dashboard = () => {
                     <SantriCard
                       key={santri.id}
                       santri={santri}
-                      onDelete={handleDeleteSantri}
                     />
                   ))
               )}
@@ -134,7 +149,6 @@ const Dashboard = () => {
                     <SantriCard
                       key={santri.id}
                       santri={santri}
-                      onDelete={handleDeleteSantri}
                     />
                   ))
               )}

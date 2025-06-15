@@ -66,7 +66,7 @@ const SantriProfile = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <SantriProfileInfo santri={santri} />
+            <SantriProfileInfo santri={santri} setorans={setoran} />
             <div className="mt-6">
               <SantriProfileAchievement santri={santri} />
             </div>
@@ -74,14 +74,14 @@ const SantriProfile = () => {
 
           <div className="lg:col-span-2 space-y-6">
             <SantriProfileChart
-              setoran={setoran}
+              setorans={setoran}
               isLoading={isLoadingSetoran}
             />
 
             <Separator />
 
             <SantriProfileSetoranTable
-              setoran={setoran}
+              setorans={setoran}
               isLoading={isLoadingSetoran}
             />
           </div>
