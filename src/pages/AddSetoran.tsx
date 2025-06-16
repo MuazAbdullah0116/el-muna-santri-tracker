@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,7 +15,7 @@ import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminer
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
 import { Setoran } from "@/types";
 import { fetchSantri } from "@/services/supabase/santri.service";
-import { createSetoran } from "@/services/supabase/setoran.service";
+import { createSetoran } from "@/services/sheety/setoran.service";
 import { getSurahsForJuz, getMinAyatForSurahInJuz, getMaxAyatForSurahInJuz } from "@/services/supabase/client";
 import SelectJuz from "@/components/add-setoran/SelectJuz";
 import SelectSurah from "@/components/add-setoran/SelectSurah";
@@ -47,12 +48,6 @@ const AddSetoran = () => {
       santri_id: santriId ?? "",
     }));
   }, [santriId]);
-
-  // Tidak perlu fetch santri lagi
-  // const { data: santris = [], isLoading: isLoadingSantris } = useQuery({
-  //   queryKey: ["santris"],
-  //   queryFn: () => fetchSantri(),
-  // });
 
   const createSetoranMutation = useMutation({
     mutationFn: (setoranData: Omit<Setoran, 'id' | 'created_at'>) => 
@@ -152,28 +147,6 @@ const AddSetoran = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* FIELD PILIH SANTRI DIHAPUS */}
-              {/* <div className="space-y-2">
-                <Label htmlFor="santri" className="text-white font-medium">
-                  Pilih Santri *
-                </Label>
-                <Select 
-                  onValueChange={(value) => handleInputChange("santri_id", value)}
-                  disabled={isLoadingSantris}
-                >
-                  <SelectTrigger className="bg-background border-border text-white">
-                    <SelectValue placeholder={isLoadingSantris ? "Memuat santri..." : "Pilih santri"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {santris.map((santri) => (
-                      <SelectItem key={santri.id} value={santri.id}>
-                        {santri.nama} - Kelas {santri.kelas} ({santri.jenis_kelamin})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div> */}
-
               <AddSetoranDatePicker
                 tanggal={formData.tanggal}
                 onTanggalChange={(date) => handleInputChange("tanggal", date || new Date())}
