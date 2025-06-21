@@ -15,7 +15,7 @@ import AddSetoranExaminerInput from "@/components/add-setoran/AddSetoranExaminer
 import ScoreSelectGroup from "@/components/add-setoran/ScoreSelectGroup";
 import { Setoran } from "@/types";
 import { fetchSantri } from "@/services/supabase/santri.service";
-import { createSetoran } from "@/services/supabase/setoran.service";
+import { createSetoran } from "@/services/replit/setoran.service";
 import { getSurahsForJuz, getMinAyatForSurahInJuz, getMaxAyatForSurahInJuz } from "@/services/supabase/client";
 import SelectJuz from "@/components/add-setoran/SelectJuz";
 import SelectSurah from "@/components/add-setoran/SelectSurah";
