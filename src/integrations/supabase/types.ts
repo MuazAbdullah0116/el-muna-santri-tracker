@@ -44,6 +44,7 @@ export type Database = {
       setoran: {
         Row: {
           akhir_ayat: number
+          archived_at: string | null
           awal_ayat: number
           catatan: string | null
           created_at: string | null
@@ -59,6 +60,7 @@ export type Database = {
         }
         Insert: {
           akhir_ayat: number
+          archived_at?: string | null
           awal_ayat: number
           catatan?: string | null
           created_at?: string | null
@@ -74,6 +76,7 @@ export type Database = {
         }
         Update: {
           akhir_ayat?: number
+          archived_at?: string | null
           awal_ayat?: number
           catatan?: string | null
           created_at?: string | null
@@ -96,6 +99,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      setoran_archives: {
+        Row: {
+          archive_name: string
+          created_at: string | null
+          google_sheet_id: string
+          google_sheet_url: string
+          id: string
+          period_end: string
+          period_start: string
+          total_records: number
+        }
+        Insert: {
+          archive_name: string
+          created_at?: string | null
+          google_sheet_id: string
+          google_sheet_url: string
+          id?: string
+          period_end: string
+          period_start: string
+          total_records?: number
+        }
+        Update: {
+          archive_name?: string
+          created_at?: string | null
+          google_sheet_id?: string
+          google_sheet_url?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          total_records?: number
+        }
+        Relationships: []
       }
     }
     Views: {
