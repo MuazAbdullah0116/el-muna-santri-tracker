@@ -206,24 +206,39 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
       };
     }
 
+    console.log('🔐 Creating JWT token for Google Sheets API...');
+
     // Buat JWT token untuk autentikasi
-    const header = btoa(JSON.stringify({
+    const header = {
       alg: 'RS256',
       typ: 'JWT'
-    }));
+    };
 
     const now = Math.floor(Date.now() / 1000);
-    const payload = btoa(JSON.stringify({
+    const payload = {
       iss: serviceAccountEmail,
-      scope: 'https://www.googleapis.com/auth/spreadsheets',
+      scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
       aud: 'https://oauth2.googleapis.com/token',
       exp: now + 3600,
       iat: now
-    }));
+    };
+
+    const headerB64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    const payloadB64 = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
     // Import crypto untuk signing
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(privateKey);
+    const decoder = new TextDecoder();
+    
+    // Parse private key
+    const pemHeader = '-----BEGIN PRIVATE KEY-----';
+    const pemFooter = '-----END PRIVATE KEY-----';
+    const pemContents = privateKey
+      .replace(pemHeader, '')
+      .replace(pemFooter, '')
+      .replace(/\s/g, '');
+    
+    const keyData = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
     
     const cryptoKey = await crypto.subtle.importKey(
       'pkcs8',
@@ -236,11 +251,17 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
       ['sign']
     );
 
-    const signatureData = encoder.encode(`${header}.${payload}`);
+    const signatureData = encoder.encode(`${headerB64}.${payloadB64}`);
     const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, signatureData);
-    const signatureB64 = btoa(String.fromCharCode(...new Uint8Array(signature)));
+    const signatureArray = new Uint8Array(signature);
+    const signatureB64 = btoa(String.fromCharCode(...signatureArray))
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
 
-    const jwt = `${header}.${payload}.${signatureB64}`;
+    const jwt = `${headerB64}.${payloadB64}.${signatureB64}`;
+
+    console.log('🔑 Getting access token...');
 
     // Dapatkan access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -252,14 +273,18 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
     });
 
     if (!tokenResponse.ok) {
+      const tokenError = await tokenResponse.text();
+      console.error('Token error:', tokenError);
       return {
         success: false,
-        error: 'Failed to get access token'
+        error: `Failed to get access token: ${tokenResponse.statusText}`
       };
     }
 
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
+
+    console.log('📊 Creating spreadsheet...');
 
     // Buat spreadsheet baru
     const createResponse = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
@@ -274,21 +299,29 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
         },
         sheets: [{
           properties: {
-            title: 'Data Setoran'
+            title: 'Data Setoran',
+            gridProperties: {
+              rowCount: Math.max(1000, data.length + 100),
+              columnCount: 20
+            }
           }
         }]
       })
     });
 
     if (!createResponse.ok) {
+      const createError = await createResponse.text();
+      console.error('Create error:', createError);
       return {
         success: false,
-        error: 'Failed to create spreadsheet'
+        error: `Failed to create spreadsheet: ${createResponse.statusText}`
       };
     }
 
     const sheetData = await createResponse.json();
     const sheetId = sheetData.spreadsheetId;
+
+    console.log(`📋 Spreadsheet created: ${sheetId}`);
 
     // Siapkan data untuk dimasukkan
     const headers = [
@@ -301,16 +334,18 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
       row.santri_id,
       row.tanggal,
       row.surat,
-      row.juz,
-      row.awal_ayat,
-      row.akhir_ayat,
-      row.kelancaran,
-      row.tajwid,
-      row.tahsin,
-      row.diuji_oleh,
+      row.juz?.toString() || '',
+      row.awal_ayat?.toString() || '',
+      row.akhir_ayat?.toString() || '',
+      row.kelancaran?.toString() || '',
+      row.tajwid?.toString() || '',
+      row.tahsin?.toString() || '',
+      row.diuji_oleh || '',
       row.catatan || '',
       row.created_at
     ]);
+
+    console.log(`📝 Adding ${rows.length} rows to spreadsheet...`);
 
     // Masukkan data ke spreadsheet
     const updateResponse = await fetch(
@@ -328,11 +363,15 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
     );
 
     if (!updateResponse.ok) {
+      const updateError = await updateResponse.text();
+      console.error('Update error:', updateError);
       return {
         success: false,
-        error: 'Failed to add data to spreadsheet'
+        error: `Failed to add data to spreadsheet: ${updateResponse.statusText}`
       };
     }
+
+    console.log('✅ Data successfully added to spreadsheet');
 
     return {
       success: true,
@@ -344,7 +383,7 @@ async function createGoogleSheet(sheetName: string, data: ArchiveRecord[]) {
     console.error('Google Sheets error:', error);
     return {
       success: false,
-      error: error.message
+      error: error.message || 'Unknown error occurred'
     };
   }
 }
