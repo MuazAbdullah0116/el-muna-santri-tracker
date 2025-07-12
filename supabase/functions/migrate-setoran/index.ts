@@ -56,9 +56,22 @@ Deno.serve(async (req) => {
 
       if (archiveError) throw archiveError;
 
+      // Check for exported but not migrated data
+      const { data: exportedData, error: exportedError } = await supabase
+        .from('setoran')
+        .select('id, created_at')
+        .not('exported_at', 'is', null)
+        .is('archived_at', null);
+
+      if (exportedError) throw exportedError;
+
       const lastMigrationDate = latestArchive?.created_at;
       const daysSinceLastMigration = lastMigrationDate 
         ? Math.floor((Date.now() - new Date(lastMigrationDate).getTime()) / (1000 * 60 * 60 * 24))
+        : null;
+
+      const lastExportDate = exportedData && exportedData.length > 0 
+        ? exportedData[0].created_at 
         : null;
 
       return new Response(
@@ -67,7 +80,10 @@ Deno.serve(async (req) => {
           lastMigrationDate: lastMigrationDate || null,
           pendingRecordsCount: pendingData?.length || 0,
           cutoffDate: cutoffDateStr,
-          daysSinceLastMigration: daysSinceLastMigration || 0
+          daysSinceLastMigration: daysSinceLastMigration || 0,
+          hasExportedData: (exportedData?.length || 0) > 0,
+          lastExportDate: lastExportDate,
+          exportedRecordsCount: exportedData?.length || 0
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -17,6 +17,9 @@ export interface MigrationStatus {
   pendingRecordsCount: number;
   cutoffDate: string;
   daysSinceLastMigration: number;
+  hasExportedData: boolean;
+  lastExportDate: string | null;
+  exportedRecordsCount: number;
 }
 
 export interface MigrationResult {
@@ -137,14 +140,45 @@ export async function fetchArchivedSetoran(archiveId: string): Promise<any[]> {
       throw new Error('Archive not found');
     }
 
-    // Note: Untuk mengambil data dari Google Sheets, perlu implementasi 
-    // Google Sheets API di frontend atau edge function terpisah
-    // Untuk sekarang, return empty array sebagai placeholder
-    console.log('Archive URL:', archive.google_sheet_url);
-    
-    return [];
+    // Fetch data from Google Sheets using edge function
+    const { data, error: fetchError } = await supabase.functions.invoke('fetch-sheets-data', {
+      method: 'POST',
+      body: { 
+        spreadsheetId: archive.google_sheet_id,
+        sheetUrl: archive.google_sheet_url 
+      }
+    });
+
+    if (fetchError) {
+      console.error('Error fetching from Google Sheets:', fetchError);
+      throw fetchError;
+    }
+
+    return data?.records || [];
   } catch (error) {
     console.error('Error in fetchArchivedSetoran:', error);
     throw error;
+  }
+}
+
+/**
+ * Verify Google Sheets access before completing migration
+ */
+export async function verifySheetAccess(sheetUrl: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase.functions.invoke('verify-sheet-access', {
+      method: 'POST',
+      body: { sheetUrl }
+    });
+
+    if (error) {
+      console.error('Error verifying sheet access:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in verifySheetAccess:', error);
+    return { success: false, error: error.message };
   }
 }

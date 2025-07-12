@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Download, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { exportToCSV, completeMigration, getMigrationStatus } from '@/services/supabase/archive.service';
+import { exportToCSV, completeMigration, getMigrationStatus, verifySheetAccess } from '@/services/supabase/archive.service';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -48,11 +48,26 @@ export default function MigrationNotification() {
     },
   });
 
+  const verifyMutation = useMutation({
+    mutationFn: () => verifySheetAccess(sheetUrl),
+    onSuccess: (data) => {
+      if (data.success) {
+        completeMutation.mutate();
+      } else {
+        toast.error(data.error || 'Tidak dapat mengakses Google Sheets. Pastikan link dapat diakses publik.');
+      }
+    },
+    onError: (error) => {
+      console.error('Verify sheet access error:', error);
+      toast.error('Gagal memverifikasi akses Google Sheets');
+    },
+  });
+
   const completeMutation = useMutation({
     mutationFn: () => completeMigration(archiveName, sheetUrl),
     onSuccess: (data) => {
       if (data.success) {
-        toast.success('Migrasi berhasil diselesaikan');
+        toast.success('Migrasi berhasil diselesaikan dan data asli telah dihapus');
         setShowCompleteDialog(false);
         setArchiveName('');
         setSheetUrl('');
@@ -66,34 +81,59 @@ export default function MigrationNotification() {
     },
   });
 
-  if (!migrationStatus?.needsMigration) {
+  // Show notification if migration is needed or data has been exported but not migrated
+  if (!migrationStatus?.needsMigration && !migrationStatus?.hasExportedData) {
     return null;
   }
 
   return (
     <>
-      <Alert className="mb-4 border-orange-200 bg-orange-50">
-        <AlertTriangle className="h-4 w-4 text-orange-600" />
-        <AlertDescription className="text-orange-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Migrasi Data Diperlukan</p>
-              <p className="text-sm">
-                Data setoran perlu dipindahkan ke arsip. Sudah {migrationStatus.daysSinceLastMigration} hari 
-                sejak migrasi terakhir. {migrationStatus.pendingRecordsCount} record menunggu migrasi.
-              </p>
+      {migrationStatus?.hasExportedData && !migrationStatus?.needsMigration ? (
+        <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Data Sudah Diekspor - Menunggu Konfirmasi Migrasi</p>
+                <p className="text-sm">
+                  Data telah diekspor pada {new Date(migrationStatus.lastExportDate).toLocaleDateString('id-ID')}. 
+                  {migrationStatus.exportedRecordsCount} record menunggu konfirmasi migrasi ke Google Sheets.
+                </p>
+              </div>
+              <Button 
+                onClick={() => setShowCompleteDialog(true)}
+                className="ml-4"
+              >
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Konfirmasi Migrasi
+              </Button>
             </div>
-            <Button 
-              onClick={() => exportMutation.mutate()}
-              disabled={exportMutation.isPending}
-              className="ml-4"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              {exportMutation.isPending ? 'Mengekspor...' : 'Download CSV'}
-            </Button>
-          </div>
-        </AlertDescription>
-      </Alert>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Alert className="mb-4 border-orange-200 bg-orange-50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Migrasi Data Diperlukan</p>
+                <p className="text-sm">
+                  Data setoran perlu dipindahkan ke arsip. Sudah {migrationStatus.daysSinceLastMigration} hari 
+                  sejak migrasi terakhir. {migrationStatus.pendingRecordsCount} record menunggu migrasi.
+                </p>
+              </div>
+              <Button 
+                onClick={() => exportMutation.mutate()}
+                disabled={exportMutation.isPending}
+                className="ml-4"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {exportMutation.isPending ? 'Mengekspor...' : 'Download CSV'}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
         <DialogContent>
@@ -127,12 +167,12 @@ export default function MigrationNotification() {
             
             <div className="flex gap-2">
               <Button 
-                onClick={() => completeMutation.mutate()}
-                disabled={!archiveName || !sheetUrl || completeMutation.isPending}
+                onClick={() => verifyMutation.mutate()}
+                disabled={!archiveName || !sheetUrl || verifyMutation.isPending || completeMutation.isPending}
                 className="flex-1"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
-                {completeMutation.isPending ? 'Menyelesaikan...' : 'Selesaikan Migrasi'}
+                {verifyMutation.isPending ? 'Memverifikasi...' : completeMutation.isPending ? 'Menyelesaikan...' : 'Selesaikan Migrasi'}
               </Button>
               <Button 
                 variant="outline" 
