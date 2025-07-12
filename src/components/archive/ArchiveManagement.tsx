@@ -18,16 +18,13 @@ import {
 } from 'lucide-react';
 import {
   getMigrationStatus,
-  startMigration,
   fetchSetoranArchives,
   SetoranArchive,
   MigrationStatus
 } from '@/services/supabase/archive.service';
+import MigrationNotification from './MigrationNotification';
 
 export default function ArchiveManagement() {
-  const [isManualMigration, setIsManualMigration] = useState(false);
-  const queryClient = useQueryClient();
-
   // Query status migrasi
   const { data: migrationStatus, isLoading: statusLoading } = useQuery<MigrationStatus>({
     queryKey: ['migration-status'],
@@ -40,39 +37,6 @@ export default function ArchiveManagement() {
     queryKey: ['setoran-archives'],
     queryFn: fetchSetoranArchives,
   });
-
-  // Mutation untuk memulai migrasi
-  const migrationMutation = useMutation({
-    mutationFn: startMigration,
-    onSuccess: (result) => {
-      if (result.success) {
-        toast.success(
-          `✅ Migrasi berhasil! ${result.recordsProcessed} record dipindahkan ke Google Sheets`,
-          {
-            description: `Arsip: ${result.archiveName}`,
-            action: result.sheetUrl ? {
-              label: 'Buka Sheet',
-              onClick: () => window.open(result.sheetUrl, '_blank')
-            } : undefined
-          }
-        );
-        queryClient.invalidateQueries({ queryKey: ['migration-status'] });
-        queryClient.invalidateQueries({ queryKey: ['setoran-archives'] });
-      } else {
-        toast.error(`❌ Migrasi gagal: ${result.error}`);
-      }
-      setIsManualMigration(false);
-    },
-    onError: (error) => {
-      toast.error(`❌ Error: ${error.message}`);
-      setIsManualMigration(false);
-    },
-  });
-
-  const handleStartMigration = () => {
-    setIsManualMigration(true);
-    migrationMutation.mutate(false);
-  };
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('id-ID', {
@@ -109,15 +73,18 @@ export default function ArchiveManagement() {
 
   return (
     <div className="space-y-6">
+      {/* Migration Notification */}
+      <MigrationNotification />
+
       {/* Status Migrasi */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5" />
-            Status Sistem Migrasi Otomatis
+            Status Sistem Migrasi Manual
           </CardTitle>
           <CardDescription>
-            Sistem migrasi data setoran ke Google Sheets setiap 2 bulan
+            Sistem migrasi manual data setoran ke CSV setiap 2 minggu
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -130,10 +97,10 @@ export default function ArchiveManagement() {
                     <span className="text-sm font-medium">Data Pending</span>
                   </div>
                   <div className="text-2xl font-bold">
-                    {migrationStatus.pendingMigrationCount}
+                    {migrationStatus.pendingRecordsCount}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    record &gt; 2 bulan
+                    record &gt; 2 minggu
                   </div>
                 </div>
 
@@ -156,52 +123,28 @@ export default function ArchiveManagement() {
                     <span className="text-sm font-medium">Migrasi Terakhir</span>
                   </div>
                   <div className="text-sm">
-                    {migrationStatus.latestArchive ? 
-                      formatDateTime(migrationStatus.latestArchive.created_at) : 
+                    {migrationStatus.lastMigrationDate ? 
+                      `${migrationStatus.daysSinceLastMigration} hari lalu` : 
                       'Belum pernah'
                     }
                   </div>
-                  {migrationStatus.latestArchive && (
+                  {migrationStatus.lastMigrationDate && (
                     <div className="text-xs text-muted-foreground">
-                      {migrationStatus.latestArchive.total_records} record
+                      {formatDate(migrationStatus.lastMigrationDate)}
                     </div>
                   )}
                 </div>
               </div>
 
-              {migrationStatus.pendingMigrationCount > 0 && (
+              {migrationStatus.needsMigration && (
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    Ada {migrationStatus.pendingMigrationCount} record yang siap dimigrasi. 
-                    Data yang lebih dari 2 bulan akan dipindahkan ke Google Sheets.
+                    Migrasi data diperlukan! Sudah {migrationStatus.daysSinceLastMigration} hari sejak migrasi terakhir.
+                    Data perlu dipindahkan setiap 2 minggu.
                   </AlertDescription>
                 </Alert>
               )}
-
-              <div className="flex items-center gap-2">
-                <Button 
-                  onClick={handleStartMigration}
-                  disabled={migrationMutation.isPending || isManualMigration}
-                  size="sm"
-                >
-                  {(migrationMutation.isPending || isManualMigration) ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Migrasi Berjalan...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Mulai Migrasi Manual
-                    </>
-                  )}
-                </Button>
-                
-                <div className="text-sm text-muted-foreground">
-                  Migrasi otomatis berikutnya: {formatDate(getNextMigrationDate().toISOString())}
-                </div>
-              </div>
             </>
           )}
         </CardContent>
@@ -269,12 +212,12 @@ export default function ArchiveManagement() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <h5 className="font-semibold mb-2">🔄 Proses Otomatis</h5>
+              <h5 className="font-semibold mb-2">📥 Proses Manual</h5>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Berjalan setiap 2 bulan sekali</li>
-                <li>• Data &gt; 2 bulan dipindahkan ke Google Sheets</li>
-                <li>• Total hafalan santri tetap tersimpan</li>
-                <li>• Data tetap bisa diakses melalui arsip</li>
+                <li>• Notifikasi setiap 2 minggu</li>
+                <li>• Data diekspor ke file CSV</li>
+                <li>• User manual copy ke Google Sheets</li>
+                <li>• Data lama dihapus setelah migrasi</li>
               </ul>
             </div>
             <div>

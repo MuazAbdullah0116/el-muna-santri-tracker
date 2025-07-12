@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SantriCard from "@/components/dashboard/SantriCard";
 import SearchBar from "@/components/dashboard/SearchBar";
 import ClassFilter from "@/components/dashboard/ClassFilter";
+import MigrationNotification from "@/components/archive/MigrationNotification";
 import { fetchSantri, fetchSantriByClass, deleteSantri } from "@/services/supabase/santri.service";
 
 const Dashboard = () => {
@@ -64,6 +65,9 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Migration Notification */}
+        <MigrationNotification />
+        
         <Card className="mb-6 bg-white/70 backdrop-blur-sm border-emerald-200">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-emerald-800 text-center">

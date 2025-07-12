@@ -12,10 +12,11 @@ export interface SetoranArchive {
 }
 
 export interface MigrationStatus {
-  success: boolean;
-  latestArchive: SetoranArchive | null;
-  pendingMigrationCount: number;
+  needsMigration: boolean;
+  lastMigrationDate: string | null;
+  pendingRecordsCount: number;
   cutoffDate: string;
+  daysSinceLastMigration: number;
 }
 
 export interface MigrationResult {
@@ -72,23 +73,45 @@ export async function getMigrationStatus(): Promise<MigrationStatus> {
 }
 
 /**
- * Start migration process
+ * Export data to CSV for manual migration
  */
-export async function startMigration(force: boolean = false): Promise<MigrationResult> {
+export async function exportToCSV(): Promise<{ success: boolean; csvData?: string; filename?: string; error?: string }> {
   try {
     const { data, error } = await supabase.functions.invoke('migrate-setoran', {
       method: 'POST',
-      body: { force }
+      body: { action: 'export_csv' }
     });
 
     if (error) {
-      console.error('Error starting migration:', error);
+      console.error('Error exporting to CSV:', error);
       throw error;
     }
 
     return data;
   } catch (error) {
-    console.error('Error in startMigration:', error);
+    console.error('Error in exportToCSV:', error);
+    throw error;
+  }
+}
+
+/**
+ * Mark migration as completed and delete exported data
+ */
+export async function completeMigration(archiveName: string, sheetUrl: string): Promise<MigrationResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke('migrate-setoran', {
+      method: 'POST',
+      body: { action: 'complete_migration', archiveName, sheetUrl }
+    });
+
+    if (error) {
+      console.error('Error completing migration:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in completeMigration:', error);
     throw error;
   }
 }
