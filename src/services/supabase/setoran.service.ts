@@ -1,176 +1,195 @@
 
-import { Setoran } from "@/types";
 import { supabase } from "./client";
-import { calculateHafalanProgress } from "../quran/quranMapping";
+import { fetchArchivedSetoran } from "./archive.service";
+
+export interface Setoran {
+  id: string;
+  santri_id: string;
+  tanggal: string;
+  surat: string;
+  juz: number;
+  awal_ayat: number;
+  akhir_ayat: number;
+  kelancaran: number;
+  tajwid: number;
+  tahsin: number;
+  diuji_oleh: string;
+  catatan?: string;
+  created_at?: string;
+  santri?: {
+    nama: string;
+  };
+}
 
 /**
- * Fetches all setoran records
+ * Fetch all setoran including archived data from Google Sheets
  */
-export const fetchSetoran = async (): Promise<Setoran[]> => {
-  console.log("Fetching all setoran records");
+export async function fetchAllSetoran(): Promise<Setoran[]> {
   try {
-    const { data, error } = await supabase
+    // Fetch current data from database
+    const { data: currentData, error: currentError } = await supabase
       .from('setoran')
-      .select('*')
+      .select(`
+        *,
+        santri:santri_id (nama)
+      `)
+      .is('archived_at', null)
       .order('tanggal', { ascending: false });
 
-    if (error) {
-      console.error("Error fetching setoran:", error);
-      throw error;
+    if (currentError) {
+      console.error('Error fetching current setoran:', currentError);
+      throw currentError;
     }
 
-    console.log("Setoran data retrieved:", data?.length || 0, "records");
-    return data || [];
-  } catch (err) {
-    console.error("Exception in fetchSetoran:", err);
-    throw err;
-  }
-};
-
-/**
- * Fetches setoran records for a specific santri
- */
-export const fetchSetoranBySantri = async (santriId: string): Promise<Setoran[]> => {
-  console.log("Fetching setoran records for santri:", santriId);
-  try {
-    const { data, error } = await supabase
-      .from('setoran')
+    // Fetch archived data from all Google Sheets
+    const { data: archives, error: archiveError } = await supabase
+      .from('setoran_archives')
       .select('*')
-      .eq('santri_id', santriId)
-      .order('tanggal', { ascending: false });
+      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error("Error fetching setoran by santri:", error);
-      throw error;
+    if (archiveError) {
+      console.error('Error fetching archives:', archiveError);
+      // Continue with current data only if archive fetch fails
+      return currentData || [];
     }
 
-    console.log("Setoran data for santri retrieved:", data?.length || 0, "records");
-    return data || [];
-  } catch (err) {
-    console.error("Exception in fetchSetoranBySantri:", err);
-    throw err;
+    let archivedData: any[] = [];
+    if (archives && archives.length > 0) {
+      // Fetch data from the latest archive (most recent Google Sheet)
+      try {
+        const latestArchive = archives[0];
+        archivedData = await fetchArchivedSetoran(latestArchive.id);
+        
+        // Transform archived data to match current data structure
+        archivedData = archivedData.map(item => ({
+          id: item.ID || item.id,
+          santri_id: item['Santri ID'] || item.santri_id,
+          tanggal: item.Tanggal || item.tanggal,
+          surat: item.Surat || item.surat,
+          juz: parseInt(item.Juz || item.juz) || 0,
+          awal_ayat: parseInt(item['Awal Ayat'] || item.awal_ayat) || 0,
+          akhir_ayat: parseInt(item['Akhir Ayat'] || item.akhir_ayat) || 0,
+          kelancaran: parseInt(item.Kelancaran || item.kelancaran) || 0,
+          tajwid: parseInt(item.Tajwid || item.tajwid) || 0,
+          tahsin: parseInt(item.Tahsin || item.tahsin) || 0,
+          diuji_oleh: item['Diuji Oleh'] || item.diuji_oleh || '',
+          catatan: item.Catatan || item.catatan || null,
+          created_at: item['Created At'] || item.created_at,
+          santri: {
+            nama: item['Nama Santri'] || item.nama || 'Unknown'
+          }
+        }));
+      } catch (archiveError) {
+        console.error('Error fetching archived data:', archiveError);
+        // Continue with current data only
+      }
+    }
+
+    // Combine current and archived data
+    const allData = [...(currentData || []), ...archivedData];
+    
+    // Sort by date (newest first)
+    return allData.sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+
+  } catch (error) {
+    console.error('Error in fetchAllSetoran:', error);
+    throw error;
   }
-};
+}
 
 /**
- * Creates a new setoran record
+ * Fetch setoran by santri ID including archived data
  */
-export const createSetoran = async (setoran: Omit<Setoran, 'id' | 'created_at'>): Promise<Setoran> => {
-  console.log("Creating setoran:", setoran);
+export async function fetchSetoranBySantri(santriId: string): Promise<Setoran[]> {
+  try {
+    // Get all setoran data first
+    const allSetoran = await fetchAllSetoran();
+    
+    // Filter by santri ID
+    return allSetoran.filter(setoran => setoran.santri_id === santriId);
+  } catch (error) {
+    console.error('Error in fetchSetoranBySantri:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create new setoran
+ */
+export async function createSetoran(setoranData: Omit<Setoran, 'id' | 'created_at' | 'santri'>): Promise<Setoran> {
   try {
     const { data, error } = await supabase
       .from('setoran')
-      .insert([setoran])
-      .select()
+      .insert(setoranData)
+      .select(`
+        *,
+        santri:santri_id (nama)
+      `)
       .single();
 
     if (error) {
-      console.error("Error creating setoran:", error);
+      console.error('Error creating setoran:', error);
       throw error;
     }
 
-    console.log("Setoran created:", data);
-    
-    // Update the total hafalan count for this santri
-    await updateTotalHafalan(setoran.santri_id);
-    
     return data;
-  } catch (err) {
-    console.error("Exception in createSetoran:", err);
-    throw err;
+  } catch (error) {
+    console.error('Error in createSetoran:', error);
+    throw error;
   }
-};
+}
 
 /**
- * Deletes a setoran record by ID
+ * Delete setoran
  */
-export const deleteSetoran = async (id: string): Promise<void> => {
-  console.log("Deleting setoran:", id);
+export async function deleteSetoran(id: string): Promise<void> {
   try {
-    // First get the setoran to find the santri_id
-    const { data: setoranData, error: setoranError } = await supabase
-      .from('setoran')
-      .select('santri_id')
-      .eq('id', id)
-      .single();
-      
-    if (setoranError) {
-      console.error("Error getting setoran before delete:", setoranError);
-      throw setoranError;
-    }
-    
-    const santriId = setoranData.santri_id;
-    
-    // Now delete the setoran
     const { error } = await supabase
       .from('setoran')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error("Error deleting setoran:", error);
+      console.error('Error deleting setoran:', error);
       throw error;
     }
-    
-    console.log("Setoran deleted successfully");
-    
-    // Update the total hafalan count for this santri
-    await updateTotalHafalan(santriId);
-  } catch (err) {
-    console.error("Exception in deleteSetoran:", err);
-    throw err;
+  } catch (error) {
+    console.error('Error in deleteSetoran:', error);
+    throw error;
   }
-};
+}
 
 /**
- * Updates the total hafalan count for a santri based on their setoran records
- * Now with improved calculation based on juz, pages, and lines
+ * Get setoran statistics including archived data
  */
-export const updateTotalHafalan = async (santriId: string): Promise<void> => {
-  console.log("Updating total hafalan for santri:", santriId);
+export async function getSetoranStats() {
   try {
-    // Get all setoran for this santri
-    const { data: setoran, error: setoranError } = await supabase
-      .from('setoran')
-      .select('awal_ayat, akhir_ayat')
-      .eq('santri_id', santriId);
-
-    if (setoranError) {
-      console.error("Error fetching setoran for total hafalan:", setoranError);
-      throw setoranError;
-    }
-
-    // Calculate total ayat
-    const totalAyat = setoran?.reduce((sum, item) => {
-      const count = (item.akhir_ayat - item.awal_ayat) + 1;
-      return sum + count;
-    }, 0) || 0;
+    const allSetoran = await fetchAllSetoran();
     
-    console.log("Calculated total hafalan ayat count:", totalAyat);
+    const totalSetoran = allSetoran.length;
+    const avgKelancaran = totalSetoran > 0 
+      ? allSetoran.reduce((sum, s) => sum + s.kelancaran, 0) / totalSetoran 
+      : 0;
+    const avgTajwid = totalSetoran > 0 
+      ? allSetoran.reduce((sum, s) => sum + s.tajwid, 0) / totalSetoran 
+      : 0;
+    const avgTahsin = totalSetoran > 0 
+      ? allSetoran.reduce((sum, s) => sum + s.tahsin, 0) / totalSetoran 
+      : 0;
 
-    // Update santri record with total ayat count
-    // The display formatting will be handled by calculateHafalanProgress function
-    const { error: updateError } = await supabase
-      .from('santri')
-      .update({ total_hafalan: totalAyat })
-      .eq('id', santriId);
-
-    if (updateError) {
-      console.error("Error updating total hafalan:", updateError);
-      throw updateError;
-    }
-    
-    console.log("Total hafalan updated successfully");
-  } catch (err) {
-    console.error("Exception in updateTotalHafalan:", err);
-    throw err;
+    return {
+      totalSetoran,
+      avgKelancaran: parseFloat(avgKelancaran.toFixed(1)),
+      avgTajwid: parseFloat(avgTajwid.toFixed(1)),
+      avgTahsin: parseFloat(avgTahsin.toFixed(1))
+    };
+  } catch (error) {
+    console.error('Error in getSetoranStats:', error);
+    return {
+      totalSetoran: 0,
+      avgKelancaran: 0,
+      avgTajwid: 0,
+      avgTahsin: 0
+    };
   }
-};
-
-/**
- * Gets the formatted hafalan progress (juz, pages, lines) for a santri
- */
-export const getFormattedHafalanProgress = (totalAyat: number): string => {
-  const progress = calculateHafalanProgress(totalAyat);
-  return progress.formattedProgress;
-};
+}

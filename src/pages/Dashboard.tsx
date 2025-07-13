@@ -1,188 +1,140 @@
 
-import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { Santri } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SantriCard from "@/components/dashboard/SantriCard";
+import React, { useState, useMemo } from "react";
+import { useQuery } from '@tanstack/react-query';
 import SearchBar from "@/components/dashboard/SearchBar";
 import ClassFilter from "@/components/dashboard/ClassFilter";
-import MigrationNotification from "@/components/archive/MigrationNotification";
-import { fetchSantri, fetchSantriByClass, deleteSantri } from "@/services/supabase/santri.service";
+import SantriCard from "@/components/dashboard/SantriCard";
+import SantriDetail from "@/components/dashboard/SantriDetail";
+import { fetchAllSantri } from "@/services/supabase/santri.service";
+import { fetchAllSetoran } from "@/services/supabase/setoran.service";
+import { Santri } from "@/types";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedClass, setSelectedClass] = useState<number | null>(null);
+  const [selectedClass, setSelectedClass] = useState<number | "all">("all");
+  const [selectedSantri, setSelectedSantri] = useState<Santri | null>(null);
 
-  const {
-    data: santris = [],
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ["santris", searchQuery, selectedClass],
-    queryFn: () => {
-      if (selectedClass) {
-        return fetchSantriByClass(selectedClass);
-      }
-      return fetchSantri(searchQuery);
-    },
+  // Fetch santri data
+  const { data: santriData = [], isLoading: santriLoading } = useQuery({
+    queryKey: ['santri'],
+    queryFn: fetchAllSantri,
   });
 
-  // Generate all classes from 7 to 12, plus any existing classes from data
-  const existingClasses = [...new Set(santris.map(santri => santri.kelas))];
-  const allClasses = [7, 8, 9, 10, 11, 12];
-  const classes = [...new Set([...allClasses, ...existingClasses])].sort((a, b) => a - b);
+  // Fetch all setoran data (including archived)
+  const { data: setoranData = [], isLoading: setoranLoading } = useQuery({
+    queryKey: ['all-setoran'],
+    queryFn: fetchAllSetoran,
+  });
 
-  const handleDeleteSantri = async (id: string) => {
-    try {
-      await deleteSantri(id);
-      toast.success("Santri berhasil dihapus");
-      refetch();
-    } catch (error) {
-      console.error("Error deleting santri:", error);
-      toast.error("Gagal menghapus santri");
-    }
-  };
+  // Calculate actual hafalan for each santri based on all setoran data
+  const santriWithActualHafalan = useMemo(() => {
+    if (!santriData.length || !setoranData.length) return santriData;
+
+    return santriData.map(santri => {
+      const santriSetoran = setoranData.filter(setoran => setoran.santri_id === santri.id);
+      const actualHafalan = santriSetoran.reduce((total, setoran) => {
+        return total + (setoran.akhir_ayat - setoran.awal_ayat + 1);
+      }, 0);
+
+      return {
+        ...santri,
+        total_hafalan: actualHafalan
+      };
+    });
+  }, [santriData, setoranData]);
+
+  const filteredSantri = useMemo(() => {
+    return santriWithActualHafalan.filter((santri) => {
+      const matchesSearch = santri.nama.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesClass = selectedClass === "all" || santri.kelas === selectedClass;
+      return matchesSearch && matchesClass;
+    });
+  }, [santriWithActualHafalan, searchQuery, selectedClass]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleClassSelect = (kelas: number) => {
-    setSelectedClass(selectedClass === kelas ? null : kelas);
+  const handleClassChange = (kelas: number | "all") => {
+    setSelectedClass(kelas);
   };
 
-  const refreshData = async () => {
-    await refetch();
+  const handleSantriClick = (santri: Santri) => {
+    setSelectedSantri(santri);
   };
 
-  if (error) {
-    toast.error("Gagal memuat data santri");
+  const handleCloseDetail = () => {
+    setSelectedSantri(null);
+  };
+
+  const isLoading = santriLoading || setoranLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-950 p-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+            <span className="ml-3 text-lg text-emerald-600">Memuat data santri...</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Migration Notification */}
-        <MigrationNotification />
-        
-        <Card className="mb-6 bg-white/70 backdrop-blur-sm border-emerald-200">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-emerald-800 text-center">
-              Dashboard Santri
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col gap-6">
-              {/* Search Bar */}
-              <div className="w-full">
-                <SearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={handleSearchChange}
-                />
-              </div>
-              
-              {/* Class Filter */}
-              <div className="w-full">
-                <ClassFilter
-                  selectedClass={selectedClass}
-                  onClassSelect={handleClassSelect}
-                  classes={classes}
-                  refreshData={refreshData}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-950 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">
+            Dashboard Santri
+          </h1>
+          <p className="text-emerald-600 dark:text-emerald-400">
+            Kelola dan pantau perkembangan hafalan santri
+          </p>
+        </div>
 
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-white/70 backdrop-blur-sm">
-            <TabsTrigger value="all">Semua Santri</TabsTrigger>
-            <TabsTrigger value="ikhwan">Ikhwan</TabsTrigger>
-            <TabsTrigger value="akhwat">Akhwat</TabsTrigger>
-          </TabsList>
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          <div className="flex-1">
+            <SearchBar 
+              searchQuery={searchQuery} 
+              onSearchChange={handleSearchChange}
+              placeholder="Cari santri berdasarkan nama..."
+            />
+          </div>
+          <div className="lg:w-64">
+            <ClassFilter 
+              selectedClass={selectedClass} 
+              onClassChange={handleClassChange}
+            />
+          </div>
+        </div>
 
-          <TabsContent value="all" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {isLoading ? (
-                <div className="col-span-full text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                  <p className="mt-2 text-emerald-600">Memuat data santri...</p>
-                </div>
-              ) : santris.length === 0 ? (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500">
-                    {selectedClass 
-                      ? `Tidak ada santri di kelas ${selectedClass}` 
-                      : searchQuery 
-                        ? `Tidak ada santri yang ditemukan untuk "${searchQuery}"` 
-                        : "Tidak ada santri yang ditemukan"
-                    }
-                  </p>
-                </div>
-              ) : (
-                santris.map((santri) => (
-                  <SantriCard
-                    key={santri.id}
-                    santri={santri}
-                  />
-                ))
-              )}
-            </div>
-          </TabsContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredSantri.map((santri) => (
+            <SantriCard 
+              key={santri.id} 
+              santri={santri} 
+              onClick={() => handleSantriClick(santri)}
+            />
+          ))}
+        </div>
 
-          <TabsContent value="ikhwan" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {isLoading ? (
-                <div className="col-span-full text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                  <p className="mt-2 text-emerald-600">Memuat data santri...</p>
-                </div>
-              ) : (
-                santris
-                  .filter((santri) => santri.jenis_kelamin === "Ikhwan")
-                  .map((santri) => (
-                    <SantriCard
-                      key={santri.id}
-                      santri={santri}
-                    />
-                  ))
-              )}
-              {santris.filter((santri) => santri.jenis_kelamin === "Ikhwan").length === 0 && !isLoading && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500">Tidak ada santri Ikhwan yang ditemukan</p>
-                </div>
-              )}
+        {filteredSantri.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-500 dark:text-gray-400 text-lg">
+              {searchQuery || selectedClass !== "all" 
+                ? "Tidak ada santri yang sesuai dengan filter"
+                : "Belum ada data santri"
+              }
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          <TabsContent value="akhwat" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {isLoading ? (
-                <div className="col-span-full text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto"></div>
-                  <p className="mt-2 text-emerald-600">Memuat data santri...</p>
-                </div>
-              ) : (
-                santris
-                  .filter((santri) => santri.jenis_kelamin === "Akhwat")
-                  .map((santri) => (
-                    <SantriCard
-                      key={santri.id}
-                      santri={santri}
-                    />
-                  ))
-              )}
-              {santris.filter((santri) => santri.jenis_kelamin === "Akhwat").length === 0 && !isLoading && (
-                <div className="col-span-full text-center py-8">
-                  <p className="text-gray-500">Tidak ada santri Akhwat yang ditemukan</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+        <SantriDetail 
+          santri={selectedSantri} 
+          onClose={handleCloseDetail}
+        />
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 
 import { supabase } from "./client";
 import { getHafalanScore } from "../quran/quranMapping";
+import { fetchAllSetoran } from "./setoran.service";
 
 /**
  * Fetches top santri by hafalan amount, optionally filtered by gender
- * Now uses improved ranking based on juz, pages, and lines
+ * Now includes data from Google Sheets archives
  */
 export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
   console.log("Fetching top hafalan", gender ? `for ${gender}` : "for all");
@@ -18,7 +19,6 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
       query = query.eq('jenis_kelamin', gender);
     }
     
-    // Get all records to sort by our improved logic
     const { data, error } = await query;
 
     if (error) {
@@ -32,12 +32,21 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
       return [];
     }
     
-    // Process the data to calculate juz, pages, and lines for each santri
+    // Get all setoran data (including archived) to calculate accurate totals
+    const allSetoran = await fetchAllSetoran();
+    
+    // Calculate actual hafalan for each santri based on all setoran data
     const enhancedData = data.map(santri => {
-      const hafalanScore = getHafalanScore(santri.total_hafalan || 0);
+      const santriSetoran = allSetoran.filter(s => s.santri_id === santri.id);
+      const actualHafalan = santriSetoran.reduce((total, setoran) => {
+        return total + (setoran.akhir_ayat - setoran.awal_ayat + 1);
+      }, 0);
+      
+      const hafalanScore = getHafalanScore(actualHafalan);
       return {
         ...santri,
         jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat",
+        total_hafalan: actualHafalan, // Use calculated value
         hafalanJuz: hafalanScore.juz,
         hafalanPages: hafalanScore.pages,
         hafalanLines: hafalanScore.lines,
@@ -53,76 +62,69 @@ export const fetchTopHafalan = async (gender?: "Ikhwan" | "Akhwat"): Promise<any
     return sortedData;
   } catch (err) {
     console.error("Exception in fetchTopHafalan:", err);
-    return []; // Return empty array instead of throwing
+    return [];
   }
 };
 
 /**
  * Fetches top performers based on average scores, optionally filtered by gender
+ * Now includes data from Google Sheets archives
  */
 export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
   console.log("Fetching top performers", gender ? `for ${gender}` : "for all");
   try {
-    // First, get all setoran records with santri data
-    let setoranQuery = supabase
-      .from('setoran')
-      .select(`
-        santri_id,
-        kelancaran,
-        tajwid,
-        tahsin,
-        santri:santri_id (
-          id,
-          nama,
-          kelas,
-          jenis_kelamin,
-          total_hafalan
-        )
-      `);
-
-    const { data: setoranData, error: setoranError } = await setoranQuery;
+    // Get all santri data
+    const { data: santriData, error: santriError } = await supabase
+      .from('santri')
+      .select('id, nama, kelas, jenis_kelamin, total_hafalan');
     
-    if (setoranError) {
-      console.error("Error fetching setoran for top performers:", setoranError);
+    if (santriError) {
+      console.error("Error fetching santri for top performers:", santriError);
       return [];
     }
 
-    if (!setoranData || setoranData.length === 0) {
+    if (!santriData || santriData.length === 0) {
+      return [];
+    }
+
+    // Get all setoran data (including archived)
+    const allSetoran = await fetchAllSetoran();
+    
+    if (!allSetoran || allSetoran.length === 0) {
       console.log("No setoran data found for top performers");
       return [];
     }
 
-    // Filter by gender if specified and group by santri
+    // Filter by gender and calculate scores
     const scoreMap = new Map();
     
-    setoranData.forEach(item => {
-      const santri = item.santri;
-      
-      // Skip if no santri data or doesn't match gender filter
-      if (!santri || (gender && santri.jenis_kelamin !== gender)) {
+    santriData.forEach(santri => {
+      // Skip if doesn't match gender filter
+      if (gender && santri.jenis_kelamin !== gender) {
         return;
       }
 
-      const santriId = item.santri_id;
-      const avgScore = (item.kelancaran + item.tajwid + item.tahsin) / 3;
+      const santriSetoran = allSetoran.filter(s => s.santri_id === santri.id);
       
-      if (scoreMap.has(santriId)) {
-        const current = scoreMap.get(santriId);
-        scoreMap.set(santriId, {
-          ...current,
-          totalScore: current.totalScore + avgScore,
-          count: current.count + 1
-        });
-      } else {
-        scoreMap.set(santriId, {
-          santri: {
-            ...santri,
-            jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat"
-          },
-          totalScore: avgScore,
-          count: 1
-        });
-      }
+      if (santriSetoran.length === 0) return;
+
+      const totalScore = santriSetoran.reduce((sum, setoran) => {
+        return sum + (setoran.kelancaran + setoran.tajwid + setoran.tahsin) / 3;
+      }, 0);
+
+      const actualHafalan = santriSetoran.reduce((total, setoran) => {
+        return total + (setoran.akhir_ayat - setoran.awal_ayat + 1);
+      }, 0);
+
+      scoreMap.set(santri.id, {
+        santri: {
+          ...santri,
+          jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat",
+          total_hafalan: actualHafalan
+        },
+        totalScore,
+        count: santriSetoran.length
+      });
     });
     
     console.log("Calculated performer scores for", scoreMap.size, "santri");
@@ -135,7 +137,7 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
         kelas: data.santri.kelas,
         jenis_kelamin: data.santri.jenis_kelamin,
         nilai_rata: data.totalScore / data.count,
-        total_hafalan: data.santri.total_hafalan || 0
+        total_hafalan: data.santri.total_hafalan
       }))
       .sort((a, b) => b.nilai_rata - a.nilai_rata)
       .slice(0, 10);
@@ -143,61 +145,74 @@ export const fetchTopPerformers = async (gender?: "Ikhwan" | "Akhwat"): Promise<
     return result;
   } catch (err) {
     console.error("Exception in fetchTopPerformers:", err);
-    return []; // Return empty array instead of throwing
+    return [];
   }
 };
 
 /**
  * Fetches top santri by regularity (consistent setoran patterns)
- * This is currently a placeholder using total_hafalan as a metric
- * In the future, it can be enhanced to analyze setoran patterns
+ * Now includes data from Google Sheets archives
  */
 export const fetchTopRegularity = async (gender?: "Ikhwan" | "Akhwat"): Promise<any[]> => {
   console.log("Fetching top regularity", gender ? `for ${gender}` : "for all");
   try {
-    let query = supabase
+    // Get all santri data
+    const { data: santriData, error: santriError } = await supabase
       .from('santri')
       .select('id, nama, kelas, jenis_kelamin, total_hafalan');
     
-    // Apply gender filter if specified
-    if (gender) {
-      query = query.eq('jenis_kelamin', gender);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      console.error("Error fetching top regularity:", error);
+    if (santriError) {
+      console.error("Error fetching santri for top regularity:", santriError);
       return [];
     }
     
-    if (!data || data.length === 0) {
+    if (!santriData || santriData.length === 0) {
       return [];
     }
     
-    // Process data for regularity metrics
-    // For now, just using total_hafalan as a placeholder
-    const processedData = data.map(santri => {
-      const hafalanScore = getHafalanScore(santri.total_hafalan || 0);
+    // Get all setoran data (including archived)
+    const allSetoran = await fetchAllSetoran();
+    
+    // Calculate regularity metrics for each santri
+    const processedData = santriData.map(santri => {
+      // Skip if doesn't match gender filter
+      if (gender && santri.jenis_kelamin !== gender) {
+        return null;
+      }
+
+      const santriSetoran = allSetoran.filter(s => s.santri_id === santri.id);
+      const actualHafalan = santriSetoran.reduce((total, setoran) => {
+        return total + (setoran.akhir_ayat - setoran.awal_ayat + 1);
+      }, 0);
+      
+      const hafalanScore = getHafalanScore(actualHafalan);
       return {
         ...santri,
         jenis_kelamin: santri.jenis_kelamin as "Ikhwan" | "Akhwat",
+        total_hafalan: actualHafalan,
         hafalanJuz: hafalanScore.juz,
         hafalanPages: hafalanScore.pages,
         hafalanLines: hafalanScore.lines,
-        hafalanScore: hafalanScore.score
+        hafalanScore: hafalanScore.score,
+        totalSetoran: santriSetoran.length
       };
-    });
+    }).filter(Boolean);
     
-    // Sort by total_hafalan for now
-    // In the future, implement a more sophisticated regularity algorithm
+    // Sort by combination of total setoran and hafalan score
     const sortedData = processedData
-      .sort((a, b) => b.hafalanScore - a.hafalanScore)
+      .sort((a, b) => {
+        // Primary sort: total setoran (regularity)
+        const setoranDiff = b.totalSetoran - a.totalSetoran;
+        if (setoranDiff !== 0) return setoranDiff;
+        
+        // Secondary sort: hafalan score
+        return b.hafalanScore - a.hafalanScore;
+      })
       .slice(0, 10);
     
     return sortedData;
   } catch (err) {
     console.error("Exception in fetchTopRegularity:", err);
-    return []; // Return empty array instead of throwing
+    return [];
   }
 };
