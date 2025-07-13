@@ -99,11 +99,11 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData, showP
           </div>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
           {/* All Classes Button */}
           <button
             onClick={handleAllClassClick}
-            className={`group relative overflow-hidden rounded-xl md:rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg md:hover:shadow-xl ${
+            className={`group relative overflow-hidden rounded-2xl h-24 md:h-32 lg:h-36 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg md:hover:shadow-xl ${
               selectedClass === null 
                 ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-md md:shadow-lg" 
                 : "bg-card border-2 border-border text-foreground hover:border-islamic-primary/40"
@@ -112,12 +112,12 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData, showP
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
             <div className="relative text-center">
-              <div className="text-xs md:text-sm font-medium mb-1">Semua</div>
-              <div className="text-lg md:text-2xl font-bold">Kelas</div>
+              <div className="text-sm md:text-base font-medium mb-1">Semua</div>
+              <div className="text-2xl md:text-3xl lg:text-4xl font-bold">Kelas</div>
             </div>
             
             {selectedClass === null && (
-              <div className="absolute inset-0 border-2 border-white/30 rounded-xl md:rounded-2xl" />
+              <div className="absolute inset-0 border-2 border-white/30 rounded-2xl" />
             )}
           </button>
 
@@ -148,7 +148,7 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData, showP
                 e.currentTarget.addEventListener('touchend', endTouch, { once: true });
                 e.currentTarget.addEventListener('touchcancel', endTouch, { once: true });
               }}
-              className={`group relative overflow-hidden rounded-xl md:rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg md:hover:shadow-xl ${
+              className={`group relative overflow-hidden rounded-2xl h-24 md:h-32 lg:h-36 flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg md:hover:shadow-xl ${
                 selectedClass === kelas 
                   ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-md md:shadow-lg" 
                   : "bg-card border-2 border-border text-foreground hover:border-islamic-primary/40"
@@ -157,12 +157,12 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData, showP
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               
               <div className="relative text-center">
-                <div className="text-xs md:text-sm font-medium mb-1">Kelas</div>
-                <div className="text-lg md:text-2xl font-bold">{kelas}</div>
+                <div className="text-sm md:text-base font-medium mb-1">Kelas</div>
+                <div className="text-2xl md:text-3xl lg:text-4xl font-bold">{kelas}</div>
               </div>
               
               {selectedClass === kelas && (
-                <div className="absolute inset-0 border-2 border-white/30 rounded-xl md:rounded-2xl" />
+                <div className="absolute inset-0 border-2 border-white/30 rounded-2xl" />
               )}
             </button>
           ))}
