@@ -8,7 +8,7 @@ import SearchBar from "@/components/dashboard/SearchBar";
 import ClassFilter from "@/components/dashboard/ClassFilter";
 import SantriCard from "@/components/dashboard/SantriCard";
 import SantriDetail from "@/components/dashboard/SantriDetail";
-import SpreadsheetTest from "@/components/test/SpreadsheetTest";
+
 import { fetchSantri } from "@/services/supabase/santri.service";
 import { fetchAllSetoran, fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 import { Santri } from "@/types";
@@ -163,11 +163,6 @@ const Dashboard = () => {
                 Tambah Santri
               </Button>
             </Link>
-          </div>
-          
-          {/* Test Spreadsheet Access */}
-          <div className="mb-8">
-            <SpreadsheetTest />
           </div>
         </div>
 

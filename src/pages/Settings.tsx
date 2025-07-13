@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import ThemeSettings from "@/components/settings/ThemeSettings";
 import MigrationSettings from "@/components/settings/MigrationSettings";
 import ClassPromotionSettings from "@/components/settings/ClassPromotionSettings";
+import SpreadsheetTest from "@/components/test/SpreadsheetTest";
 import IslamicLogo from "@/components/IslamicLogo";
 
 const Settings = () => {
@@ -54,7 +55,7 @@ const Settings = () => {
         {/* Settings Content */}
         <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-xl border border-border">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 lg:w-[500px] bg-background border border-border rounded-xl">
+            <TabsList className="grid w-full grid-cols-4 lg:w-[600px] bg-background border border-border rounded-xl">
               <TabsTrigger value="general" className="flex items-center gap-2 text-foreground data-[state=active]:bg-islamic-primary data-[state=active]:text-white">
                 <SettingsIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Umum</span>
@@ -66,6 +67,10 @@ const Settings = () => {
               <TabsTrigger value="users" className="flex items-center gap-2 text-foreground data-[state=active]:bg-islamic-primary data-[state=active]:text-white">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">Pengguna</span>
+              </TabsTrigger>
+              <TabsTrigger value="spreadsheet" className="flex items-center gap-2 text-foreground data-[state=active]:bg-islamic-primary data-[state=active]:text-white">
+                <Database className="w-4 h-4" />
+                <span className="hidden sm:inline">Test Sheet</span>
               </TabsTrigger>
             </TabsList>
 
@@ -183,6 +188,10 @@ const Settings = () => {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="spreadsheet" className="space-y-6">
+              <SpreadsheetTest />
             </TabsContent>
           </Tabs>
         </div>
