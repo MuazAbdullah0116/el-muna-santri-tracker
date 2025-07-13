@@ -67,7 +67,8 @@ export default {
 					primary: 'hsl(var(--islamic-primary))',
 					secondary: 'hsl(var(--islamic-secondary))',
 					accent: 'hsl(var(--islamic-accent))',
-					light: 'hsl(var(--islamic-light))'
+					light: 'hsl(var(--islamic-light))',
+					dark: 'hsl(var(--islamic-dark))'
 				}
 			},
 			borderRadius: {

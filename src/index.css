@@ -49,6 +49,7 @@
     --islamic-secondary: 90 27% 56%;
     --islamic-accent: 43 32% 67%;
     --islamic-light: 142 30% 96%;
+    --islamic-dark: 168 42% 13%;
   }
 
   .dark {
@@ -94,6 +95,7 @@
     --islamic-secondary: 90 27% 46%;
     --islamic-accent: 43 32% 47%;
     --islamic-light: 168 46% 14%;
+    --islamic-dark: 142 30% 96%;
   }
 }
 
