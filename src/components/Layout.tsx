@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, BookOpen, Trophy, Settings } from "lucide-react";
+import { Home, BookOpen, Trophy, Settings, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -34,6 +34,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       navigate("/login");
     }
   }, [user, location.pathname, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const navItems = [
     {
@@ -88,6 +93,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Logout button for non-authenticated users */}
+              {user === "Wali" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton 
+                    asChild 
+                    tooltip="Logout"
+                  >
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 w-full text-left px-2 py-1 rounded-md hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>Logout</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarContent>
         </Sidebar>
@@ -102,10 +124,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Pengelola Santri Al-Munawwarah
               </h1>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary text-primary-foreground">
                 {user || "Guest"}
               </span>
+              {user === "Wali" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-xs"
+                >
+                  <LogOut className="h-3 w-3 mr-1" />
+                  Logout
+                </Button>
+              )}
             </div>
           </div>
         </header>
@@ -133,6 +166,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="mt-1 text-[10px]">{item.name}</span>
               </Link>
             ))}
+            {/* Mobile logout button for non-authenticated users */}
+            {user === "Wali" && (
+              <button
+                onClick={handleLogout}
+                className="flex flex-col items-center py-1 px-2 text-muted-foreground text-xs"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="mt-1 text-[10px]">Logout</span>
+              </button>
+            )}
           </div>
         </nav>
       </div>

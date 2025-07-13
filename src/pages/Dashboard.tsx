@@ -1,6 +1,9 @@
 
 import React, { useState, useMemo } from "react";
 import { useQuery } from '@tanstack/react-query';
+import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/dashboard/SearchBar";
 import ClassFilter from "@/components/dashboard/ClassFilter";
 import SantriCard from "@/components/dashboard/SantriCard";
@@ -59,7 +62,7 @@ const Dashboard = () => {
   const filteredSantri = useMemo(() => {
     return santriWithActualHafalan.filter((santri) => {
       const matchesSearch = santri.nama.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesClass = selectedClass === "all" || santri.kelas === Number(selectedClass);
+      const matchesClass = selectedClass === "all" || santri.kelas === selectedClass;
       return matchesSearch && matchesClass;
     });
   }, [santriWithActualHafalan, searchQuery, selectedClass]);
@@ -141,15 +144,25 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-950 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-islamic-light to-islamic-light/50 dark:from-islamic-dark dark:to-islamic-dark/50 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-emerald-800 dark:text-emerald-200 mb-2">
-            Dashboard Santri
-          </h1>
-          <p className="text-emerald-600 dark:text-emerald-400">
-            Kelola dan pantau perkembangan hafalan santri
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Dashboard Santri
+              </h1>
+              <p className="text-muted-foreground">
+                Kelola dan pantau perkembangan hafalan santri
+              </p>
+            </div>
+            <Link to="/add-santri">
+              <Button className="bg-islamic-primary hover:bg-islamic-primary/90 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Tambah Santri
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mb-6">
@@ -162,10 +175,11 @@ const Dashboard = () => {
           </div>
           <div className="lg:w-64">
             <ClassFilter 
-              selectedClass={selectedClass === "all" ? null : selectedClass as number}
+              selectedClass={selectedClass === "all" ? null : selectedClass}
               onClassSelect={handleClassChange}
               classes={classes}
               refreshData={refreshData}
+              showPromotionHint={false}
             />
           </div>
         </div>
@@ -182,7 +196,7 @@ const Dashboard = () => {
 
         {filteredSantri.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-500 dark:text-gray-400 text-lg">
+            <div className="text-muted-foreground text-lg">
               {searchQuery || selectedClass !== "all" 
                 ? "Tidak ada santri yang sesuai dengan filter"
                 : "Belum ada data santri"

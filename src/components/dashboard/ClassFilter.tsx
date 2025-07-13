@@ -18,9 +18,10 @@ interface ClassFilterProps {
   onClassSelect: (kelas: number | "all") => void;
   classes: number[];
   refreshData: () => Promise<void>;
+  showPromotionHint?: boolean;
 }
 
-const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: ClassFilterProps) => {
+const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData, showPromotionHint = true }: ClassFilterProps) => {
   const [promoteDialogOpen, setPromoteDialogOpen] = useState(false);
   const [classToPromote, setClassToPromote] = useState<number | null>(null);
   const [isPromoting, setIsPromoting] = useState(false);
@@ -30,7 +31,12 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
     onClassSelect(kelas);
   };
 
+  const handleAllClassClick = () => {
+    onClassSelect("all");
+  };
+
   const handleLongPress = (kelas: number) => {
+    if (!showPromotionHint) return;
     setClassToPromote(kelas);
     setPromoteDialogOpen(true);
   };
@@ -87,20 +93,45 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
           </div>
           <div>
             <h2 className="text-lg md:text-xl font-bold text-foreground">Filter Kelas</h2>
-            <p className="text-xs md:text-sm text-muted-foreground">Tekan lama untuk naikkan kelas</p>
+            {showPromotionHint && (
+              <p className="text-xs md:text-sm text-muted-foreground">Tekan lama untuk naikkan kelas</p>
+            )}
           </div>
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+          {/* All Classes Button */}
+          <button
+            onClick={handleAllClassClick}
+            className={`group relative overflow-hidden rounded-xl md:rounded-2xl aspect-square flex items-center justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg md:hover:shadow-xl ${
+              selectedClass === null 
+                ? "bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white shadow-md md:shadow-lg" 
+                : "bg-card border-2 border-border text-foreground hover:border-islamic-primary/40"
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            <div className="relative text-center">
+              <div className="text-xs md:text-sm font-medium mb-1">Semua</div>
+              <div className="text-lg md:text-2xl font-bold">Kelas</div>
+            </div>
+            
+            {selectedClass === null && (
+              <div className="absolute inset-0 border-2 border-white/30 rounded-xl md:rounded-2xl" />
+            )}
+          </button>
+
           {classes.map((kelas) => (
             <button
               key={kelas}
               onClick={() => handleClassClick(kelas)}
               onContextMenu={(e) => {
+                if (!showPromotionHint) return;
                 e.preventDefault();
                 handleLongPress(kelas);
               }}
               onTouchStart={(e) => {
+                if (!showPromotionHint) return;
                 let touchTimer: NodeJS.Timeout;
                 const startTouch = () => {
                   touchTimer = setTimeout(() => {
@@ -138,38 +169,40 @@ const ClassFilter = ({ selectedClass, onClassSelect, classes, refreshData }: Cla
         </div>
       </div>
 
-      <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
-        <DialogContent className="sm:max-w-md mx-4">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-foreground">
-              <ChevronUp className="w-5 h-5 text-islamic-primary" />
-              Naikkan Kelas
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Apakah Anda yakin ingin menaikkan seluruh santri kelas {classToPromote} ke kelas {classToPromote ? classToPromote + 1 : ""}?
-              <br />
-              <span className="text-destructive font-medium">Tindakan ini tidak dapat dibatalkan.</span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => setPromoteDialogOpen(false)}
-              className="w-full sm:w-auto"
-            >
-              Batal
-            </Button>
-            <Button 
-              onClick={handlePromoteClass} 
-              disabled={isPromoting}
-              className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90"
-            >
-              <ChevronUp className="h-4 w-4 mr-2" />
-              {isPromoting ? "Memproses..." : "Naikkan Kelas"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {showPromotionHint && (
+        <Dialog open={promoteDialogOpen} onOpenChange={setPromoteDialogOpen}>
+          <DialogContent className="sm:max-w-md mx-4">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-foreground">
+                <ChevronUp className="w-5 h-5 text-islamic-primary" />
+                Naikkan Kelas
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Apakah Anda yakin ingin menaikkan seluruh santri kelas {classToPromote} ke kelas {classToPromote ? classToPromote + 1 : ""}?
+                <br />
+                <span className="text-destructive font-medium">Tindakan ini tidak dapat dibatalkan.</span>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setPromoteDialogOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Batal
+              </Button>
+              <Button 
+                onClick={handlePromoteClass} 
+                disabled={isPromoting}
+                className="w-full sm:w-auto bg-gradient-to-r from-islamic-primary to-islamic-secondary hover:from-islamic-primary/90 hover:to-islamic-secondary/90"
+              >
+                <ChevronUp className="h-4 w-4 mr-2" />
+                {isPromoting ? "Memproses..." : "Naikkan Kelas"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
