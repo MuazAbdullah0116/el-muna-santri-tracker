@@ -39,6 +39,16 @@ const SplashScreen = () => {
           <div className="h-2 w-2 rounded-full bg-islamic-primary mr-1"></div>
           <div className="h-2 w-2 rounded-full bg-islamic-primary"></div>
         </div>
+        
+        {/* Add browse button for public access */}
+        <div className="mt-8">
+          <a 
+            href="/browse" 
+            className="inline-flex items-center px-6 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
+          >
+            Jelajah Santri Tanpa Login
+          </a>
+        </div>
       </div>
     </div>
   );

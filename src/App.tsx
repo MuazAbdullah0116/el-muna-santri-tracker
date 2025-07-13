@@ -15,6 +15,7 @@ import QuranDigital from "./pages/QuranDigital";
 import SurahDetail from "./pages/SurahDetail";
 import Achievements from "./pages/Achievements";
 import Settings from "./pages/Settings";
+import BrowseSantri from "./pages/BrowseSantri";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 import QuranAudioPlayer from "./components/QuranAudioPlayer";
@@ -114,6 +115,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<SplashScreen />} />
+                <Route path="/browse" element={<BrowseSantri />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
                 <Route path="/add-santri" element={<Layout><AddSantri /></Layout>} />
