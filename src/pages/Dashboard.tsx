@@ -145,20 +145,20 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-islamic-light to-islamic-light/50 dark:from-islamic-dark dark:to-islamic-dark/50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-islamic-light to-islamic-light/50 dark:from-islamic-dark dark:to-islamic-dark/50 p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-1 sm:mb-2">
                 Dashboard Santri
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Kelola dan pantau perkembangan hafalan santri
               </p>
             </div>
-            <Link to="/add-santri">
-              <Button className="bg-islamic-primary hover:bg-islamic-primary/90 text-white">
+            <Link to="/add-santri" className="w-full sm:w-auto">
+              <Button className="bg-islamic-primary hover:bg-islamic-primary/90 text-white w-full sm:w-auto">
                 <Plus className="w-4 h-4 mr-2" />
                 Tambah Santri
               </Button>
@@ -167,7 +167,7 @@ const Dashboard = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <SearchBar 
             searchQuery={searchQuery} 
             onSearchChange={handleSearchChange}
@@ -176,7 +176,7 @@ const Dashboard = () => {
         </div>
 
         {/* Class Filter */}
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-8">
           <ClassFilter 
             selectedClass={selectedClass === "all" ? null : selectedClass}
             onClassSelect={handleClassChange}
@@ -186,7 +186,7 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {filteredSantri.map((santri) => (
             <SantriCard 
               key={santri.id} 

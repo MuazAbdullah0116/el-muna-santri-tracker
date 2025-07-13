@@ -73,23 +73,25 @@ const TopPerformersCard = ({ data, isLoading, searchQuery, onSantriClick }: TopP
             className={`${getRankColor(rank)} text-white border-none ${onSantriClick ? 'cursor-pointer transition-all duration-200' : ''}`}
             onClick={() => onSantriClick?.(item.id)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  {getRankIcon(rank)}
-                  <div>
-                    <h3 className="font-semibold">{item.nama}</h3>
-                    <div className="flex items-center space-x-2 text-sm opacity-90">
-                      <span>Kelas {item.kelas}</span>
-                      <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                  <div className="flex-shrink-0">
+                    {getRankIcon(rank)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-semibold text-sm sm:text-base truncate">{item.nama}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm opacity-90">
+                      <span className="whitespace-nowrap">Kelas {item.kelas}</span>
+                      <Badge variant="secondary" className="text-[10px] sm:text-xs bg-white/20 text-white border-white/30 w-fit">
                         {item.jenis_kelamin}
                       </Badge>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold">#{rank}</div>
-                  <div className="text-sm opacity-90">
+                <div className="text-right flex-shrink-0">
+                  <div className="text-sm sm:text-lg font-bold">#{rank}</div>
+                  <div className="text-xs sm:text-sm opacity-90">
                     {item.nilai_rata?.toFixed(1) || 0}/10
                   </div>
                 </div>

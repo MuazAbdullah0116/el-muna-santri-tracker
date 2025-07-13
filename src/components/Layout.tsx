@@ -118,14 +118,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex flex-col min-h-screen w-full">
         {/* Header */}
         <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container flex h-14 max-w-screen-2xl items-center">
-            <div className="flex-1 flex items-center justify-center md:justify-start">
-              <h1 className="text-sm md:text-base lg:text-lg font-semibold">
+          <div className="container flex h-12 sm:h-14 max-w-screen-2xl items-center px-2 sm:px-4">
+            <div className="flex-1 flex items-center justify-center md:justify-start min-w-0">
+              <h1 className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold truncate">
                 Pengelola Santri Al-Munawwarah
               </h1>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary text-primary-foreground">
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              <span className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-primary text-primary-foreground">
                 {user || "Guest"}
               </span>
               {user === "Wali" && (
@@ -133,10 +133,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-xs"
+                  className="text-[10px] sm:text-xs p-1 sm:p-2 h-6 sm:h-8"
                 >
-                  <LogOut className="h-3 w-3 mr-1" />
-                  Logout
+                  <LogOut className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Logout</span>
                 </Button>
               )}
             </div>
@@ -144,36 +144,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 container py-4 md:py-6 pb-20 md:pb-6 px-2 md:px-6">
+        <main className="flex-1 container py-2 sm:py-4 md:py-6 pb-16 sm:pb-20 md:pb-6 px-2 sm:px-4 md:px-6">
           {children}
         </main>
 
         {/* Bottom navigation for mobile */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg">
-          <div className="container flex justify-around py-2">
+          <div className="container flex justify-around py-1.5 sm:py-2 px-1">
             {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center py-1 px-2 text-muted-foreground text-xs",
+                  "flex flex-col items-center py-1 px-1 sm:px-2 text-muted-foreground text-xs min-w-0 flex-1",
                   (location.pathname === item.path || 
                    (item.path === "/quran" && location.pathname.startsWith("/quran/"))) 
                     && "text-primary font-medium"
                 )}
               >
-                {item.icon}
-                <span className="mt-1 text-[10px]">{item.name}</span>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                  {React.cloneElement(item.icon, { className: "w-4 h-4 sm:w-5 sm:h-5" })}
+                </div>
+                <span className="mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] leading-tight text-center truncate w-full">{item.name}</span>
               </Link>
             ))}
             {/* Mobile logout button for non-authenticated users */}
             {user === "Wali" && (
               <button
                 onClick={handleLogout}
-                className="flex flex-col items-center py-1 px-2 text-muted-foreground text-xs"
+                className="flex flex-col items-center py-1 px-1 sm:px-2 text-muted-foreground text-xs min-w-0 flex-1"
               >
-                <LogOut className="h-5 w-5" />
-                <span className="mt-1 text-[10px]">Logout</span>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                <span className="mt-0.5 sm:mt-1 text-[9px] sm:text-[10px] leading-tight text-center truncate w-full">Logout</span>
               </button>
             )}
           </div>
