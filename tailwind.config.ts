@@ -64,12 +64,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				islamic: {
-					primary: '#1A936F',
-					secondary: '#88B169',
-					accent: '#C6B38E',
-					gold: '#D4AF37',
-					light: '#F8F1E0',
-					dark: '#114D40'
+					primary: 'hsl(var(--islamic-primary))',
+					secondary: 'hsl(var(--islamic-secondary))',
+					accent: 'hsl(var(--islamic-accent))',
+					light: 'hsl(var(--islamic-light))'
 				}
 			},
 			borderRadius: {

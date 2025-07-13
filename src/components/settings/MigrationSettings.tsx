@@ -6,8 +6,15 @@ import { Download, Database } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { exportToCSV, getMigrationStatus } from '@/services/supabase/archive.service';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/auth-context';
 
 export default function MigrationSettings() {
+  const { user } = useAuth();
+  
+  // Only show for authenticated users
+  if (!user || user === "Wali") {
+    return null;
+  }
   const { data: migrationStatus } = useQuery({
     queryKey: ['migration-status'],
     queryFn: getMigrationStatus,

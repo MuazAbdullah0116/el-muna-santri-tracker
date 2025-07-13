@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import ThemeSettings from "@/components/settings/ThemeSettings";
 import MigrationSettings from "@/components/settings/MigrationSettings";
+import ClassPromotionSettings from "@/components/settings/ClassPromotionSettings";
 import IslamicLogo from "@/components/IslamicLogo";
 
 const Settings = () => {
@@ -104,6 +105,9 @@ const Settings = () => {
 
               {/* Migration Settings */}
               <MigrationSettings />
+
+              {/* Class Promotion Settings */}
+              <ClassPromotionSettings />
 
               <Card className="bg-card border border-border text-foreground">
                 <CardHeader>

@@ -43,6 +43,12 @@
     --sidebar-accent-foreground: 60 30% 95%;
     --sidebar-border: 162 49% 25%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Islamic theme colors */
+    --islamic-primary: 162 70% 35%;
+    --islamic-secondary: 90 27% 56%;
+    --islamic-accent: 43 32% 67%;
+    --islamic-light: 142 30% 96%;
   }
 
   .dark {
@@ -82,6 +88,12 @@
     --sidebar-accent-foreground: 142 30% 96%;
     --sidebar-border: 167 30% 25%;
     --sidebar-ring: 162 70% 35%;
+
+    /* Islamic theme colors for dark mode */
+    --islamic-primary: 162 70% 35%;
+    --islamic-secondary: 90 27% 46%;
+    --islamic-accent: 43 32% 47%;
+    --islamic-light: 168 46% 14%;
   }
 }
 

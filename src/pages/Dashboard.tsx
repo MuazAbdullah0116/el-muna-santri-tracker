@@ -78,10 +78,6 @@ const Dashboard = () => {
     setSelectedClass(kelas);
   };
 
-  const handleClassSelect = (kelas: number) => {
-    setSelectedClass(kelas);
-  };
-
   const handleSantriClick = (santri: Santri) => {
     setSelectedSantri(santri);
   };
@@ -167,7 +163,7 @@ const Dashboard = () => {
           <div className="lg:w-64">
             <ClassFilter 
               selectedClass={selectedClass === "all" ? null : selectedClass as number}
-              onClassSelect={handleClassSelect}
+              onClassSelect={handleClassChange}
               classes={classes}
               refreshData={refreshData}
             />

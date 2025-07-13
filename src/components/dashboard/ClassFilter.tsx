@@ -15,7 +15,7 @@ import {
 
 interface ClassFilterProps {
   selectedClass: number | null;
-  onClassSelect: (kelas: number) => void;
+  onClassSelect: (kelas: number | "all") => void;
   classes: number[];
   refreshData: () => Promise<void>;
 }
