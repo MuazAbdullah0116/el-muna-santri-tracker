@@ -49,6 +49,7 @@ export type Database = {
           catatan: string | null
           created_at: string | null
           diuji_oleh: string
+          exported_at: string | null
           id: string
           juz: number
           kelancaran: number
@@ -65,6 +66,7 @@ export type Database = {
           catatan?: string | null
           created_at?: string | null
           diuji_oleh: string
+          exported_at?: string | null
           id?: string
           juz: number
           kelancaran: number
@@ -81,6 +83,7 @@ export type Database = {
           catatan?: string | null
           created_at?: string | null
           diuji_oleh?: string
+          exported_at?: string | null
           id?: string
           juz?: number
           kelancaran?: number

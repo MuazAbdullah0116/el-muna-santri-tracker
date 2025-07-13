@@ -158,6 +158,18 @@ Deno.serve(async (req) => {
 
         console.log(`✅ CSV generated with ${setoranData.length} records`);
 
+        // Mark data as exported but not migrated yet
+        const setoranIds = setoranData.map(s => s.id);
+        const { error: updateError } = await supabase
+          .from('setoran')
+          .update({ exported_at: new Date().toISOString() })
+          .in('id', setoranIds);
+
+        if (updateError) {
+          console.error('❌ Error marking data as exported:', updateError);
+          throw updateError;
+        }
+
         return new Response(
           JSON.stringify({ 
             success: true,
@@ -188,15 +200,11 @@ Deno.serve(async (req) => {
 
         console.log('🔄 Completing migration process...');
         
-        // Get data to be archived
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - 14);
-        const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-        
+        // Get exported data to be migrated
         const { data: setoranData, error: fetchError } = await supabase
           .from('setoran')
           .select('*')
-          .lt('tanggal', cutoffDateStr)
+          .not('exported_at', 'is', null)
           .is('archived_at', null);
 
         if (fetchError) throw fetchError;
@@ -205,7 +213,31 @@ Deno.serve(async (req) => {
           return new Response(
             JSON.stringify({ 
               success: false,
-              error: 'Tidak ada data untuk diarsipkan'
+              error: 'Tidak ada data yang sudah diekspor untuk diarsipkan'
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          );
+        }
+
+        // Verify sheet access first using full URL
+        const supabaseUrl = "https://uszycbjecrbinezzecda.supabase.co";
+        const verifyResponse = await fetch(`${supabaseUrl}/functions/v1/verify-sheet-access`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`
+          },
+          body: JSON.stringify({ sheetUrl })
+        });
+
+        const verifyResult = await verifyResponse.json();
+        if (!verifyResult.success) {
+          return new Response(
+            JSON.stringify({ 
+              success: false,
+              error: verifyResult.error || 'Gagal memverifikasi akses Google Sheets'
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
