@@ -10,6 +10,7 @@ import SantriProfileSetoranTable from "@/components/santri-profile/SantriProfile
 import SantriProfileChart from "@/components/santri-profile/SantriProfileChart";
 import { fetchSantriById } from "@/services/supabase/santri.service";
 import { fetchSetoranBySantri } from "@/services/supabase/setoran.service";
+import { Setoran } from "@/types";
 
 const SantriProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,11 +22,19 @@ const SantriProfile = () => {
     enabled: !!id,
   });
 
-  const { data: setorans = [], isLoading: setoranLoading } = useQuery({
+  const { data: rawSetorans = [], isLoading: setoranLoading } = useQuery({
     queryKey: ['setoran', id],
     queryFn: () => fetchSetoranBySantri(id!),
     enabled: !!id,
   });
+
+  // Transform the data to ensure proper typing
+  const setorans: Setoran[] = React.useMemo(() => {
+    return rawSetorans.map((setoran: any) => ({
+      ...setoran,
+      catatan: setoran.catatan || ""
+    }));
+  }, [rawSetorans]);
 
   if (santriLoading) {
     return (

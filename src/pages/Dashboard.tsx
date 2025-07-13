@@ -5,7 +5,7 @@ import SearchBar from "@/components/dashboard/SearchBar";
 import ClassFilter from "@/components/dashboard/ClassFilter";
 import SantriCard from "@/components/dashboard/SantriCard";
 import SantriDetail from "@/components/dashboard/SantriDetail";
-import { fetchAllSantri } from "@/services/supabase/santri.service";
+import { fetchSantri } from "@/services/supabase/santri.service";
 import { fetchAllSetoran } from "@/services/supabase/setoran.service";
 import { Santri } from "@/types";
 
@@ -17,7 +17,7 @@ const Dashboard = () => {
   // Fetch santri data
   const { data: santriData = [], isLoading: santriLoading } = useQuery({
     queryKey: ['santri'],
-    queryFn: fetchAllSantri,
+    queryFn: () => fetchSantri(),
   });
 
   // Fetch all setoran data (including archived)
@@ -28,11 +28,13 @@ const Dashboard = () => {
 
   // Calculate actual hafalan for each santri based on all setoran data
   const santriWithActualHafalan = useMemo(() => {
-    if (!santriData.length || !setoranData.length) return santriData;
+    if (!Array.isArray(santriData) || santriData.length === 0 || !Array.isArray(setoranData) || setoranData.length === 0) {
+      return santriData || [];
+    }
 
     return santriData.map(santri => {
-      const santriSetoran = setoranData.filter(setoran => setoran.santri_id === santri.id);
-      const actualHafalan = santriSetoran.reduce((total, setoran) => {
+      const santriSetoran = setoranData.filter((setoran: any) => setoran.santri_id === santri.id);
+      const actualHafalan = santriSetoran.reduce((total: number, setoran: any) => {
         return total + (setoran.akhir_ayat - setoran.awal_ayat + 1);
       }, 0);
 
@@ -46,7 +48,7 @@ const Dashboard = () => {
   const filteredSantri = useMemo(() => {
     return santriWithActualHafalan.filter((santri) => {
       const matchesSearch = santri.nama.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesClass = selectedClass === "all" || santri.kelas === selectedClass;
+      const matchesClass = selectedClass === "all" || santri.kelas === Number(selectedClass);
       return matchesSearch && matchesClass;
     });
   }, [santriWithActualHafalan, searchQuery, selectedClass]);
@@ -131,10 +133,12 @@ const Dashboard = () => {
           </div>
         )}
 
-        <SantriDetail 
-          santri={selectedSantri} 
-          onClose={handleCloseDetail}
-        />
+        {selectedSantri && (
+          <SantriDetail 
+            santri={selectedSantri} 
+            onClose={handleCloseDetail}
+          />
+        )}
       </div>
     </div>
   );
