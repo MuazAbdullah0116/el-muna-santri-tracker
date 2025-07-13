@@ -77,7 +77,7 @@
     --sidebar-background: 168 46% 14%;
     --sidebar-foreground: 142 30% 96%;
     --sidebar-primary: 56 55% 52%;
-    --sidebar-primary-foreground: 168 42% 13%;
+    --sidebar-primary-foreground: 142 30% 96%;
     --sidebar-accent: 162 70% 35%;
     --sidebar-accent-foreground: 142 30% 96%;
     --sidebar-border: 167 30% 25%;
@@ -115,15 +115,15 @@
 
 @layer utilities {
   .islamic-card {
-    @apply bg-gradient-to-br from-white via-white to-islamic-light/30 shadow-lg border border-islamic-primary/20 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:shadow-xl hover:border-islamic-primary/40;
+    @apply bg-gradient-to-br from-card via-card to-accent/10 shadow-lg border border-primary/20 backdrop-blur-sm rounded-2xl transition-all duration-300 hover:shadow-xl hover:border-primary/40;
   }
   
   .islamic-bubble {
-    @apply rounded-2xl bg-gradient-to-br from-islamic-primary to-islamic-secondary text-white flex items-center justify-center shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105;
+    @apply rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground flex items-center justify-center shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105;
   }
   
   .islamic-pattern-border {
-    @apply border-2 border-islamic-primary/30 bg-gradient-to-br from-white/90 to-islamic-light/50 dark:from-card dark:to-card/90 rounded-2xl;
+    @apply border-2 border-primary/30 bg-gradient-to-br from-card/90 to-accent/20 rounded-2xl;
   }
 
   .font-arabic {
@@ -132,15 +132,15 @@
   }
   
   .glass-effect {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+    @apply bg-card/80 backdrop-blur-md border border-border shadow-xl;
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-islamic-primary to-islamic-secondary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
   }
   
   .islamic-gradient {
-    @apply bg-gradient-to-br from-islamic-primary via-islamic-secondary to-islamic-accent;
+    @apply bg-gradient-to-br from-primary via-secondary to-accent;
   }
   
   .card-hover {
@@ -158,15 +158,15 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 rounded-full;
+  @apply bg-muted rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-islamic-primary to-islamic-secondary rounded-full;
+  @apply bg-gradient-to-b from-primary to-secondary rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply from-islamic-primary/80 to-islamic-secondary/80;
+  @apply from-primary/80 to-secondary/80;
 }
 
 /* Responsive text size adjustments */
@@ -202,19 +202,19 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.4), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
 /* Enhanced focus states */
 .focus-enhanced:focus {
-  @apply ring-2 ring-islamic-primary/50 ring-offset-2 outline-none;
+  @apply ring-2 ring-primary/50 ring-offset-2 outline-none;
 }
 
 /* Custom selection colors */
 ::selection {
-  @apply bg-islamic-primary/20 text-islamic-primary;
+  @apply bg-primary/20 text-primary;
 }
 
 /* Additional utility classes for small screens */
