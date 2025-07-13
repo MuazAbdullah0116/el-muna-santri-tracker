@@ -165,23 +165,24 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 mb-6">
-          <div className="flex-1">
-            <SearchBar 
-              searchQuery={searchQuery} 
-              onSearchChange={handleSearchChange}
-              placeholder="Cari santri berdasarkan nama..."
-            />
-          </div>
-          <div className="lg:w-64">
-            <ClassFilter 
-              selectedClass={selectedClass === "all" ? null : selectedClass}
-              onClassSelect={handleClassChange}
-              classes={classes}
-              refreshData={refreshData}
-              showPromotionHint={false}
-            />
-          </div>
+        {/* Search Bar */}
+        <div className="mb-6">
+          <SearchBar 
+            searchQuery={searchQuery} 
+            onSearchChange={handleSearchChange}
+            placeholder="Cari santri berdasarkan nama..."
+          />
+        </div>
+
+        {/* Class Filter */}
+        <div className="mb-8">
+          <ClassFilter 
+            selectedClass={selectedClass === "all" ? null : selectedClass}
+            onClassSelect={handleClassChange}
+            classes={classes}
+            refreshData={refreshData}
+            showPromotionHint={false}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
