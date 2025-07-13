@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
 import { 
   Archive, 
-  Calendar, 
-  Download, 
   RefreshCw, 
   Database, 
   ExternalLink,
-  AlertTriangle,
-  Clock
+  AlertTriangle
 } from 'lucide-react';
 import {
   getMigrationStatus,
@@ -56,12 +52,6 @@ export default function ArchiveManagement() {
     });
   };
 
-  const getNextMigrationDate = () => {
-    const now = new Date();
-    const nextMigration = new Date(now.getFullYear(), now.getMonth() + (now.getMonth() % 2 === 0 ? 2 : 1), 1);
-    return nextMigration;
-  };
-
   if (statusLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -81,58 +71,50 @@ export default function ArchiveManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5" />
-            Status Sistem Migrasi Manual
+            Sistem Migrasi Berdasarkan Kapasitas
           </CardTitle>
           <CardDescription>
-            Sistem migrasi manual data setoran ke CSV setiap 2 minggu
+            Migrasi otomatis saat database mencapai 7000 record untuk menjaga performa
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {migrationStatus && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Data Pending</span>
+                    <Database className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Total Record</span>
                   </div>
                   <div className="text-2xl font-bold">
-                    {migrationStatus.pendingRecordsCount}
+                    {migrationStatus.totalRowsCount || migrationStatus.pendingRecordsCount}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    record &gt; 2 minggu
-                  </div>
-                </div>
-
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Cutoff Date</span>
-                  </div>
-                  <div className="text-lg font-semibold">
-                    {formatDate(migrationStatus.cutoffDate)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    batas data aktif
+                    dari maksimal 7000
                   </div>
                 </div>
 
                 <div className="p-4 border rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Archive className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Migrasi Terakhir</span>
+                    <span className="text-sm font-medium">Status Sistem</span>
                   </div>
                   <div className="text-sm">
-                    {migrationStatus.lastMigrationDate ? 
-                      `${migrationStatus.daysSinceLastMigration} hari lalu` : 
-                      'Belum pernah'
+                    {migrationStatus.needsMigration ? 
+                      'Migrasi Diperlukan' : 
+                      migrationStatus.hasExportedData ?
+                      'Menunggu Konfirmasi' :
+                      'Normal'
                     }
                   </div>
-                  {migrationStatus.lastMigrationDate && (
-                    <div className="text-xs text-muted-foreground">
-                      {formatDate(migrationStatus.lastMigrationDate)}
-                    </div>
-                  )}
+                  <div className="text-xs text-muted-foreground">
+                    {migrationStatus.needsMigration ? 
+                      'Database telah penuh' :
+                      migrationStatus.hasExportedData ?
+                      'Data telah diekspor' :
+                      'Kapasitas masih tersedia'
+                    }
+                  </div>
                 </div>
               </div>
 
@@ -140,8 +122,8 @@ export default function ArchiveManagement() {
                 <Alert>
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>
-                    Migrasi data diperlukan! Sudah {migrationStatus.daysSinceLastMigration} hari sejak migrasi terakhir.
-                    Data perlu dipindahkan setiap 2 minggu.
+                    Database telah mencapai kapasitas maksimal 7000 record. 
+                    Migrasi diperlukan untuk menjaga performa aplikasi.
                   </AlertDescription>
                 </Alert>
               )}
@@ -212,16 +194,16 @@ export default function ArchiveManagement() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <h5 className="font-semibold mb-2">📥 Proses Manual</h5>
+              <h5 className="font-semibold mb-2">📊 Sistem Berbasis Kapasitas</h5>
               <ul className="space-y-1 text-muted-foreground">
-                <li>• Notifikasi setiap 2 minggu</li>
+                <li>• Migrasi otomatis saat 7000 record</li>
                 <li>• Data diekspor ke file CSV</li>
-                <li>• User manual copy ke Google Sheets</li>
+                <li>• Manual copy ke Google Sheets yang sama</li>
                 <li>• Data lama dihapus setelah migrasi</li>
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-2">📊 Keuntungan</h5>
+              <h5 className="font-semibold mb-2">⚡ Keuntungan</h5>
               <ul className="space-y-1 text-muted-foreground">
                 <li>• Database tetap ringan dan cepat</li>
                 <li>• Riwayat data tidak hilang</li>

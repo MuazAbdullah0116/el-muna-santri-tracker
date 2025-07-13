@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,49 +48,48 @@ export default function MigrationSettings() {
           Migrasi Data
         </CardTitle>
         <CardDescription>
-          Kelola migrasi data setoran ke Google Sheets
+          Sistem migrasi otomatis saat database mencapai 7000 record
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <p className="text-sm font-medium">Status Migrasi</p>
+            <p className="text-sm font-medium">Total Record Saat Ini</p>
             <p className="text-sm text-muted-foreground">
-              {migrationStatus?.needsMigration 
-                ? `${migrationStatus.pendingRecordsCount} record perlu migrasi`
-                : migrationStatus?.hasExportedData 
-                ? `${migrationStatus.exportedRecordsCount} record menunggu konfirmasi`
-                : 'Tidak ada data yang perlu migrasi'
-              }
+              {migrationStatus?.totalRowsCount || 0} record dari batas 7000
             </p>
           </div>
           
           <div className="space-y-2">
-            <p className="text-sm font-medium">Migrasi Terakhir</p>
+            <p className="text-sm font-medium">Status</p>
             <p className="text-sm text-muted-foreground">
-              {migrationStatus?.lastMigrationDate 
-                ? new Date(migrationStatus.lastMigrationDate).toLocaleDateString('id-ID')
-                : 'Belum pernah migrasi'
+              {migrationStatus?.needsMigration 
+                ? 'Migrasi diperlukan - database penuh'
+                : migrationStatus?.hasExportedData 
+                ? 'Menunggu konfirmasi migrasi'
+                : 'Normal - tidak perlu migrasi'
               }
             </p>
           </div>
         </div>
 
-        <div className="pt-4 border-t">
-          <Button
-            onClick={() => exportMutation.mutate()}
-            disabled={exportMutation.isPending || (!migrationStatus?.needsMigration && !migrationStatus?.hasExportedData)}
-            className="w-full"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            {exportMutation.isPending ? 'Mengekspor...' : 'Download Data untuk Migrasi'}
-          </Button>
-          
-          <p className="text-xs text-muted-foreground mt-2">
-            Data yang didownload berupa file CSV yang dapat diimpor ke Google Sheets.
-            Setelah mengimpor ke Google Sheets, gunakan notifikasi migrasi untuk menyelesaikan proses.
-          </p>
-        </div>
+        {(migrationStatus?.needsMigration || migrationStatus?.hasExportedData) && (
+          <div className="pt-4 border-t">
+            <Button
+              onClick={() => exportMutation.mutate()}
+              disabled={exportMutation.isPending || migrationStatus?.hasExportedData}
+              className="w-full"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              {exportMutation.isPending ? 'Mengekspor...' : 'Download Data untuk Migrasi'}
+            </Button>
+            
+            <p className="text-xs text-muted-foreground mt-2">
+              Sistem akan meminta migrasi otomatis saat database mencapai 7000 record.
+              Data akan didownload sebagai CSV untuk dipindahkan ke Google Sheets.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

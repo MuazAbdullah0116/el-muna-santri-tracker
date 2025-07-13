@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -5,14 +6,14 @@ import { Download, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { exportToCSV, completeMigration, getMigrationStatus, verifySheetAccess } from '@/services/supabase/archive.service';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function MigrationNotification() {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [archiveName, setArchiveName] = useState('');
-  const [sheetUrl, setSheetUrl] = useState('https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing');
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing';
 
   const { data: migrationStatus } = useQuery({
     queryKey: ['migration-status'],
@@ -70,7 +71,6 @@ export default function MigrationNotification() {
         toast.success('Migrasi berhasil diselesaikan dan data asli telah dihapus');
         setShowCompleteDialog(false);
         setArchiveName('');
-        setSheetUrl('https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing');
       } else {
         toast.error(data.error || 'Gagal menyelesaikan migrasi');
       }
@@ -89,9 +89,9 @@ export default function MigrationNotification() {
   return (
     <>
       {migrationStatus?.hasExportedData && !migrationStatus?.needsMigration ? (
-        <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
+        <Alert className="mb-4 border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-900/20">
+          <AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Data Sudah Diekspor - Menunggu Konfirmasi Migrasi</p>
@@ -111,9 +111,9 @@ export default function MigrationNotification() {
           </AlertDescription>
         </Alert>
       ) : (
-        <Alert className="mb-4 border-orange-200 bg-orange-50">
-          <AlertTriangle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800">
+        <Alert className="mb-4 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20">
+          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+          <AlertDescription className="text-orange-800 dark:text-orange-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Migrasi Data Diperlukan</p>
@@ -140,7 +140,7 @@ export default function MigrationNotification() {
           <DialogHeader>
             <DialogTitle>Selesaikan Migrasi</DialogTitle>
             <DialogDescription>
-              Setelah Anda memindahkan data CSV ke Google Sheets, lengkapi informasi berikut untuk menyelesaikan proses migrasi.
+              Setelah Anda memindahkan data CSV ke Google Sheets yang sama, masukkan nama arsip untuk menyelesaikan proses migrasi.
             </DialogDescription>
           </DialogHeader>
           
@@ -156,19 +156,21 @@ export default function MigrationNotification() {
             </div>
             
             <div>
-              <Label htmlFor="sheet-url">URL Google Sheets</Label>
+              <Label>Google Sheets URL (Tetap)</Label>
               <Input
-                id="sheet-url"
                 value={sheetUrl}
-                onChange={(e) => setSheetUrl(e.target.value)}
-                placeholder="https://docs.google.com/spreadsheets/d/..."
+                disabled
+                className="bg-muted"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Data akan dipindahkan ke Google Sheets yang sama setiap migrasi
+              </p>
             </div>
             
             <div className="flex gap-2">
               <Button 
                 onClick={() => verifyMutation.mutate()}
-                disabled={!archiveName || !sheetUrl || verifyMutation.isPending || completeMutation.isPending}
+                disabled={!archiveName || verifyMutation.isPending || completeMutation.isPending}
                 className="flex-1"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />

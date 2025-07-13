@@ -1,3 +1,4 @@
+
 import { supabase } from './client';
 
 export interface SetoranArchive {
@@ -15,8 +16,6 @@ export interface MigrationStatus {
   needsMigration: boolean;
   lastMigrationDate: string | null;
   pendingRecordsCount: number;
-  cutoffDate: string | null;
-  daysSinceLastMigration: number;
   hasExportedData: boolean;
   lastExportDate: string | null;
   exportedRecordsCount: number;
@@ -56,7 +55,7 @@ export async function fetchSetoranArchives(): Promise<SetoranArchive[]> {
 }
 
 /**
- * Get migration status
+ * Get migration status based on 7000 rows limit
  */
 export async function getMigrationStatus(): Promise<MigrationStatus> {
   try {
@@ -77,7 +76,7 @@ export async function getMigrationStatus(): Promise<MigrationStatus> {
 }
 
 /**
- * Export data to CSV for manual migration
+ * Export data to CSV when 7000+ rows reached
  */
 export async function exportToCSV(): Promise<{ success: boolean; csvData?: string; filename?: string; error?: string }> {
   try {
