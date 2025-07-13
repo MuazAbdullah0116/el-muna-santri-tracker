@@ -6,16 +6,20 @@ import ClassFilter from "@/components/dashboard/ClassFilter";
 import SantriCard from "@/components/dashboard/SantriCard";
 import SantriDetail from "@/components/dashboard/SantriDetail";
 import { fetchSantri } from "@/services/supabase/santri.service";
-import { fetchAllSetoran } from "@/services/supabase/setoran.service";
+import { fetchAllSetoran, fetchSetoranBySantri } from "@/services/supabase/setoran.service";
 import { Santri } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/services/supabase/client";
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClass, setSelectedClass] = useState<number | "all">("all");
   const [selectedSantri, setSelectedSantri] = useState<Santri | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { toast } = useToast();
 
   // Fetch santri data
-  const { data: santriData = [], isLoading: santriLoading } = useQuery({
+  const { data: santriData = [], isLoading: santriLoading, refetch: refetchSantri } = useQuery({
     queryKey: ['santri'],
     queryFn: () => fetchSantri(),
   });
@@ -24,6 +28,13 @@ const Dashboard = () => {
   const { data: setoranData = [], isLoading: setoranLoading } = useQuery({
     queryKey: ['all-setoran'],
     queryFn: fetchAllSetoran,
+  });
+
+  // Fetch selected santri's setoran data
+  const { data: studentSetoran = [] } = useQuery({
+    queryKey: ['santri-setoran', selectedSantri?.id],
+    queryFn: () => fetchSetoranBySantri(selectedSantri!.id),
+    enabled: !!selectedSantri,
   });
 
   // Calculate actual hafalan for each santri based on all setoran data
@@ -53,11 +64,21 @@ const Dashboard = () => {
     });
   }, [santriWithActualHafalan, searchQuery, selectedClass]);
 
+  // Get unique classes from santri data
+  const classes = useMemo(() => {
+    const uniqueClasses = [...new Set(santriData.map(santri => santri.kelas))].sort((a, b) => a - b);
+    return uniqueClasses;
+  }, [santriData]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   const handleClassChange = (kelas: number | "all") => {
+    setSelectedClass(kelas);
+  };
+
+  const handleClassSelect = (kelas: number) => {
     setSelectedClass(kelas);
   };
 
@@ -67,6 +88,45 @@ const Dashboard = () => {
 
   const handleCloseDetail = () => {
     setSelectedSantri(null);
+    setShowDeleteDialog(false);
+  };
+
+  const handleDeleteSantri = async () => {
+    if (!selectedSantri) return;
+
+    try {
+      // Delete all setoran records for this santri first
+      await supabase
+        .from('setoran')
+        .delete()
+        .eq('santri_id', selectedSantri.id);
+
+      // Then delete the santri
+      await supabase
+        .from('santri')
+        .delete()
+        .eq('id', selectedSantri.id);
+
+      toast({
+        title: "Berhasil",
+        description: "Data santri berhasil dihapus",
+      });
+
+      setSelectedSantri(null);
+      setShowDeleteDialog(false);
+      await refetchSantri();
+    } catch (error) {
+      console.error("Error deleting santri:", error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus data santri",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const refreshData = async () => {
+    await refetchSantri();
   };
 
   const isLoading = santriLoading || setoranLoading;
@@ -106,8 +166,10 @@ const Dashboard = () => {
           </div>
           <div className="lg:w-64">
             <ClassFilter 
-              selectedClass={selectedClass} 
-              onClassChange={handleClassChange}
+              selectedClass={selectedClass === "all" ? null : selectedClass as number}
+              onClassSelect={handleClassSelect}
+              classes={classes}
+              refreshData={refreshData}
             />
           </div>
         </div>
@@ -135,8 +197,13 @@ const Dashboard = () => {
 
         {selectedSantri && (
           <SantriDetail 
-            santri={selectedSantri} 
+            selectedSantri={selectedSantri}
+            studentSetoran={studentSetoran}
             onClose={handleCloseDetail}
+            onDelete={handleDeleteSantri}
+            showDeleteDialog={showDeleteDialog}
+            setShowDeleteDialog={setShowDeleteDialog}
+            refreshData={refreshData}
           />
         )}
       </div>
