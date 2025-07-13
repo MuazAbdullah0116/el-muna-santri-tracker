@@ -15,11 +15,12 @@ export interface MigrationStatus {
   needsMigration: boolean;
   lastMigrationDate: string | null;
   pendingRecordsCount: number;
-  cutoffDate: string;
+  cutoffDate: string | null;
   daysSinceLastMigration: number;
   hasExportedData: boolean;
   lastExportDate: string | null;
   exportedRecordsCount: number;
+  totalRowsCount: number;
 }
 
 export interface MigrationResult {

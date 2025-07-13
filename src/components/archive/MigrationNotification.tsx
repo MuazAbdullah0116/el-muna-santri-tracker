@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 export default function MigrationNotification() {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [archiveName, setArchiveName] = useState('');
-  const [sheetUrl, setSheetUrl] = useState('');
+  const [sheetUrl, setSheetUrl] = useState('https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing');
 
   const { data: migrationStatus } = useQuery({
     queryKey: ['migration-status'],
@@ -70,7 +70,7 @@ export default function MigrationNotification() {
         toast.success('Migrasi berhasil diselesaikan dan data asli telah dihapus');
         setShowCompleteDialog(false);
         setArchiveName('');
-        setSheetUrl('');
+        setSheetUrl('https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing');
       } else {
         toast.error(data.error || 'Gagal menyelesaikan migrasi');
       }
@@ -118,8 +118,8 @@ export default function MigrationNotification() {
               <div>
                 <p className="font-medium">Migrasi Data Diperlukan</p>
                 <p className="text-sm">
-                  Data setoran perlu dipindahkan ke arsip. Sudah {migrationStatus.daysSinceLastMigration} hari 
-                  sejak migrasi terakhir. {migrationStatus.pendingRecordsCount} record menunggu migrasi.
+                  Database telah mencapai {migrationStatus.totalRowsCount || migrationStatus.pendingRecordsCount} record (batas: 7000). 
+                  Data perlu dimigrasikan untuk menjaga performa aplikasi.
                 </p>
               </div>
               <Button 

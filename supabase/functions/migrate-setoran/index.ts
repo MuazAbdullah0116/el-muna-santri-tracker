@@ -34,18 +34,16 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (req.method === 'GET') {
-      // Get migration status (changed to 2 weeks)
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - 14); // 2 weeks ago
-      const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-
-      const { data: pendingData, error: pendingError } = await supabase
+      // Get migration status (based on row count - 7000 rows)
+      const { data: totalData, error: totalError } = await supabase
         .from('setoran')
-        .select('id')
-        .lt('tanggal', cutoffDateStr)
+        .select('id', { count: 'exact' })
         .is('archived_at', null);
 
-      if (pendingError) throw pendingError;
+      if (totalError) throw totalError;
+
+      const totalRows = totalData?.length || 0;
+      const needsMigration = totalRows >= 7000;
 
       const { data: latestArchive, error: archiveError } = await supabase
         .from('setoran_archives')
@@ -76,14 +74,15 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({
-          needsMigration: (pendingData?.length || 0) > 0 || (daysSinceLastMigration && daysSinceLastMigration >= 14),
+          needsMigration: needsMigration || (exportedData?.length || 0) > 0,
           lastMigrationDate: lastMigrationDate || null,
-          pendingRecordsCount: pendingData?.length || 0,
-          cutoffDate: cutoffDateStr,
+          pendingRecordsCount: totalRows,
+          cutoffDate: null,
           daysSinceLastMigration: daysSinceLastMigration || 0,
           hasExportedData: (exportedData?.length || 0) > 0,
           lastExportDate: lastExportDate,
-          exportedRecordsCount: exportedData?.length || 0
+          exportedRecordsCount: exportedData?.length || 0,
+          totalRowsCount: totalRows
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -99,18 +98,13 @@ Deno.serve(async (req) => {
       if (action === 'export_csv') {
         console.log('📥 Starting CSV export process...');
         
-        // Get data to export (2 weeks old)
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - 14);
-        const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-        
+        // Get all non-archived data for export when 7000+ rows reached
         const { data: setoranData, error: fetchError } = await supabase
           .from('setoran')
           .select(`
             *,
             santri:santri_id (nama)
           `)
-          .lt('tanggal', cutoffDateStr)
           .is('archived_at', null);
 
         if (fetchError) throw fetchError;
@@ -184,13 +178,14 @@ Deno.serve(async (req) => {
       }
 
       if (action === 'complete_migration') {
-        const { archiveName, sheetUrl } = body;
+        const { archiveName } = body;
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1VqZv8EtcB3AWMOANiDNw4xFqD4AyonJemPgBRJ8Moys/edit?usp=sharing';
         
-        if (!archiveName || !sheetUrl) {
+        if (!archiveName) {
           return new Response(
             JSON.stringify({ 
               success: false,
-              error: 'Nama arsip dan URL sheet diperlukan'
+              error: 'Nama arsip diperlukan'
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
