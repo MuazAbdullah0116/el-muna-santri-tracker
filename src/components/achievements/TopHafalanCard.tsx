@@ -66,7 +66,7 @@ const TopHafalanCard = ({ data, isLoading, searchQuery, onSantriClick }: TopHafa
 
   return (
     <div className="space-y-4">
-      {filteredData.slice(0, 10).map((item, index) => {
+      {filteredData.map((item, index) => {
         const rank = index + 1;
         const hafalanScore = getHafalanScore(item.total_hafalan || 0);
         
