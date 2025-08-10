@@ -2,16 +2,41 @@
 import { Setoran } from "@/types";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, BookOpen, Archive } from "lucide-react";
+import { Calendar, BookOpen, Archive, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteSetoran } from "@/services/supabase/setoran.service";
+import { toast } from "sonner";
 
 const SantriProfileSetoranTable = ({ 
   setorans, 
-  isLoading 
+  isLoading,
+  santriId
 }: { 
   setorans: Setoran[];
   isLoading?: boolean;
+  santriId?: string;
 }) => {
+  const queryClient = useQueryClient();
+
+  const deleteSetoranMutation = useMutation({
+    mutationFn: deleteSetoran,
+    onSuccess: () => {
+      toast.success("Setoran berhasil dihapus!");
+      queryClient.invalidateQueries({ queryKey: ["setoran"] });
+      queryClient.invalidateQueries({ queryKey: ["santris"] });
+      if (santriId) {
+        queryClient.invalidateQueries({ queryKey: ["setoran", santriId] });
+      }
+    },
+    onError: (error) => {
+      console.error("Error deleting setoran:", error);
+      toast.error("Gagal menghapus setoran. Silakan coba lagi.");
+    },
+  });
+
   if (isLoading) {
     return (
       <Card className="bg-card/70 backdrop-blur-sm border-border">
@@ -63,20 +88,31 @@ const SantriProfileSetoranTable = ({
                   <TableHead className="font-semibold text-center">Tajwid</TableHead>
                   <TableHead className="font-semibold text-center">Tahsin</TableHead>
                   <TableHead className="font-semibold">Penguji</TableHead>
+                  <TableHead className="font-semibold text-center">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {recentSetorans.map((s, index) => (
                   <TableRow key={s.id || index} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
-                      {new Date(s.tanggal).toLocaleDateString("id-ID", {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                      })}
+                      <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded text-sm">
+                        {new Date(s.tanggal).toLocaleDateString("id-ID", {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      </span>
                     </TableCell>
-                    <TableCell className="font-medium text-emerald-700 dark:text-emerald-400">{s.surat}</TableCell>
-                    <TableCell>{s.juz}</TableCell>
+                    <TableCell className="font-medium">
+                      <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded text-sm">
+                        {s.surat}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded text-sm">
+                        {s.juz}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded text-sm">
                         {s.awal_ayat}-{s.akhir_ayat}
@@ -97,7 +133,43 @@ const SantriProfileSetoranTable = ({
                         {s.tahsin}
                       </span>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{s.diuji_oleh}</TableCell>
+                    <TableCell className="text-sm">
+                      <span className="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-200 px-2 py-1 rounded text-sm">
+                        {s.diuji_oleh}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Hapus Setoran</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Apakah Anda yakin ingin menghapus setoran {s.surat} Juz {s.juz} ayat {s.awal_ayat}-{s.akhir_ayat} tanggal {new Date(s.tanggal).toLocaleDateString("id-ID")}? 
+                              Tindakan ini tidak dapat dibatalkan.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteSetoranMutation.mutate(s.id)}
+                              className="bg-red-600 hover:bg-red-700"
+                              disabled={deleteSetoranMutation.isPending}
+                            >
+                              {deleteSetoranMutation.isPending ? "Menghapus..." : "Hapus"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

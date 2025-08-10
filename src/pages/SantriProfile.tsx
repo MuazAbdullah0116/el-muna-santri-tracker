@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -66,7 +65,7 @@ const SantriProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-950 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <Button 
@@ -93,7 +92,11 @@ const SantriProfile = () => {
           {/* Right Column - Chart & Table */}
           <div className="lg:col-span-2 space-y-6">
             <SantriProfileChart setorans={setorans} />
-            <SantriProfileSetoranTable setorans={setorans} isLoading={setoranLoading} />
+            <SantriProfileSetoranTable 
+              setorans={setorans} 
+              isLoading={setoranLoading}
+              santriId={id}
+            />
           </div>
         </div>
       </div>
