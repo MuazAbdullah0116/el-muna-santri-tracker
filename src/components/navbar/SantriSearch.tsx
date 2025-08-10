@@ -18,7 +18,7 @@ const SantriSearch = () => {
 
   const { data: santris = [], isLoading } = useQuery({
     queryKey: ["santris"],
-    queryFn: fetchSantri,
+    queryFn: () => fetchSantri(),
   });
 
   const filteredSantris = santris.filter(santri =>
@@ -69,7 +69,7 @@ const SantriSearch = () => {
                   <div className="flex flex-col">
                     <span className="font-medium">{santri.nama}</span>
                     <span className="text-xs text-muted-foreground">
-                      Kelas {santri.kelas} • {santri.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}
+                      Kelas {santri.kelas} • {santri.jenis_kelamin === "Ikhwan" ? "Ikhwan" : "Akhwat"}
                     </span>
                   </div>
                 </CommandItem>

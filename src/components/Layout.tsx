@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home, Users, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import IslamicLogo from "@/components/IslamicLogo";
@@ -23,11 +24,10 @@ const Layout = ({ children }: LayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const menuItems: MenuItem[] = [
-    { label: "Dashboard", path: "/", icon: Menu },
-    { label: "Santri", path: "/santri", icon: Menu },
-    { label: "Tambah Setoran", path: "/add-setoran", icon: Menu },
-    { label: "Jelajah Santri", path: "/browse-santri", icon: Menu },
-    // Add more menu items as needed
+    { label: "Dashboard", path: "/", icon: Home },
+    { label: "Santri", path: "/santri", icon: Users },
+    { label: "Tambah Setoran", path: "/add-setoran", icon: Plus },
+    { label: "Jelajah Santri", path: "/browse-santri", icon: Search },
   ];
 
   return (
@@ -70,7 +70,7 @@ const Layout = ({ children }: LayoutProps) => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="md:hidden text-white hover:bg-white/10"
               >
-                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </Button>
 
               {/* Desktop Navigation */}
@@ -87,7 +87,7 @@ const Layout = ({ children }: LayoutProps) => {
                     )}
                   >
                     <Link to={item.path} className="flex items-center space-x-2">
-                      <item.icon size={16} />
+                      <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </Link>
                   </Button>
@@ -113,7 +113,7 @@ const Layout = ({ children }: LayoutProps) => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Link to={item.path} className="flex items-center space-x-2">
-                      <item.icon size={16} />
+                      <item.icon className="w-4 h-4" />
                       <span>{item.label}</span>
                     </Link>
                   </Button>
@@ -143,7 +143,7 @@ const Layout = ({ children }: LayoutProps) => {
                 )}
               >
                 <Link to={item.path} className="flex flex-col items-center justify-center space-y-1">
-                  <item.icon size={20} />
+                  <item.icon className="w-5 h-5" />
                   <span className="text-xs">{item.label}</span>
                 </Link>
               </Button>
